@@ -178,6 +178,33 @@
       min-height: 200px;
     }
     .center { text-align: center; }
+
+    .auth-shell {
+      max-width: 420px;
+      margin: 40px auto 0;
+    }
+    .auth-title {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .auth-link {
+      text-align: center;
+      margin-top: 12px;
+    }
+    .link-btn {
+      background: transparent;
+      color: #93c5fd;
+      border: none;
+      padding: 0;
+      min-height: auto;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .link-btn:hover {
+      text-decoration: underline;
+    }
+
     @media (max-width: 1100px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
       .grid, .grid-3, .menu-grid, .kitchen-board { grid-template-columns: 1fr; }
@@ -185,6 +212,10 @@
     @media (max-width: 640px) {
       .stats { grid-template-columns: 1fr; }
       .title { font-size: 24px; }
+      .auth-shell {
+        max-width: 100%;
+        margin-top: 20px;
+      }
     }
     @media print {
       body { background: white; color: black; }
@@ -201,28 +232,39 @@
 <body>
   <div class="wrap">
     <div id="auth_screen">
-      <div class="topbar">
-        <div>
-          <div class="title">Anote</div>
-          <div class="subtitle">Gestão inteligente de pedidos</div>
+      <div class="auth-shell">
+        <div class="topbar auth-title" style="justify-content:center;">
+          <div>
+            <div class="title">Anote</div>
+            <div class="subtitle">Gestão inteligente de pedidos</div>
+          </div>
         </div>
-      </div>
 
-      <div class="grid">
         <div class="card">
-          <h3>Entrar</h3>
+          <h3 id="auth_mode_title">Entrar</h3>
+
           <input id="login_email" type="email" placeholder="Email" />
           <input id="login_password" type="password" placeholder="Senha" />
-          <button class="primary" onclick="login()">Entrar</button>
+          <button class="primary" style="width:100%;" onclick="login()">Entrar</button>
           <div id="login_result"></div>
-        </div>
 
-        <div class="card">
-          <h3>Criar conta</h3>
-          <input id="signup_email" type="email" placeholder="Email" />
-          <input id="signup_password" type="password" placeholder="Senha" />
-          <button class="ghost" onclick="signup()">Criar conta</button>
-          <div id="signup_result"></div>
+          <div class="auth-link" id="show_signup_cta">
+            <span class="muted">Não tem conta? </span>
+            <button type="button" class="link-btn" onclick="toggleSignup(true)">Criar conta</button>
+          </div>
+
+          <div id="signup_box" class="hidden" style="margin-top:18px; border-top:1px solid rgba(255,255,255,.08); padding-top:18px;">
+            <h3 style="margin-top:0;">Criar conta</h3>
+            <input id="signup_email" type="email" placeholder="Email" />
+            <input id="signup_password" type="password" placeholder="Senha" />
+            <button class="ghost" style="width:100%;" onclick="signup()">Criar conta</button>
+            <div id="signup_result"></div>
+
+            <div class="auth-link">
+              <span class="muted">Já tem conta? </span>
+              <button type="button" class="link-btn" onclick="toggleSignup(false)">Voltar para entrar</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -516,6 +558,15 @@
       return status || "";
     }
 
+    function toggleSignup(show = null) {
+      const box = document.getElementById("signup_box");
+      if (!box) return;
+
+      if (show === true) box.classList.remove("hidden");
+      else if (show === false) box.classList.add("hidden");
+      else box.classList.toggle("hidden");
+    }
+
     function openTab(name, btn) {
       ["dashboard", "catalog", "orders", "kitchen", "cashier", "menu"].forEach(id => {
         document.getElementById(`tab_${id}`).classList.add("hidden");
@@ -555,6 +606,8 @@
       const password = document.getElementById("login_password").value.trim();
       const box = document.getElementById("login_result");
 
+      box.innerHTML = "";
+
       const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
@@ -570,6 +623,8 @@
       const password = document.getElementById("signup_password").value.trim();
       const box = document.getElementById("signup_result");
 
+      box.innerHTML = "";
+
       const { error } = await supabase.auth.signUp({ email, password });
 
       if (error) {
@@ -578,6 +633,10 @@
       }
 
       box.innerHTML = `<div class="item">Conta criada. Faça login para continuar.</div>`;
+      toggleSignup(false);
+
+      const loginEmail = document.getElementById("login_email");
+      if (loginEmail && !loginEmail.value) loginEmail.value = email;
     }
 
     async function logout() {
@@ -1357,7 +1416,6 @@
 
     async function loadPublicMenu() {
       const menu = document.getElementById("public_menu");
-      const tableId = document.getElementById("public_table_select").value;
 
       const { data: categories } = await supabase
         .from("categories")
@@ -1714,6 +1772,7 @@
     window.closeCashSession = closeCashSession;
     window.openTab = openTab;
     window.toggleTableField = toggleTableField;
+    window.toggleSignup = toggleSignup;
     window.enterWaiterMode = enterWaiterMode;
     window.exitWaiterMode = exitWaiterMode;
     window.createQuickWaiterOrder = createQuickWaiterOrder;
