@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anote</title>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    window.supabase = createClient(
+      "https://zbxrpprwjrholrycwsqa.supabase.co",
+      "sb_publishable_c4O2UN_u487qWsu4TNwG0Q_OGj3aHNM"
+    );
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111827;
+      color: white;
+    }
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .title {
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .subtitle {
+      color: #cbd5e1;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .card {
+      background: #1f2937;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    }
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr 1fr;
+    }
+    .grid-3 {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .stats {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .stat {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .stat strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 24px;
+    }
+    .item {
+      background: #0f172a;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.06);
+      margin-top: 10px;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .row > * {
+      flex: 1;
+      min-width: 140px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 8px;
+      margin-bottom: 10px;
+      background: white;
+      color: black;
+      font-size: 15px;
+    }
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
+    }
+    .primary { background: #22c55e; color: black; }
+    .ghost { background: #334155; color: white; }
+    .danger { background: #ef4444; color: white; }
+    .warning { background: #f59e0b; color: black; }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .tab-btn.active {
+      background: #22c55e;
+      color: black;
+    }
+    .hidden { display: none; }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 6px;
+      background: #22c55e;
+      color: black;
+    }
+    .badge.new { background: #60a5fa; color: black; }
+    .badge.preparing { background: #f59e0b; color: black; }
+    .badge.ready { background: #22c55e; color: black; }
+    .badge.delivered { background: #a78bfa; color: white; }
+    .badge.cancelled { background: #ef4444; color: white; }
+    .badge.open { background: #f59e0b; color: black; }
+    .badge.paid { background: #22c55e; color: black; }
+    .muted {
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+    .menu-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .product-card {
+      background: #0f172a;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .kitchen-board {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .kitchen-col {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 200px;
+    }
+    .center { text-align: center; }
+
+    .auth-shell {
+      max-width: 420px;
+      margin: 40px auto 0;
+    }
+    .auth-title {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 1100px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .grid, .grid-3, .menu-grid, .kitchen-board { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: 1fr; }
+      .title { font-size: 24px; }
+      .auth-shell {
+        max-width: 100%;
+        margin-top: 20px;
+      }
+    }
+    @media print {
+      body { background: white; color: black; }
+      .no-print { display: none !important; }
+      .card, .item, .product-card, .kitchen-col {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        background: white;
+        color: black;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- TELA DE ACESSO COM CHAVE (MODIFICADA) -->
+    <div id="auth_screen">
+      <div class="auth-shell">
+        <div class="topbar auth-title" style="justify-content:center;">
+          <div>
+            <div class="title">Anote</div>
+            <div class="subtitle">Gestão inteligente de pedidos</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Acesso ao Sistema</h3>
+          <input id="access_key" type="text" placeholder="Digite a chave de acesso" />
+          <button class="primary" style="width:100%;" onclick="login()">Acessar</button>
+          <div id="login_result"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="store_setup_screen" class="hidden">
+      <div class="topbar">
+        <div>
+          <div class="title">Anote</div>
+          <div class="subtitle">Crie sua loja para começar</div>
+        </div>
+        <button class="danger" onclick="logout()">Sair</button>
+      </div>
+
+      <div class="card">
+        <h3>Nova loja</h3>
+        <input id="store_name" placeholder="Nome da loja" />
+        <input id="store_phone" placeholder="Telefone" />
+        <input id="store_address" placeholder="Endereço" />
+        <button class="primary" onclick="createStore()">Criar loja</button>
+        <div id="store_result"></div>
+      </div>
+    </div>
+
+    <div id="app_screen" class="hidden">
+      <div class="topbar">
+        <div>
+          <div class="title">Anote</div>
+          <div class="subtitle" id="store_label">Carregando loja...</div>
+        </div>
+        <div class="row no-print" style="max-width:460px;width:100%;">
+          <button class="ghost" onclick="loadAll()">Atualizar</button>
+          <button class="ghost" onclick="printKitchen()">Imprimir cozinha</button>
+          <button class="ghost" onclick="enterWaiterMode()">Modo garçom</button>
+          <button class="danger" onclick="logout()">Sair</button>
+        </div>
+      </div>
+
+      <div class="tabs no-print">
+        <button class="tab-btn ghost active" onclick="openTab('dashboard', this)">Painel</button>
+        <button class="tab-btn ghost" onclick="openTab('catalog', this)">Catálogo</button>
+        <button class="tab-btn ghost" onclick="openTab('orders', this)">Pedidos</button>
+        <button class="tab-btn ghost" onclick="openTab('kitchen', this)">Cozinha</button>
+        <button class="tab-btn ghost" onclick="openTab('cashier', this)">Caixa</button>
+        <button class="tab-btn ghost" onclick="openTab('menu', this)">Cardápio / QR</button>
+      </div>
+
+      <div id="tab_dashboard">
+        <div class="card">
+          <h3>Resumo geral</h3>
+          <div class="stats" id="stats"></div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h3>Pedidos recentes</h3>
+            <div id="recent_orders"></div>
+          </div>
+          <div class="card">
+            <h3>Resumo do dia</h3>
+            <div id="daily_summary"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab_catalog" class="hidden">
+        <div class="grid">
+          <div>
+            <div class="card">
+              <h3>Nova categoria</h3>
+              <input id="category_name" placeholder="Nome da categoria" />
+              <button class="primary" onclick="createCategory()">Salvar categoria</button>
+              <div id="category_result"></div>
+            </div>
+
+            <div class="card">
+              <h3>Novo produto</h3>
+              <input id="product_name" placeholder="Nome do produto" />
+              <select id="product_category"></select>
+              <input id="product_price" type="number" step="0.01" placeholder="Preço" />
+              <textarea id="product_description" placeholder="Descrição"></textarea>
+              <button class="primary" onclick="createProduct()">Salvar produto</button>
+              <div id="product_result"></div>
+            </div>
+
+            <div class="card">
+              <h3>Nova mesa</h3>
+              <input id="table_number" placeholder="Número / nome da mesa" />
+              <button class="ghost" onclick="createTable()">Salvar mesa</button>
+              <div id="table_result"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <h3>Categorias</h3>
+              <div id="categories_list"></div>
+            </div>
+
+            <div class="card">
+              <h3>Produtos</h3>
+              <div id="products_list"></div>
+            </div>
+
+            <div class="card">
+              <h3>Mesas</h3>
+              <div id="tables_list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab_orders" class="hidden">
+        <div class="grid">
+          <div>
+            <div class="card">
+              <h3>Novo cliente</h3>
+              <input id="customer_name" placeholder="Nome do cliente" />
+              <input id="customer_phone" placeholder="Telefone" />
+              <input id="customer_address" placeholder="Endereço" />
+              <textarea id="customer_notes" placeholder="Observações"></textarea>
+              <button class="ghost" onclick="createCustomer()">Salvar cliente</button>
+              <div id="customer_result"></div>
+            </div>
+
+            <div class="card">
+              <h3>Novo pedido</h3>
+              <select id="order_customer"></select>
+              <select id="order_type" onchange="toggleTableField()">
+                <option value="counter">Balcão</option>
+                <option value="delivery">Delivery</option>
+                <option value="pickup">Retirada</option>
+                <option value="table">Mesa</option>
+              </select>
+              <select id="order_table" class="hidden"></select>
+              <textarea id="order_notes" placeholder="Observações do pedido"></textarea>
+              <button class="primary" onclick="createOrder()">Criar pedido</button>
+              <div id="order_result"></div>
+            </div>
+
+            <div class="card">
+              <h3>Adicionar item ao pedido</h3>
+              <select id="item_order"></select>
+              <select id="item_product"></select>
+              <input id="item_quantity" type="number" min="1" value="1" />
+              <textarea id="item_notes" placeholder="Observações do item"></textarea>
+              <button class="primary" onclick="addItemToOrder()">Adicionar item</button>
+              <div id="item_result"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <h3>Filtros de pedidos</h3>
+              <div class="row">
+                <select id="filter_status" onchange="loadOrders()">
+                  <option value="">Todos os status</option>
+                  <option value="new">Novo</option>
+                  <option value="preparing">Preparando</option>
+                  <option value="ready">Pronto</option>
+                  <option value="delivered">Entregue</option>
+                  <option value="cancelled">Cancelado</option>
+                </select>
+                <select id="filter_type" onchange="loadOrders()">
+                  <option value="">Todos os tipos</option>
+                  <option value="counter">Balcão</option>
+                  <option value="delivery">Delivery</option>
+                  <option value="pickup">Retirada</option>
+                  <option value="table">Mesa</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Pedidos</h3>
+              <div id="orders_list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab_kitchen" class="hidden">
+        <div class="card">
+          <h3>Tela da cozinha automática</h3>
+          <div class="kitchen-board">
+            <div class="kitchen-col">
+              <div class="section-title">Novos</div>
+              <div id="kitchen_new"></div>
+            </div>
+            <div class="kitchen-col">
+              <div class="section-title">Preparando</div>
+              <div id="kitchen_preparing"></div>
+            </div>
+            <div class="kitchen-col">
+              <div class="section-title">Prontos</div>
+              <div id="kitchen_ready"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab_cashier" class="hidden">
+        <div class="grid">
+          <div>
+            <div class="card">
+              <h3>Controle de caixa</h3>
+              <input id="opening_amount" type="number" step="0.01" placeholder="Valor de abertura" />
+              <div class="row">
+                <button class="primary" onclick="openCashSession()">Abrir caixa</button>
+                <button class="danger" onclick="closeCashSession()">Fechar caixa</button>
+              </div>
+              <div id="cash_result"></div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3>Sessão atual</h3>
+              <div id="cash_session_info"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab_menu" class="hidden">
+        <div class="grid">
+          <div>
+            <div class="card">
+              <h3>QR Code das mesas</h3>
+              <p class="muted">Copie os links abaixo e transforme em QR Code externo ou interno.</p>
+              <div id="table_qr_list"></div>
+            </div>
+
+            <div class="card">
+              <h3>Link do cardápio online</h3>
+              <div id="menu_public_link" class="item">Carregando...</div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <h3>Cardápio online / mesa</h3>
+              <div class="row">
+                <select id="public_table_select" onchange="loadPublicMenu()"></select>
+                <input id="public_customer_name" placeholder="Nome do cliente (opcional)" />
+              </div>
+              <div id="public_menu"></div>
+              <div class="card" style="margin-top:12px;background:#0f172a;">
+                <h3>Carrinho</h3>
+                <div id="public_cart"></div>
+                <button class="primary" onclick="submitPublicOrder()">Enviar pedido</button>
+                <div id="public_order_result"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="waiter_mode" class="hidden">
+        <div class="card">
+          <div class="topbar">
+            <div>
+              <div class="title">Modo Garçom</div>
+              <div class="subtitle">Uso rápido no celular</div>
+            </div>
+            <button class="danger" onclick="exitWaiterMode()">Fechar</button>
+          </div>
+
+          <div class="card" style="background:#0f172a;">
+            <h3>Novo pedido rápido</h3>
+            <select id="waiter_table"></select>
+            <select id="waiter_product"></select>
+            <input id="waiter_quantity" type="number" min="1" value="1" />
+            <textarea id="waiter_notes" placeholder="Observações"></textarea>
+            <button class="primary" onclick="createQuickWaiterOrder()">Enviar para cozinha</button>
+            <div id="waiter_result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+
+
+
+
+
+  <script>
+      let currentStore = null;
+    let currentCashSession = null;
+    let publicCart = [];
+    let kitchenAutoTimer = null;
+
+    // CHAVE DE ACESSO AUTORIZADA
+    const CHAVE_AUTORIZADA = "7846SIS2026BRA85";
+
+    function money(v) {
+      return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    }
+
+    function badgeClass(status) {
+      return status || "";
+    }
+
+    function toggleSignup(show = null) {
+      const box = document.getElementById("signup_box");
+      if (!box) return;
+
+      if (show === true) box.classList.remove("hidden");
+      else if (show === false) box.classList.add("hidden");
+      else box.classList.toggle("hidden");
+    }
+
+    function openTab(name, btn) {
+      ["dashboard", "catalog", "orders", "kitchen", "cashier", "menu"].forEach(id => {
+        document.getElementById(`tab_${id}`).classList.add("hidden");
+      });
+      document.getElementById(`tab_${name}`).classList.remove("hidden");
+
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      if (name === "kitchen") startKitchenAutoRefresh();
+      else stopKitchenAutoRefresh();
+    }
+
+    function enterWaiterMode() {
+      document.getElementById("waiter_mode").classList.remove("hidden");
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    }
+
+    function exitWaiterMode() {
+      document.getElementById("waiter_mode").classList.add("hidden");
+    }
+
+    function toggleTableField() {
+      const type = document.getElementById("order_type").value;
+      const tableField = document.getElementById("order_table");
+      if (type === "table") tableField.classList.remove("hidden");
+      else tableField.classList.add("hidden");
+    }
+
+    // REMOVIDA a função getUser() que usava autenticação do Supabase — mantida compatibilidade onde necessário
+    async function getUser() {
+      // Retorna usuário genérico pois usamos chave
+      return { id: "user-chave-acesso" };
+    }
+
+    // NOVA FUNÇÃO DE LOGIN COM CHAVE
+    async function login() {
+      const chave = document.getElementById("access_key").value.trim();
+      const box = document.getElementById("login_result");
+
+      box.innerHTML = "";
+
+      if (chave === CHAVE_AUTORIZADA) {
+        box.innerHTML = `<div class="item" style="color:#22c55e;">✅ Chave válida! Carregando...</div>`;
+        localStorage.setItem("anote_autorizado", "sim");
+        setTimeout(bootstrap, 800);
+      } else {
+        box.innerHTML = `<div class="item" style="color:#ef4444;">❌ Chave inválida! Tente novamente.</div>`;
+      }
+    }
+
+    // REMOVIDA função de cadastro de conta
+    async function signup() {
+      alert("Cadastro desativado — use a chave de acesso para entrar.");
+      return;
+    }
+
+    // LOGOUT ATUALIZADO
+    async function logout() {
+      localStorage.removeItem("anote_autorizado");
+      location.reload();
+    }
+
+    async function getCurrentStore() {
+      const { data, error } = await supabase
+        .from("store_users")
+        .select("store_id, stores(*)")
+        .limit(1)
+        .single();
+
+      if (error || !data) return null;
+      return data.stores;
+    }
+
+    async function createStore() {
+      const name = document.getElementById("store_name").value.trim();
+      const phone = document.getElementById("store_phone").value.trim();
+      const address = document.getElementById("store_address").value.trim();
+      const box = document.getElementById("store_result");
+
+      const { error } = await supabase.rpc("create_store_with_owner", {
+        p_name: name,
+        p_phone: phone || null,
+        p_address: address || null
+      });
+
+      if (error) {
+        box.innerHTML = `<div class="item">${error.message}</div>`;
+        return;
+      }
+
+      await bootstrap();
+    }
+
+    async function createCategory() {
+      const name = document.getElementById("category_name").value.trim();
+      const box = document.getElementById("category_result");
+
+      const { error } = await supabase.from("categories").insert({
+        store_id: currentStore.id,
+        name,
+        created_by: (await getUser()).id
+      });
+
+      if (error) {
+        box.innerHTML = `<div class="item">${error.message}</div>`;
+        return;
+      }
+
+      document.getElementById("category_name").value = "";
+      box.innerHTML = `<div class="item">Categoria criada.</div>`;
+      await loadCategories();
+      await loadPublicMenu();
+    }
+
+    async function createProduct() {
+      const name = document.getElementById("product_name").value.trim();
+      const categoryId = document.getElementById("product_category").value || null;
+      const price = Number(document.getElementById("product_price").value || 0);
+      const description = document.getElementById("product_description").value.trim();
+      const box = document.getElementById("product_result");
+
+      const { error } = await supabase.from("products").insert({
+        store_id: currentStore.id,
+        category_id: categoryId,
+        name,
+        price,
+        description: description || null,
+        created_by: (await getUser()).id
+      });
+
+      if (error) {
+        box.innerHTML = `<div class="item">${error.message}</div>`;
+        return;
+      }
+
+      document.getElementById("product_name").value = "";
+      document.getElementById("product_price").value = "";
+      document.getElementById("product_description").value = "";
+      box.innerHTML = `<div class="item">Produto criado.</div>`;
+      await loadProducts();
+      await loadPublicMenu();
+    }
+
+    async function createTable() {
+      const tableNumber = document.getElementById("table_number").value.trim();
+      const box = document.getElementById("table_result");
+
+      const { error } = await supabase.from("tables").insert({
+        store_id: currentStore.id,
+        table_number: tableNumber,
+        qr_code: `mesa-${tableNumber}`,
+        created_by: (await getUser()).id
+      });
+
+      if (error) {
+        box.innerHTML = `<div class="item">${error.message}</div>`;
+        return;
+      }
+
+      document.getElementById("table_number").value = "";
+      box.innerHTML = `<div class="item">Mesa criada.</div>`;
+      await loadTables();
+      await loadPublicTableSelect();
+    }
+
+    async function createCustomer() {
+      const fullName = document.getElementById("customer_name").value.trim();
+      const phone = document.getElementById("customer_phone").value.trim();
+      const address = document.getElementById("customer_address").value.trim();
+      const notes = document.getElementById("customer_notes").value.trim();
+      const box = document.getElementById("customer_result");
+
+      const { error } = await supabase.from("customers").insert({
+        store_id: currentStore.id,
+        full_name: fullName,
+        phone: phone || null,
+        address: address || null,
+        notes: notes || null,
+        created_by: (await getUser()).id
+      });
+
+      if (error) {
+        box.innerHTML = `<div class="item">${error.message}</div>`;
+        return;
+      }
+
+      document.getElementById("customer_name").value = "";
+      document.getElementById("customer_phone").value = "";
+      document.getElementById("customer_address").value = "";
+      document.getElementById("customer_notes").value = "";
+      box.innerHTML = `<div class="item">Cliente criado.</div>`;
+      await loadCustomers();
+    }
+
+    async function createOrder() {
+      const customerId = document.getElementById("order_customer").value || null;
+      const orderType = document.getElementById("order_type").value;
+      const tableId = orderType === "table" ? (document.getElementById("order_table").value || null) : null;
+      const notes = document.getElementById("order_notes").value.trim();
+      const box = document.getElementById("order_result");
+
+      const user = await getUser();
+
+      const { data, error } = await supabase
+        .from("orders")
+        .insert({
+          store_id: currentStore.id,
+          customer_id: customerId,
+          table_id: tableId,
+          order_type: orderType,
+          order_source: "counter",
+          notes: notes || null,
+          created_by: user.id
+        })
+        .select("*")
+        .single();
+
+      if (error) {
+        box.innerHTML = `<div class="item">${error.message}</div>`;
+        return;
+      }
+
+      await supabase.rpc("add_order_history", {
+        p_order_id: data.id,
+        p_action: "created",
+        p_description: `Pedido criado como ${orderType}.`
+      });
+
+      document.getElementById("order_notes").value = "";
+      box.innerHTML = `<div class="item">Pedido criado.</div>`;
+      await loadOrders();
+      await loadStats();
+      await loadDailySummary();
+    }
+
+    async function addItemToOrder() {
+      const orderId = document.getElementById("item_order").value;
+      const productId = document.getElementById("item_product").value;
+      const quantity = Number(document.getElementById("item_quantity").value || 1);
+      const notes = document.getElementById("item_notes").value.trim();
+      const box = document.getElementById("item_result");
+
+      const { data: product } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", productId)
+        .single();
+
+      if (!product) {
+        box.innerHTML = `<div class="item">Produto inválido.</div>`;
+        return;
+      }
+
+      const { error } = await supabase.from("order_items").insert({
+        order_id: orderId,
+        product_id: product.id,
+        product_name: product.name,
+        unit_price: product.price,
+        quantity,
+        notes: notes || null
+      });
+
+      if (error) {
+        box.innerHTML = `<div class="item">${error.message}</div>`;
+        return;
+      }
+
+      await supabase.rpc("add_order_history", {
+        p_order_id: orderId,
+        p_action: "item_added",
+        p_description: `${quantity}x ${product.name} adicionado(s).`
+      });
+
+      document.getElementById("item_quantity").value = "1";
+      document.getElementById("item_notes").value = "";
+      box.innerHTML = `<div class="item">Item adicionado.</div>`;
+      await loadOrders();
+      await loadStats();
+      await loadDailySummary();
+    }
+
+    async function updateOrderStatus(id, status) {
+      const { error } = await supabase
+        .from("orders")
+        .update({ status })
+        .eq("id", id);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      await supabase.rpc("add_order_history", {
+        p_order_id: id,
+        p_action: "status_changed",
+        p_description: `Status alterado para ${status}.`
+      });
+
+      await loadOrders();
+      await loadStats();
+      await loadDailySummary();
+    }
+
+    async function updatePaymentStatus(id, status) {
+      const { error } = await supabase
+        .from("orders")
+        .update({ payment_status: status })
+        .eq("id", id);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      await supabase.rpc("add_order_history", {
+        p_order_id: id,
+        p_action: "payment_changed",
+        p_description: `Pagamento alterado para ${status}.`
+      });
+
+      await loadOrders();
+      await loadStats();
+      await loadDailySummary();
+    }
+
+    async function openCashSession() {
+      const openingAmount = Number(document.getElementById("opening_amount").value || 0);
+      const box = document.getElementById("cash_result");
+      const user = await getUser();
+
+      const { data: existing } = await supabase
+        .from("cash_sessions")
+        .select("*")
+        .eq("store_id", currentStore.id)
+        .eq("status", "open")
+        .maybeSingle();
+
+      if (existing) {
+        box.innerHTML = `<div class="item">Já existe um caixa aberto.</div>`;
+        await loadCashSession();
+        return;
+      }
+
+      const { error } = await supabase.from("cash_sessions").insert({
+        store_id: currentStore.id,
+        opened_by: user.id,
+        opening_amount: openingAmount,
+        status: "open"
+      });
+
+      if (error) {
+        box.innerHTML = `<div class="item">${error.message}</div>`;
+        return;
+      }
+
+      box.innerHTML = `<div class="item">Caixa aberto com sucesso.</div>`;
+      document.getElementById("opening_amount").value = "";
+      await loadCashSession();
+    }
+
+    async function closeCashSession() {
+      const box = document.getElementById("cash_result");
+      const user = await getUser();
+
+      if (!currentCashSession) {
+        box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`;
+        return;
+      }
+
+      const { data: deliveredOrders } = await supabase
+        .from("orders")
+        .select("total")
+        .eq("store_id", currentStore.id)
+        .eq("status", "delivered")
+        .eq("payment_status", "paid");
+
+      const salesTotal = (deliveredOrders || []).reduce((acc, o) => acc + Number(o.total || 0), 0);
+      const closingAmount = Number(currentCashSession.opening_amount || 0) + salesTotal;
+
+      const { error } = await supabase
+        .from("cash_sessions")
+        .update({
+          closed_by: user.id,
+          closing_amount: closingAmount,
+          sales_total: salesTotal,
+          status: "closed",
+          closed_at: new Date().toISOString()
+        })
+        .eq("id", currentCashSession.id);
+
+      if (error) {
+        box.innerHTML = `<div class="item">${error.message}</div>`;
+        return;
+      }
+
+      box.innerHTML = `<div class="item">Caixa fechado com sucesso.</div>`;
+      await loadCashSession();
+    }
+
+    async function loadCashSession() {
+      const box = document.getElementById("cash_session_info");
+
+      const { data } = await supabase
+        .from("cash_sessions")
+        .select("*")
+        .eq("store_id", currentStore.id)
+        .eq("status", "open")
+        .maybeSingle();
+
+      currentCashSession = data || null;
+
+      if (!data) {
+        box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`;
+        return;
+      }
+
+      box.innerHTML = `
+        <div class="item">
+          <b>Caixa aberto</b><br>
+          Abertura: ${money(data.opening_amount)}<br>
+          Aberto em: ${new Date(data.opened_at).toLocaleString("pt-BR")}<br>
+          <span class="badge open">open</span>
+        </div>
+      `;
+    }
+
+    async function loadCategories() {
+      const { data } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      const list = document.getElementById("categories_list");
+      const select = document.getElementById("product_category");
+
+      list.innerHTML = "";
+      select.innerHTML = `<option value="">Sem categoria</option>`;
+
+      if (!data || !data.length) {
+        list.innerHTML = `<div class="item">Nenhuma categoria.</div>`;
+        return;
+      }
+
+      data.forEach(c => {
+        list.innerHTML += `
+          <div class="item">
+            <b>${c.name}</b><br>
+            <span class="badge">${c.active ? "ativa" : "inativa"}</span>
+          </div>
+        `;
+        select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+      });
+    }
+
+    async function loadProducts() {
+      const { data } = await supabase
+        .from("products")
+        .select("*, categories(name)")
+        .order("name", { ascending: true });
+
+      const list = document.getElementById("products_list");
+      const select = document.getElementById("item_product");
+      const waiterSelect = document.getElementById("waiter_product");
+
+      list.innerHTML = "";
+      select.innerHTML = "";
+      waiterSelect.innerHTML = "";
+
+      if (!data || !data.length) {
+        list.innerHTML = `<div class="item">Nenhum produto.</div>`;
+        return;
+      }
+
+      data.forEach(p => {
+        list.innerHTML += `
+          <div class="item">
+            <b>${p.name}</b><br>
+            Categoria: ${p.categories?.name || "-"}<br>
+            Preço: ${money(p.price)}<br>
+            ${p.description || ""}
+          </div>
+        `;
+        select.innerHTML += `<option value="${p.id}">${p.name} — ${money(p.price)}</option>`;
+        waiterSelect.innerHTML += `<option value="${p.id}">${p.name} — ${money(p.price)}</option>`;
+      });
+    }
+
+    async function loadCustomers() {
+      const { data } = await supabase
+        .from("customers")
+        .select("*")
+        .order("full_name", { ascending: true });
+
+      const select = document.getElementById("order_customer");
+      select.innerHTML = `<option value="">Sem cliente</option>`;
+
+      (data || []).forEach(c => {
+        select.innerHTML += `<option value="${c.id}">${c.full_name}${c.phone ? " — " + c.phone : ""}</option>`;
+      });
+    }
+
+    async function loadTables() {
+      const { data } = await supabase
+        .from("tables")
+        .select("*")
+        .order("table_number", { ascending: true });
+
+      const list = document.getElementById("tables_list");
+      const orderSelect = document.getElementById("order_table");
+      const publicSelect = document.getElementById("public_table_select");
+      const waiterSelect = document.getElementById("waiter_table");
+      const qrList = document.getElementById("table_qr_list");
+
+      list.innerHTML = "";
+      qrList.innerHTML = "";
+      orderSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
+      publicSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
+      waiterSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
+
+      if (!data || !data.length) {
+        list.innerHTML = `<div class="item">Nenhuma mesa.</div>`;
+        qrList.innerHTML = `<div class="item">Nenhuma mesa cadastrada.</div>`;
+        return;
+      }
+
+      const baseUrl = location.origin + location.pathname;
+
+      data.forEach(t => {
+        list.innerHTML += `
+          <div class="item">
+            <b>Mesa ${t.table_number}</b><br>
+            <span class="badge">${t.active ? "ativa" : "inativa"}</span>
+          </div>
+        `;
+
+        orderSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
+        publicSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
+        waiterSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
+
+        const link = `${baseUrl}?menu=1&table=${encodeURIComponent(t.id)}`;
+        qrList.innerHTML += `
+          <div class="item">
+            <b>Mesa ${t.table_number}</b><br>
+            QR/link: <br><span class="muted">${link}</span>
+          </div>
+        `;
+      });
+
+      document.getElementById("menu_public_link").innerHTML = `${baseUrl}?menu=1`;
+    }
+
+    async function loadOrders() {
+      const filterStatus = document.getElementById("filter_status").value;
+      const filterType = document.getElementById("filter_type").value;
+
+      let query = supabase
+        .from("orders")
+        .select("*, customers(full_name), tables(table_number)")
+        .order("created_at", { ascending: false });
+
+      if (filterStatus) query = query.eq("status", filterStatus);
+      if (filterType) query = query.eq("order_type", filterType);
+
+      const { data: orders } = await query;
+
+      const list = document.getElementById("orders_list");
+      const recent = document.getElementById("recent_orders");
+      const itemOrder = document.getElementById("item_order");
+
+      list.innerHTML = "";
+      recent.innerHTML = "";
+      itemOrder.innerHTML = "";
+
+      if (!orders || !orders.length) {
+        list.innerHTML = `<div class="item">Nenhum pedido.</div>`;
+        recent.innerHTML = `<div class="item">Nenhum pedido recente.</div>`;
+        renderKitchenBoard([]);
+        return;
+      }
+
+      for (const o of orders) {
+        const { data: items } = await supabase
+          .from("order_items")
+          .select("*")
+          .eq("order_id", o.id)
+          .order("created_at", { ascending: true });
+
+        const itemsHtml = (items || []).map(i => `
+          <div style="margin-top:6px;">
+            ${i.quantity}x ${i.product_name} — ${money(i.line_total)}
+            ${i.notes ? `<br><span class="muted">${i.notes}</span>` : ""}
+          </div>
+        `).join("");
+
+        const aiSuggestions = await getAISuggestionsForOrder(items || []);
+
+        const orderHeader = `
+          <b>Pedido #${o.order_number}</b><br>
+          Cliente: ${o.customers?.full_name || "Balcão"}<br>
+          Tipo: ${o.order_type}${o.tables?.table_number ? ` • Mesa ${o.tables.table_number}` : ""}<br>
+          Origem: ${o.order_source}<br>
+          Total: ${money(o.total)}<br>
+          Pagamento: <span class="badge ${o.payment_status}">${o.payment_status}</span><br>
+          <span class="badge ${badgeClass(o.status)}">${o.status}</span>
+        `;
+
+        const suggestionsHtml = aiSuggestions.length ? `
+          <div class="item" style="margin-top:10px;">
+            <b>IA sugere:</b><br>
+            ${aiSuggestions.map(s => `${s.name} — ${money(s.price)}`).join("<br>")}
+          </div>
+        ` : "";
+
+        const actionsHtml = `
+          <div class="row no-print" style="margin-top:10px;">
+            <button class="ghost" onclick="updateOrderStatus('${o.id}','new')">Novo</button>
+            <button class="warning" onclick="updateOrderStatus('${o.id}','preparing')">Preparando</button>
+            <button class="primary" onclick="updateOrderStatus('${o.id}','ready')">Pronto</button>
+            <button class="ghost" onclick="updateOrderStatus('${o.id}','delivered')">Entregue</button>
+            <button class="danger" onclick="updateOrderStatus('${o.id}','cancelled')">Cancelar</button>
+          </div>
+          <div class="row no-print" style="margin-top:10px;">
+            <button class="ghost" onclick="updatePaymentStatus('${o.id}','open')">Pagamento aberto</button>
+            <button class="primary" onclick="updatePaymentStatus('${o.id}','paid')">Marcar pago</button>
+            <button class="ghost" onclick="printOrder('${o.id}')">Imprimir</button>
+          </div>
+        `;
+
+        const html = `
+          <div class="item" id="order-card-${o.id}">
+            ${orderHeader}
+            <div style="margin-top:10px;">${itemsHtml || "<span class='muted'>Sem itens</span>"}</div>
+            ${o.notes ? `<div class="muted" style="margin-top:8px;">Obs: ${o.notes}</div>` : ""}
+            ${suggestionsHtml}
+            ${actionsHtml}
+          </div>
+        `;
+
+        list.innerHTML += html;
+        itemOrder.innerHTML += `<option value="${o.id}">#${o.order_number} — ${o.customers?.full_name || "Balcão"}</option>`;
+      }
+
+      recent.innerHTML = orders.slice(0, 5).map(o => `
+        <div class="item">
+          <b>Pedido #${o.order_number}</b><br>
+          Cliente: ${o.customers?.full_name || "Balcão"}<br>
+          Total: ${money(o.total)}<br>
+          <span class="badge ${o.status}">${o.status}</span>
+        </div>
+      `).join("");
+
+      renderKitchenBoard(orders);
+    }
+
+    function renderKitchenBoard(orders) {
+      const newBox = document.getElementById("kitchen_new");
+      const preparingBox = document.getElementById("kitchen_preparing");
+      const readyBox = document.getElementById("kitchen_ready");
+
+      newBox.innerHTML = "";
+      preparingBox.innerHTML = "";
+      readyBox.innerHTML = "";
+
+      if (!orders || !orders.length) {
+        newBox.innerHTML = `<div class="item">Sem pedidos.</div>`;
+        preparingBox.innerHTML = `<div class="item">Sem pedidos.</div>`;
+        readyBox.innerHTML = `<div class="item">Sem pedidos.</div>`;
+        return;
+      }
+
+      orders.forEach(o => {
+        const html = `
+          <div class="item">
+            <b>#${o.order_number}</b><br>
+            ${o.customers?.full_name || "Balcão"}<br>
+            ${o.tables?.table_number ? `Mesa ${o.tables.table_number}<br>` : ""}
+            <span class="badge ${o.status}">${o.status}</span>
+          </div>
+        `;
+
+        if (o.status === "new") newBox.innerHTML += html;
+        if (o.status === "preparing") preparingBox.innerHTML += html;
+        if (o.status === "ready") readyBox.innerHTML += html;
+      });
+
+      if (!newBox.innerHTML) newBox.innerHTML = `<div class="item">Sem pedidos novos.</div>`;
+      if (!preparingBox.innerHTML) preparingBox.innerHTML = `<div class="item">Sem pedidos preparando.</div>`;
+      if (!readyBox.innerHTML) readyBox.innerHTML = `<div class="item">Sem pedidos prontos.</div>`;
+    }
+
+    function startKitchenAutoRefresh() {
+      if (kitchenAutoTimer) return;
+      kitchenAutoTimer = setInterval(async () => {
+        await loadOrders();
+      }, 5000);
+    }
+
+    function stopKitchenAutoRefresh() {
+      if (!kitchenAutoTimer) return;
+      clearInterval(kitchenAutoTimer);
+      kitchenAutoTimer = null;
+    }
+
+    async function loadStats() {
+      const productsRes = await supabase.from("products").select("*", { count: "exact", head: true });
+      const customersRes = await supabase.from("customers").select("*", { count: "exact", head: true });
+      const ordersRes = await supabase.from("orders").select("*", { count: "exact", head: true });
+      const openRes = await supabase.from("orders").select("*", { count: "exact", head: true }).in("status", ["new", "preparing", "ready"]);
+      const tablesRes = await supabase.from("tables").select("*", { count: "exact", head: true });
+      const deliveredRes = await supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "delivered");
+
+      document.getElementById("stats").innerHTML = `
+        <div class="stat">Produtos<strong>${productsRes.count || 0}</strong></div>
+        <div class="stat">Clientes<strong>${customersRes.count || 0}</strong></div>
+        <div class="stat">Pedidos<strong>${ordersRes.count || 0}</strong></div>
+        <div class="stat">Abertos<strong>${openRes.count || 0}</strong></div>
+        <div class="stat">Mesas<strong>${tablesRes.count || 0}</strong></div>
+        <div class="stat">Entregues<strong>${deliveredRes.count || 0}</strong></div>
+      `;
+    }
+
+    async function loadDailySummary() {
+      const today = new Date();
+      const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
+      const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
+
+      const { data: orders } = await supabase
+        .from("orders")
+        .select("*")
+        .gte("created_at", start)
+        .lt("created_at", end);
+
+      const totalOrders = (orders || []).length;
+      const totalRevenue = (orders || [])
+        .filter(o => o.status === "delivered")
+        .reduce((acc, o) => acc + Number(o.total || 0), 0);
+
+      const delivered = (orders || []).filter(o => o.status === "delivered").length;
+      const cancelled = (orders || []).filter(o => o.status === "cancelled").length;
+      const open = (orders || []).filter(o => ["new", "preparing", "ready"].includes(o.status)).length;
+
+      document.getElementById("daily_summary").innerHTML = `
+        <div class="item">
+          <b>Pedidos hoje:</b> ${totalOrders}<br>
+          <b>Faturamento:</b> ${money(totalRevenue)}<br>
+          <b>Entregues:</b> ${delivered}<br>
+          <b>Em aberto:</b> ${open}<br>
+          <b>Cancelados:</b> ${cancelled}
+        </div>
+      `;
+    }
+
+    async function getAISuggestionsForOrder(items) {
+      const currentIds = [...new Set((items || []).map(i => i.product_id).filter(Boolean))];
+      if (!currentIds.length) {
+        return await getTopSellingProducts(2);
+      }
+
+      const { data: allItems } = await supabase
+        .from("order_items")
+        .select("order_id, product_id, product_name, unit_price")
+        .not("product_id", "is", null);
+
+      if (!allItems || !allItems.length) {
+        return await getTopSellingProducts(2, currentIds);
+      }
+
+      const grouped = {};
+      allItems.forEach(i => {
+        if (!grouped[i.order_id]) grouped[i.order_id] = [];
+        grouped[i.order_id].push(i);
+      });
+
+      const scoreMap = {};
+
+      Object.values(grouped).forEach(group => {
+        const ids = group.map(g => g.product_id);
+        const intersects = currentIds.some(id => ids.includes(id));
+        if (!intersects) return;
+
+        group.forEach(g => {
+          if (currentIds.includes(g.product_id)) return;
+          if (!scoreMap[g.product_id]) {
+            scoreMap[g.product_id] = {
+              id: g.product_id,
+              name: g.product_name,
+              price: Number(g.unit_price || 0),
+              score: 0
+            };
+          }
+          scoreMap[g.product_id].score += 1;
+        });
+      });
+
+      const ranked = Object.values(scoreMap)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+
+      if (ranked.length) return ranked;
+
+      return await getTopSellingProducts(3, currentIds);
+    }
+
+    async function getTopSellingProducts(limit = 3, excludeIds = []) {
+      const { data: items } = await supabase
+        .from("order_items")
+        .select("product_id, product_name, unit_price, quantity")
+        .not("product_id", "is", null);
+
+      const map = {};
+      (items || []).forEach(i => {
+        if (excludeIds.includes(i.product_id)) return;
+        if (!map[i.product_id]) {
+          map[i.product_id] = {
+            id: i.product_id,
+            name: i.product_name,
+            price: Number(i.unit_price || 0),
+            qty: 0
+          };
+        }
+        map[i.product_id].qty += Number(i.quantity || 0);
+      });
+
+      return Object.values(map)
+        .sort((a, b) => b.qty - a.qty)
+        .slice(0, limit);
+    }
+
+    async function loadPublicTableSelect() {
+      await loadTables();
+    }
+
+    async function loadPublicMenu() {
+      const menu = document.getElementById("public_menu");
+
+      const { data: categories } = await supabase
+        .from("categories")
+        .select("*")
+        .eq("store_id", currentStore.id)
+        .eq("active", true)
+        .order("name", { ascending: true });
+
+      const { data: products } = await supabase
+        .from("products")
+        .select("*")
+        .eq("store_id", currentStore.id)
+        .eq("active", true)
+        .order("name", { ascending: true });
+
+      if (!products || !products.length) {
+        menu.innerHTML = `<div class="item">Nenhum produto disponível.</div>`;
+        return;
+      }
+
+      menu.innerHTML = "";
+
+      (categories || []).forEach(c => {
+        const items = products.filter(p => p.category_id === c.id);
+        if (!items.length) return;
+
+        menu.innerHTML += `<div class="card" style="background:#0f172a;"><h3>${c.name}</h3><div class="menu-grid">`;
+        items.forEach(p => {
+          menu.innerHTML += `
+            <div class="product-card">
+              <b>${p.name}</b><br>
+              <span class="muted">${p.description || ""}</span><br>
+              <span class="badge">${money(p.price)}</span>
+              <div class="row" style="margin-top:10px;">
+                <input id="qty_${p.id}" type="number" min="1" value="1" />
+                <button class="primary" onclick="addToPublicCart('${p.id}','${escapeHtml(p.name)}',${Number(p.price || 0)},document.getElementById('qty_${p.id}').value)">Adicionar</button>
+              </div>
+            </div>
+          `;
+        });
+        menu.innerHTML += `</div></div>`;
+      });
+
+      const uncategorized = products.filter(p => !p.category_id);
+      if (uncategorized.length) {
+        menu.innerHTML += `<div class="card" style="background:#0f172a;"><h3>Outros</h3><div class="menu-grid">`;
+        uncategorized.forEach(p => {
+          menu.innerHTML += `
+            <div class="product-card">
+              <b>${p.name}</b><br>
+              <span class="muted">${p.description || ""}</span><br>
+              <span class="badge">${money(p.price)}</span>
+              <div class="row" style="margin-top:10px;">
+                <input id="qty_${p.id}" type="number" min="1" value="1" />
+                <button class="primary" onclick="addToPublicCart('${p.id}','${escapeHtml(p.name)}',${Number(p.price || 0)},document.getElementById('qty_${p.id}').value)">Adicionar</button>
+              </div>
+            </div>
+          `;
+        });
+        menu.innerHTML += `</div></div>`;
+      }
+
+      renderPublicCart();
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function addToPublicCart(id, name, price, qty) {
+      const quantity = Number(qty || 1);
+      const existing = publicCart.find(i => i.id === id);
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        publicCart.push({ id, name, price: Number(price || 0), quantity });
+      }
+      renderPublicCart();
+    }
+
+    function removeFromPublicCart(id) {
+      publicCart = publicCart.filter(i => i.id !== id);
+      renderPublicCart();
+    }
+
+    async function renderPublicCart() {
+      const box = document.getElementById("public_cart");
+      if (!publicCart.length) {
+        box.innerHTML = `<div class="item">Carrinho vazio.</div>`;
+        return;
+      }
+
+      const suggestions = await getAISuggestionsForPublicCart();
+
+      box.innerHTML = publicCart.map(i => `
+        <div class="item">
+          <b>${i.name}</b><br>
+          ${i.quantity}x ${money(i.price)} = ${money(i.quantity * i.price)}
+          <div class="row" style="margin-top:10px;">
+            <button class="danger" onclick="removeFromPublicCart('${i.id}')">Remover</button>
+          </div>
+        </div>
+      `).join("");
+
+      const total = publicCart.reduce((acc, i) => acc + (i.quantity * i.price), 0);
+      box.innerHTML += `<div class="item"><b>Total:</b> ${money(total)}</div>`;
+
+      if (suggestions.length) {
+        box.innerHTML += `
+          <div class="item">
+            <b>IA sugere para complementar:</b><br>
+            ${suggestions.map(s => `${s.name} — ${money(s.price)}`).join("<br>")}
+          </div>
+        `;
+      }
+    }
+
+    async function getAISuggestionsForPublicCart() {
+      const fakeItems = publicCart.map(i => ({ product_id: i.id }));
+      return await getAISuggestionsForOrder(fakeItems);
+    }
+
+    async function submitPublicOrder() {
+      const box = document.getElementById("public_order_result");
+      const tableId = document.getElementById("public_table_select").value || null;
+      const customerName = document.getElementById("public_customer_name").value.trim();
+
+      if (!publicCart.length) {
+        box.innerHTML = `<div class="item">Adicione itens ao carrinho.</div>`;
+        return;
+      }
+
+      const user = await getUser();
+
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          store_id: currentStore.id,
+          table_id: tableId,
+          order_type: tableId ? "table" : "pickup",
+          order_source: "table_qr",
+          notes: customerName ? `Cliente: ${customerName}` : null,
+          created_by: user.id
+        })
+        .select("*")
+        .single();
+
+      if (orderError) {
+        box.innerHTML = `<div class="item">${orderError.message}</div>`;
+        return;
+      }
+
+      for (const item of publicCart) {
+        await supabase.from("order_items").insert({
+          order_id: order.id,
+          product_id: item.id,
+          product_name: item.name,
+          unit_price: item.price,
+          quantity: item.quantity
+        });
+      }
+
+      await supabase.rpc("add_order_history", {
+        p_order_id: order.id,
+        p_action: "created_public_menu",
+        p_description: "Pedido criado pelo cardápio online / QR da mesa."
+      });
+
+      publicCart = [];
+      document.getElementById("public_customer_name").value = "";
+      renderPublicCart();
+      box.innerHTML = `<div class="item">Pedido enviado com sucesso para a cozinha.</div>`;
+
+      await loadOrders();
+      await loadStats();
+      await loadDailySummary();
+    }
+
+    async function createQuickWaiterOrder() {
+      const tableId = document.getElementById("waiter_table").value || null;
+      const productId = document.getElementById("waiter_product").value;
+      const quantity = Number(document.getElementById("waiter_quantity").value || 1);
+      const notes = document.getElementById("waiter_notes").value.trim();
+      const box = document.getElementById("waiter_result");
+
+      if (!tableId || !productId) {
+        box.innerHTML = `<div class="item">Selecione mesa e produto.</div>`;
+        return;
+      }
+
+      const user = await getUser();
+
+      const { data: product } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", productId)
+        .single();
+
+      const { data: order, error } = await supabase
+        .from("orders")
+        .insert({
+          store_id: currentStore.id,
+          table_id: tableId,
+          order_type: "table",
+          order_source: "waiter",
+          created_by: user.id
+        })
+        .select("*")
+        .single();
+
+      if (error) {
+        box.innerHTML = `<div class="item">${error.message}</div>`;
+        return;
+      }
+
+      await supabase.from("order_items").insert({
+        order_id: order.id,
+        product_id: product.id,
+        product_name: product.name,
+        unit_price: product.price,
+        quantity,
+        notes: notes || null
+      });
+
+      await supabase.rpc("add_order_history", {
+        p_order_id: order.id,
+        p_action: "created_waiter",
+        p_description: "Pedido criado pelo modo garçom."
+      });
+
+      document.getElementById("waiter_quantity").value = "1";
+      document.getElementById("waiter_notes").value = "";
+      box.innerHTML = `<div class="item">Pedido enviado para a cozinha.</div>`;
+
+      await loadOrders();
+      await loadStats();
+      await loadDailySummary();
+    }
+
+    async function printOrder(orderId) {
+      const card = document.getElementById(`order-card-${orderId}`);
+      if (!card) return;
+
+      const html = `
+        <html>
+          <head>
+            <title>Pedido</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              .box { border: 1px solid #ddd; padding: 14px; border-radius: 8px; }
+            </style>
+          </head>
+          <body>
+            <div class="box">${card.innerHTML.replace(/class="row no-print"[\s\S]*?<\/div>/g, "")}</div>
+          </body>
+        </html>
+      `;
+
+      const win = window.open("", "_blank");
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      win.print();
+    }
+
+    function printKitchen() {
+      const content = document.getElementById("tab_kitchen").innerHTML;
+      const html = `
+        <html>
+          <head>
+            <title>Cozinha</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              .item { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+              .kitchen-board { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+              .kitchen-col { border:1px solid #ddd; border-radius:8px; padding:12px; }
+            </style>
+          </head>
+          <body>${content}</body>
+        </html>
+      `;
+      const win = window.open("", "_blank");
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      win.print();
+    }
+
+    async function loadAll() {
+      await loadCategories();
+      await loadProducts();
+      await loadCustomers();
+      await loadTables();
+      await loadOrders();
+      await loadStats();
+      await loadDailySummary();
+      await loadCashSession();
+      await loadPublicMenu();
+      toggleTableField();
+    }
+
+    // BOOTSTRAP REESCRITO PARA USAR A CHAVE EM VEZ DA SESSÃO DO SUPABASE
+    async function bootstrap() {
+      const autorizado = localStorage.getItem("anote_autorizado") === "sim";
+
+      document.getElementById("auth_screen").classList.add("hidden");
+      document.getElementById("store_setup_screen").classList.add("hidden");
+      document.getElementById("app_screen").classList.add("hidden");
+
+      if (!autorizado) {
+        document.getElementById("auth_screen").classList.remove("hidden");
+        return;
+      }
+
+      currentStore = await getCurrentStore();
+
+      if (!currentStore) {
+        document.getElementById("store_setup_screen").classList.remove("hidden");
+        return;
+      }
+
+      document.getElementById("app_screen").classList.remove("hidden");
+      document.getElementById("store_label").textContent =
+        currentStore.name +
+        (currentStore.phone ? " • " + currentStore.phone : "") +
+        (currentStore.address ? " • " + currentStore.address : "");
+
+      await loadAll();
+    }
+
+    bootstrap();
+
+    window.login = login;
+    window.signup = signup;
+    window.logout = logout;
+    window.createStore = createStore;
+    window.createCategory = createCategory;
+    window.createProduct = createProduct;
+    window.createTable = createTable;
+    window.createCustomer = createCustomer;
+    window.createOrder = createOrder;
+    window.addItemToOrder = addItemToOrder;
+    window.updateOrderStatus = updateOrderStatus;
+    window.updatePaymentStatus = updatePaymentStatus;
+    window.openCashSession = openCashSession;
+    window.closeCashSession = closeCashSession;
+    window.openTab = openTab;
+    window.toggleTableField = toggleTableField;
+    window.toggleSignup = toggleSignup;
+    window.enterWaiterMode = enterWaiterMode;
+    window.exitWaiterMode = exitWaiterMode;
+    window.createQuickWaiterOrder = createQuickWaiterOrder;
+    window.printOrder = printOrder;
+    window.printKitchen = printKitchen;
+    window.loadPublicMenu = loadPublicMenu;
+    window.addToPublicCart = addToPublicCart;
+    window.removeFromPublicCart = removeFromPublicCart;
+    window.submitPublicOrder = submitPublicOrder;
+    window.loadAll = loadAll;
+    </script>
+</body>
+</html>
