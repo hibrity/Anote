@@ -7,7 +7,6 @@
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-    // O cliente é mantido para acesso ao banco, mas sem depender de autenticação de usuário
     window.supabase = createClient(
       "https://zbxrpprwjrholrycwsqa.supabase.co",
       "sb_publishable_c4O2UN_u487qWsu4TNwG0Q_OGj3aHNM"
@@ -210,7 +209,6 @@
 </head>
 <body>
   <div class="wrap">
-    <!-- TELA DE ACESSO POR CHAVE -->
     <div id="auth_screen">
       <div class="auth-shell">
         <div class="topbar auth-title" style="justify-content:center;">
@@ -231,7 +229,6 @@
       </div>
     </div>
 
-    <!-- TELA DE CONFIGURAÇÃO DA LOJA (Primeiro acesso) -->
     <div id="store_setup_screen" class="hidden">
       <div class="topbar">
         <div>
@@ -251,7 +248,6 @@
       </div>
     </div>
 
-    <!-- TELA PRINCIPAL DO APP -->
     <div id="app_screen" class="hidden">
       <div class="topbar">
         <div>
@@ -473,7 +469,8 @@
   </div>
 
   <script>
-    const ACCESS_KEY = "7846SIS2026BRA85";
+    // CHAVE CARREGADA DO SUPABASE (não está mais fixa no código)
+    let ACCESS_KEY = null;
     let currentStore = null;
     let currentCashSession = null;
     let publicCart = [];
@@ -485,6 +482,26 @@
 
     function badgeClass(status) {
       return status || "";
+    }
+
+    // --- BUSCA A CHAVE DE ACESSO DO SUPABASE ---
+    async function loadAccessKey() {
+      try {
+        const { data, error } = await supabase
+          .from("system_config")
+          .select("config_value")
+          .eq("config_key", "access_key")
+          .maybeSingle();
+
+        if (error || !data) {
+          console.error("Erro ao carregar chave:", error);
+          return null;
+        }
+        return data.config_value;
+      } catch (e) {
+        console.error("Falha na conexão com Supabase:", e);
+        return null;
+      }
     }
 
     function openTab(name, btn) {
@@ -516,27 +533,40 @@
       else tableField.classList.add("hidden");
     }
 
-    // --- SISTEMA DE ACESSO POR CHAVE ---
-    function login() {
+    // --- LOGIN BUSCA A CHAVE DO BANCO ---
+    async function login() {
       const key = document.getElementById("access_key").value.trim();
       const box = document.getElementById("login_result");
-      box.innerHTML = "";
+      box.innerHTML = `<div class="item">Verificando...</div>`;
 
-      if (key === ACCESS_KEY) {
+      // Busca a chave atualizada do banco a cada tentativa
+      const storedKey = await loadAccessKey();
+
+      if (!storedKey) {
+        box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
+          Erro ao conectar com o servidor. Verifique sua conexão.
+        </div>`;
+        return;
+      }
+
+      if (key === storedKey) {
         sessionStorage.setItem("app_access_key", key);
+        sessionStorage.setItem("app_access_granted_at", Date.now().toString());
         bootstrap();
       } else {
-        box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">Chave de acesso inválida.</div>`;
+        box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
+          Chave de acesso inválida.
+        </div>`;
       }
     }
 
     function logout() {
       sessionStorage.removeItem("app_access_key");
+      sessionStorage.removeItem("app_access_granted_at");
       location.reload();
     }
 
     async function getCurrentStore() {
-      // Busca a primeira loja disponível (ajuste a lógica se houver múltiplas lojas)
       const { data, error } = await supabase
         .from("stores")
         .select("*")
@@ -1194,7 +1224,7 @@
           order_type: tableId ? "table" : "pickup",
           order_source: "table_qr",
           notes: customerName ? `Cliente: ${customerName}` : null,
-          created_by: "cliente_mesa" // Permite inserção sem usuário logado
+          created_by: "cliente_mesa"
         })
         .select("*")
         .single();
@@ -1304,14 +1334,21 @@
       toggleTableField();
     }
 
+    // --- BOOTSTRAP VALIDA CONTRA A CHAVE DO BANCO ---
     async function bootstrap() {
-      const hasAccess = sessionStorage.getItem("app_access_key") === ACCESS_KEY;
+      // Busca a chave do banco se ainda não estiver em memória
+      if (!ACCESS_KEY) {
+        ACCESS_KEY = await loadAccessKey();
+      }
+
+      const savedKey = sessionStorage.getItem("app_access_key");
 
       document.getElementById("auth_screen").classList.add("hidden");
       document.getElementById("store_setup_screen").classList.add("hidden");
       document.getElementById("app_screen").classList.add("hidden");
 
-      if (!hasAccess) {
+      // Verifica se a sessão salva corresponde à chave atual do banco
+      if (!savedKey || savedKey !== ACCESS_KEY) {
         document.getElementById("auth_screen").classList.remove("hidden");
         return;
       }
@@ -1335,7 +1372,6 @@
     // Inicialização
     bootstrap();
 
-    // Expor funções globalmente para os onclick do HTML
     window.login = login;
     window.logout = logout;
     window.createStore = createStore;
