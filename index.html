@@ -7,6 +7,7 @@
 
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    // O cliente é mantido para acesso ao banco, mas sem depender de autenticação de usuário
     window.supabase = createClient(
       "https://zbxrpprwjrholrycwsqa.supabase.co",
       "sb_publishable_c4O2UN_u487qWsu4TNwG0Q_OGj3aHNM"
@@ -54,11 +55,6 @@
       display: grid;
       gap: 16px;
       grid-template-columns: 1fr 1fr;
-    }
-    .grid-3 {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(3, 1fr);
     }
     .stats {
       display: grid;
@@ -181,23 +177,23 @@
 
     .auth-shell {
       max-width: 420px;
-      margin: 40px auto 0;
+      margin: 80px auto 0;
     }
     .auth-title {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
 
     @media (max-width: 1100px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
-      .grid, .grid-3, .menu-grid, .kitchen-board { grid-template-columns: 1fr; }
+      .grid, .menu-grid, .kitchen-board { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
       .stats { grid-template-columns: 1fr; }
       .title { font-size: 24px; }
       .auth-shell {
         max-width: 100%;
-        margin-top: 20px;
+        margin-top: 40px;
       }
     }
     @media print {
@@ -214,7 +210,7 @@
 </head>
 <body>
   <div class="wrap">
-    <!-- TELA DE ACESSO COM CHAVE (MODIFICADA) -->
+    <!-- TELA DE ACESSO POR CHAVE -->
     <div id="auth_screen">
       <div class="auth-shell">
         <div class="topbar auth-title" style="justify-content:center;">
@@ -225,14 +221,17 @@
         </div>
 
         <div class="card">
-          <h3>Acesso ao Sistema</h3>
-          <input id="access_key" type="text" placeholder="Digite a chave de acesso" />
-          <button class="primary" style="width:100%;" onclick="login()">Acessar</button>
+          <h3 style="text-align:center; margin-top:0;">Acesso Restrito</h3>
+          <p class="muted center" style="margin-bottom:18px;">Digite a chave de acesso do sistema</p>
+
+          <input id="access_key" type="password" placeholder="Chave de Acesso" />
+          <button class="primary" style="width:100%;" onclick="login()">Acessar Sistema</button>
           <div id="login_result"></div>
         </div>
       </div>
     </div>
 
+    <!-- TELA DE CONFIGURAÇÃO DA LOJA (Primeiro acesso) -->
     <div id="store_setup_screen" class="hidden">
       <div class="topbar">
         <div>
@@ -252,6 +251,7 @@
       </div>
     </div>
 
+    <!-- TELA PRINCIPAL DO APP -->
     <div id="app_screen" class="hidden">
       <div class="topbar">
         <div>
@@ -280,7 +280,6 @@
           <h3>Resumo geral</h3>
           <div class="stats" id="stats"></div>
         </div>
-
         <div class="grid">
           <div class="card">
             <h3>Pedidos recentes</h3>
@@ -302,7 +301,6 @@
               <button class="primary" onclick="createCategory()">Salvar categoria</button>
               <div id="category_result"></div>
             </div>
-
             <div class="card">
               <h3>Novo produto</h3>
               <input id="product_name" placeholder="Nome do produto" />
@@ -312,7 +310,6 @@
               <button class="primary" onclick="createProduct()">Salvar produto</button>
               <div id="product_result"></div>
             </div>
-
             <div class="card">
               <h3>Nova mesa</h3>
               <input id="table_number" placeholder="Número / nome da mesa" />
@@ -320,22 +317,10 @@
               <div id="table_result"></div>
             </div>
           </div>
-
           <div>
-            <div class="card">
-              <h3>Categorias</h3>
-              <div id="categories_list"></div>
-            </div>
-
-            <div class="card">
-              <h3>Produtos</h3>
-              <div id="products_list"></div>
-            </div>
-
-            <div class="card">
-              <h3>Mesas</h3>
-              <div id="tables_list"></div>
-            </div>
+            <div class="card"><h3>Categorias</h3><div id="categories_list"></div></div>
+            <div class="card"><h3>Produtos</h3><div id="products_list"></div></div>
+            <div class="card"><h3>Mesas</h3><div id="tables_list"></div></div>
           </div>
         </div>
       </div>
@@ -352,7 +337,6 @@
               <button class="ghost" onclick="createCustomer()">Salvar cliente</button>
               <div id="customer_result"></div>
             </div>
-
             <div class="card">
               <h3>Novo pedido</h3>
               <select id="order_customer"></select>
@@ -367,7 +351,6 @@
               <button class="primary" onclick="createOrder()">Criar pedido</button>
               <div id="order_result"></div>
             </div>
-
             <div class="card">
               <h3>Adicionar item ao pedido</h3>
               <select id="item_order"></select>
@@ -378,7 +361,6 @@
               <div id="item_result"></div>
             </div>
           </div>
-
           <div>
             <div class="card">
               <h3>Filtros de pedidos</h3>
@@ -400,11 +382,7 @@
                 </select>
               </div>
             </div>
-
-            <div class="card">
-              <h3>Pedidos</h3>
-              <div id="orders_list"></div>
-            </div>
+            <div class="card"><h3>Pedidos</h3><div id="orders_list"></div></div>
           </div>
         </div>
       </div>
@@ -413,18 +391,9 @@
         <div class="card">
           <h3>Tela da cozinha automática</h3>
           <div class="kitchen-board">
-            <div class="kitchen-col">
-              <div class="section-title">Novos</div>
-              <div id="kitchen_new"></div>
-            </div>
-            <div class="kitchen-col">
-              <div class="section-title">Preparando</div>
-              <div id="kitchen_preparing"></div>
-            </div>
-            <div class="kitchen-col">
-              <div class="section-title">Prontos</div>
-              <div id="kitchen_ready"></div>
-            </div>
+            <div class="kitchen-col"><div class="section-title">Novos</div><div id="kitchen_new"></div></div>
+            <div class="kitchen-col"><div class="section-title">Preparando</div><div id="kitchen_preparing"></div></div>
+            <div class="kitchen-col"><div class="section-title">Prontos</div><div id="kitchen_ready"></div></div>
           </div>
         </div>
       </div>
@@ -443,10 +412,7 @@
             </div>
           </div>
           <div>
-            <div class="card">
-              <h3>Sessão atual</h3>
-              <div id="cash_session_info"></div>
-            </div>
+            <div class="card"><h3>Sessão atual</h3><div id="cash_session_info"></div></div>
           </div>
         </div>
       </div>
@@ -459,7 +425,6 @@
               <p class="muted">Copie os links abaixo e transforme em QR Code externo ou interno.</p>
               <div id="table_qr_list"></div>
             </div>
-
             <div class="card">
               <h3>Link do cardápio online</h3>
               <div id="menu_public_link" class="item">Carregando...</div>
@@ -493,7 +458,6 @@
             </div>
             <button class="danger" onclick="exitWaiterMode()">Fechar</button>
           </div>
-
           <div class="card" style="background:#0f172a;">
             <h3>Novo pedido rápido</h3>
             <select id="waiter_table"></select>
@@ -508,21 +472,12 @@
     </div>
   </div>
 
-  
-
-
-
-
-
-
   <script>
-      let currentStore = null;
+    const ACCESS_KEY = "7846SIS2026BRA85";
+    let currentStore = null;
     let currentCashSession = null;
     let publicCart = [];
     let kitchenAutoTimer = null;
-
-    // CHAVE DE ACESSO AUTORIZADA
-    const CHAVE_AUTORIZADA = "7846SIS2026BRA85";
 
     function money(v) {
       return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -530,15 +485,6 @@
 
     function badgeClass(status) {
       return status || "";
-    }
-
-    function toggleSignup(show = null) {
-      const box = document.getElementById("signup_box");
-      if (!box) return;
-
-      if (show === true) box.classList.remove("hidden");
-      else if (show === false) box.classList.add("hidden");
-      else box.classList.toggle("hidden");
     }
 
     function openTab(name, btn) {
@@ -570,49 +516,35 @@
       else tableField.classList.add("hidden");
     }
 
-    // REMOVIDA a função getUser() que usava autenticação do Supabase — mantida compatibilidade onde necessário
-    async function getUser() {
-      // Retorna usuário genérico pois usamos chave
-      return { id: "user-chave-acesso" };
-    }
-
-    // NOVA FUNÇÃO DE LOGIN COM CHAVE
-    async function login() {
-      const chave = document.getElementById("access_key").value.trim();
+    // --- SISTEMA DE ACESSO POR CHAVE ---
+    function login() {
+      const key = document.getElementById("access_key").value.trim();
       const box = document.getElementById("login_result");
-
       box.innerHTML = "";
 
-      if (chave === CHAVE_AUTORIZADA) {
-        box.innerHTML = `<div class="item" style="color:#22c55e;">✅ Chave válida! Carregando...</div>`;
-        localStorage.setItem("anote_autorizado", "sim");
-        setTimeout(bootstrap, 800);
+      if (key === ACCESS_KEY) {
+        sessionStorage.setItem("app_access_key", key);
+        bootstrap();
       } else {
-        box.innerHTML = `<div class="item" style="color:#ef4444;">❌ Chave inválida! Tente novamente.</div>`;
+        box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">Chave de acesso inválida.</div>`;
       }
     }
 
-    // REMOVIDA função de cadastro de conta
-    async function signup() {
-      alert("Cadastro desativado — use a chave de acesso para entrar.");
-      return;
-    }
-
-    // LOGOUT ATUALIZADO
-    async function logout() {
-      localStorage.removeItem("anote_autorizado");
+    function logout() {
+      sessionStorage.removeItem("app_access_key");
       location.reload();
     }
 
     async function getCurrentStore() {
+      // Busca a primeira loja disponível (ajuste a lógica se houver múltiplas lojas)
       const { data, error } = await supabase
-        .from("store_users")
-        .select("store_id, stores(*)")
+        .from("stores")
+        .select("*")
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error || !data) return null;
-      return data.stores;
+      return data;
     }
 
     async function createStore() {
@@ -621,10 +553,11 @@
       const address = document.getElementById("store_address").value.trim();
       const box = document.getElementById("store_result");
 
-      const { error } = await supabase.rpc("create_store_with_owner", {
-        p_name: name,
-        p_phone: phone || null,
-        p_address: address || null
+      const { error } = await supabase.from("stores").insert({
+        name,
+        phone: phone || null,
+        address: address || null,
+        created_by: "admin"
       });
 
       if (error) {
@@ -632,7 +565,7 @@
         return;
       }
 
-      await bootstrap();
+      bootstrap();
     }
 
     async function createCategory() {
@@ -642,7 +575,7 @@
       const { error } = await supabase.from("categories").insert({
         store_id: currentStore.id,
         name,
-        created_by: (await getUser()).id
+        created_by: "admin"
       });
 
       if (error) {
@@ -669,7 +602,7 @@
         name,
         price,
         description: description || null,
-        created_by: (await getUser()).id
+        created_by: "admin"
       });
 
       if (error) {
@@ -693,7 +626,7 @@
         store_id: currentStore.id,
         table_number: tableNumber,
         qr_code: `mesa-${tableNumber}`,
-        created_by: (await getUser()).id
+        created_by: "admin"
       });
 
       if (error) {
@@ -720,7 +653,7 @@
         phone: phone || null,
         address: address || null,
         notes: notes || null,
-        created_by: (await getUser()).id
+        created_by: "admin"
       });
 
       if (error) {
@@ -743,8 +676,6 @@
       const notes = document.getElementById("order_notes").value.trim();
       const box = document.getElementById("order_result");
 
-      const user = await getUser();
-
       const { data, error } = await supabase
         .from("orders")
         .insert({
@@ -754,7 +685,7 @@
           order_type: orderType,
           order_source: "counter",
           notes: notes || null,
-          created_by: user.id
+          created_by: "admin"
         })
         .select("*")
         .single();
@@ -763,12 +694,6 @@
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
-      await supabase.rpc("add_order_history", {
-        p_order_id: data.id,
-        p_action: "created",
-        p_description: `Pedido criado como ${orderType}.`
-      });
 
       document.getElementById("order_notes").value = "";
       box.innerHTML = `<div class="item">Pedido criado.</div>`;
@@ -788,7 +713,7 @@
         .from("products")
         .select("*")
         .eq("id", productId)
-        .single();
+        .maybeSingle();
 
       if (!product) {
         box.innerHTML = `<div class="item">Produto inválido.</div>`;
@@ -809,12 +734,6 @@
         return;
       }
 
-      await supabase.rpc("add_order_history", {
-        p_order_id: orderId,
-        p_action: "item_added",
-        p_description: `${quantity}x ${product.name} adicionado(s).`
-      });
-
       document.getElementById("item_quantity").value = "1";
       document.getElementById("item_notes").value = "";
       box.innerHTML = `<div class="item">Item adicionado.</div>`;
@@ -824,44 +743,16 @@
     }
 
     async function updateOrderStatus(id, status) {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status })
-        .eq("id", id);
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      await supabase.rpc("add_order_history", {
-        p_order_id: id,
-        p_action: "status_changed",
-        p_description: `Status alterado para ${status}.`
-      });
-
+      const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+      if (error) { alert(error.message); return; }
       await loadOrders();
       await loadStats();
       await loadDailySummary();
     }
 
     async function updatePaymentStatus(id, status) {
-      const { error } = await supabase
-        .from("orders")
-        .update({ payment_status: status })
-        .eq("id", id);
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      await supabase.rpc("add_order_history", {
-        p_order_id: id,
-        p_action: "payment_changed",
-        p_description: `Pagamento alterado para ${status}.`
-      });
-
+      const { error } = await supabase.from("orders").update({ payment_status: status }).eq("id", id);
+      if (error) { alert(error.message); return; }
       await loadOrders();
       await loadStats();
       await loadDailySummary();
@@ -870,7 +761,6 @@
     async function openCashSession() {
       const openingAmount = Number(document.getElementById("opening_amount").value || 0);
       const box = document.getElementById("cash_result");
-      const user = await getUser();
 
       const { data: existing } = await supabase
         .from("cash_sessions")
@@ -887,7 +777,7 @@
 
       const { error } = await supabase.from("cash_sessions").insert({
         store_id: currentStore.id,
-        opened_by: user.id,
+        opened_by: "admin",
         opening_amount: openingAmount,
         status: "open"
       });
@@ -904,8 +794,6 @@
 
     async function closeCashSession() {
       const box = document.getElementById("cash_result");
-      const user = await getUser();
-
       if (!currentCashSession) {
         box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`;
         return;
@@ -924,7 +812,7 @@
       const { error } = await supabase
         .from("cash_sessions")
         .update({
-          closed_by: user.id,
+          closed_by: "admin",
           closing_amount: closingAmount,
           sales_total: salesTotal,
           status: "closed",
@@ -943,7 +831,6 @@
 
     async function loadCashSession() {
       const box = document.getElementById("cash_session_info");
-
       const { data } = await supabase
         .from("cash_sessions")
         .select("*")
@@ -963,20 +850,15 @@
           <b>Caixa aberto</b><br>
           Abertura: ${money(data.opening_amount)}<br>
           Aberto em: ${new Date(data.opened_at).toLocaleString("pt-BR")}<br>
-          <span class="badge open">open</span>
+          <span class="badge open">aberto</span>
         </div>
       `;
     }
 
     async function loadCategories() {
-      const { data } = await supabase
-        .from("categories")
-        .select("*")
-        .order("name", { ascending: true });
-
+      const { data } = await supabase.from("categories").select("*").order("name", { ascending: true });
       const list = document.getElementById("categories_list");
       const select = document.getElementById("product_category");
-
       list.innerHTML = "";
       select.innerHTML = `<option value="">Sem categoria</option>`;
 
@@ -986,26 +868,16 @@
       }
 
       data.forEach(c => {
-        list.innerHTML += `
-          <div class="item">
-            <b>${c.name}</b><br>
-            <span class="badge">${c.active ? "ativa" : "inativa"}</span>
-          </div>
-        `;
+        list.innerHTML += `<div class="item"><b>${c.name}</b><br><span class="badge">${c.active ? "ativa" : "inativa"}</span></div>`;
         select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
       });
     }
 
     async function loadProducts() {
-      const { data } = await supabase
-        .from("products")
-        .select("*, categories(name)")
-        .order("name", { ascending: true });
-
+      const { data } = await supabase.from("products").select("*, categories(name)").order("name", { ascending: true });
       const list = document.getElementById("products_list");
       const select = document.getElementById("item_product");
       const waiterSelect = document.getElementById("waiter_product");
-
       list.innerHTML = "";
       select.innerHTML = "";
       waiterSelect.innerHTML = "";
@@ -1016,39 +888,23 @@
       }
 
       data.forEach(p => {
-        list.innerHTML += `
-          <div class="item">
-            <b>${p.name}</b><br>
-            Categoria: ${p.categories?.name || "-"}<br>
-            Preço: ${money(p.price)}<br>
-            ${p.description || ""}
-          </div>
-        `;
+        list.innerHTML += `<div class="item"><b>${p.name}</b><br>Categoria: ${p.categories?.name || "-"}<br>Preço: ${money(p.price)}<br>${p.description || ""}</div>`;
         select.innerHTML += `<option value="${p.id}">${p.name} — ${money(p.price)}</option>`;
         waiterSelect.innerHTML += `<option value="${p.id}">${p.name} — ${money(p.price)}</option>`;
       });
     }
 
     async function loadCustomers() {
-      const { data } = await supabase
-        .from("customers")
-        .select("*")
-        .order("full_name", { ascending: true });
-
+      const { data } = await supabase.from("customers").select("*").order("full_name", { ascending: true });
       const select = document.getElementById("order_customer");
       select.innerHTML = `<option value="">Sem cliente</option>`;
-
       (data || []).forEach(c => {
         select.innerHTML += `<option value="${c.id}">${c.full_name}${c.phone ? " — " + c.phone : ""}</option>`;
       });
     }
 
     async function loadTables() {
-      const { data } = await supabase
-        .from("tables")
-        .select("*")
-        .order("table_number", { ascending: true });
-
+      const { data } = await supabase.from("tables").select("*").order("table_number", { ascending: true });
       const list = document.getElementById("tables_list");
       const orderSelect = document.getElementById("order_table");
       const publicSelect = document.getElementById("public_table_select");
@@ -1068,26 +924,14 @@
       }
 
       const baseUrl = location.origin + location.pathname;
-
       data.forEach(t => {
-        list.innerHTML += `
-          <div class="item">
-            <b>Mesa ${t.table_number}</b><br>
-            <span class="badge">${t.active ? "ativa" : "inativa"}</span>
-          </div>
-        `;
-
+        list.innerHTML += `<div class="item"><b>Mesa ${t.table_number}</b><br><span class="badge">${t.active ? "ativa" : "inativa"}</span></div>`;
         orderSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
         publicSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
         waiterSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
 
         const link = `${baseUrl}?menu=1&table=${encodeURIComponent(t.id)}`;
-        qrList.innerHTML += `
-          <div class="item">
-            <b>Mesa ${t.table_number}</b><br>
-            QR/link: <br><span class="muted">${link}</span>
-          </div>
-        `;
+        qrList.innerHTML += `<div class="item"><b>Mesa ${t.table_number}</b><br>QR/link: <br><span class="muted">${link}</span></div>`;
       });
 
       document.getElementById("menu_public_link").innerHTML = `${baseUrl}?menu=1`;
@@ -1097,16 +941,11 @@
       const filterStatus = document.getElementById("filter_status").value;
       const filterType = document.getElementById("filter_type").value;
 
-      let query = supabase
-        .from("orders")
-        .select("*, customers(full_name), tables(table_number)")
-        .order("created_at", { ascending: false });
-
+      let query = supabase.from("orders").select("*, customers(full_name), tables(table_number)").order("created_at", { ascending: false });
       if (filterStatus) query = query.eq("status", filterStatus);
       if (filterType) query = query.eq("order_type", filterType);
 
       const { data: orders } = await query;
-
       const list = document.getElementById("orders_list");
       const recent = document.getElementById("recent_orders");
       const itemOrder = document.getElementById("item_order");
@@ -1123,37 +962,22 @@
       }
 
       for (const o of orders) {
-        const { data: items } = await supabase
-          .from("order_items")
-          .select("*")
-          .eq("order_id", o.id)
-          .order("created_at", { ascending: true });
+        const { data: items } = await supabase.from("order_items").select("*").eq("order_id", o.id).order("created_at", { ascending: true });
 
-        const itemsHtml = (items || []).map(i => `
-          <div style="margin-top:6px;">
-            ${i.quantity}x ${i.product_name} — ${money(i.line_total)}
-            ${i.notes ? `<br><span class="muted">${i.notes}</span>` : ""}
-          </div>
-        `).join("");
-
-        const aiSuggestions = await getAISuggestionsForOrder(items || []);
+        const itemsHtml = (items || []).map(i => {
+          const lineTotal = (Number(i.unit_price) || 0) * (Number(i.quantity) || 0);
+          return `<div style="margin-top:6px;">${i.quantity}x ${i.product_name} — ${money(lineTotal)}${i.notes ? `<br><span class="muted">${i.notes}</span>` : ""}</div>`;
+        }).join("");
 
         const orderHeader = `
-          <b>Pedido #${o.order_number}</b><br>
+          <b>Pedido #${o.order_number || o.id.slice(0,4)}</b><br>
           Cliente: ${o.customers?.full_name || "Balcão"}<br>
           Tipo: ${o.order_type}${o.tables?.table_number ? ` • Mesa ${o.tables.table_number}` : ""}<br>
           Origem: ${o.order_source}<br>
           Total: ${money(o.total)}<br>
-          Pagamento: <span class="badge ${o.payment_status}">${o.payment_status}</span><br>
+          Pagamento: <span class="badge ${o.payment_status || 'open'}">${o.payment_status || 'aberto'}</span><br>
           <span class="badge ${badgeClass(o.status)}">${o.status}</span>
         `;
-
-        const suggestionsHtml = aiSuggestions.length ? `
-          <div class="item" style="margin-top:10px;">
-            <b>IA sugere:</b><br>
-            ${aiSuggestions.map(s => `${s.name} — ${money(s.price)}`).join("<br>")}
-          </div>
-        ` : "";
 
         const actionsHtml = `
           <div class="row no-print" style="margin-top:10px;">
@@ -1170,23 +994,14 @@
           </div>
         `;
 
-        const html = `
-          <div class="item" id="order-card-${o.id}">
-            ${orderHeader}
-            <div style="margin-top:10px;">${itemsHtml || "<span class='muted'>Sem itens</span>"}</div>
-            ${o.notes ? `<div class="muted" style="margin-top:8px;">Obs: ${o.notes}</div>` : ""}
-            ${suggestionsHtml}
-            ${actionsHtml}
-          </div>
-        `;
-
+        const html = `<div class="item" id="order-card-${o.id}">${orderHeader}<div style="margin-top:10px;">${itemsHtml || "<span class='muted'>Sem itens</span>"}</div>${o.notes ? `<div class="muted" style="margin-top:8px;">Obs: ${o.notes}</div>` : ""}${actionsHtml}</div>`;
         list.innerHTML += html;
-        itemOrder.innerHTML += `<option value="${o.id}">#${o.order_number} — ${o.customers?.full_name || "Balcão"}</option>`;
+        itemOrder.innerHTML += `<option value="${o.id}">#${o.order_number || o.id.slice(0,4)} — ${o.customers?.full_name || "Balcão"}</option>`;
       }
 
       recent.innerHTML = orders.slice(0, 5).map(o => `
         <div class="item">
-          <b>Pedido #${o.order_number}</b><br>
+          <b>Pedido #${o.order_number || o.id.slice(0,4)}</b><br>
           Cliente: ${o.customers?.full_name || "Balcão"}<br>
           Total: ${money(o.total)}<br>
           <span class="badge ${o.status}">${o.status}</span>
@@ -1200,10 +1015,7 @@
       const newBox = document.getElementById("kitchen_new");
       const preparingBox = document.getElementById("kitchen_preparing");
       const readyBox = document.getElementById("kitchen_ready");
-
-      newBox.innerHTML = "";
-      preparingBox.innerHTML = "";
-      readyBox.innerHTML = "";
+      newBox.innerHTML = ""; preparingBox.innerHTML = ""; readyBox.innerHTML = "";
 
       if (!orders || !orders.length) {
         newBox.innerHTML = `<div class="item">Sem pedidos.</div>`;
@@ -1213,15 +1025,7 @@
       }
 
       orders.forEach(o => {
-        const html = `
-          <div class="item">
-            <b>#${o.order_number}</b><br>
-            ${o.customers?.full_name || "Balcão"}<br>
-            ${o.tables?.table_number ? `Mesa ${o.tables.table_number}<br>` : ""}
-            <span class="badge ${o.status}">${o.status}</span>
-          </div>
-        `;
-
+        const html = `<div class="item"><b>#${o.order_number || o.id.slice(0,4)}</b><br>${o.customers?.full_name || "Balcão"}<br>${o.tables?.table_number ? `Mesa ${o.tables.table_number}<br>` : ""}<span class="badge ${o.status}">${o.status}</span></div>`;
         if (o.status === "new") newBox.innerHTML += html;
         if (o.status === "preparing") preparingBox.innerHTML += html;
         if (o.status === "ready") readyBox.innerHTML += html;
@@ -1234,9 +1038,7 @@
 
     function startKitchenAutoRefresh() {
       if (kitchenAutoTimer) return;
-      kitchenAutoTimer = setInterval(async () => {
-        await loadOrders();
-      }, 5000);
+      kitchenAutoTimer = setInterval(async () => { await loadOrders(); }, 5000);
     }
 
     function stopKitchenAutoRefresh() {
@@ -1268,17 +1070,9 @@
       const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
       const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
 
-      const { data: orders } = await supabase
-        .from("orders")
-        .select("*")
-        .gte("created_at", start)
-        .lt("created_at", end);
-
+      const { data: orders } = await supabase.from("orders").select("*").gte("created_at", start).lt("created_at", end);
       const totalOrders = (orders || []).length;
-      const totalRevenue = (orders || [])
-        .filter(o => o.status === "delivered")
-        .reduce((acc, o) => acc + Number(o.total || 0), 0);
-
+      const totalRevenue = (orders || []).filter(o => o.status === "delivered").reduce((acc, o) => acc + Number(o.total || 0), 0);
       const delivered = (orders || []).filter(o => o.status === "delivered").length;
       const cancelled = (orders || []).filter(o => o.status === "cancelled").length;
       const open = (orders || []).filter(o => ["new", "preparing", "ready"].includes(o.status)).length;
@@ -1294,102 +1088,12 @@
       `;
     }
 
-    async function getAISuggestionsForOrder(items) {
-      const currentIds = [...new Set((items || []).map(i => i.product_id).filter(Boolean))];
-      if (!currentIds.length) {
-        return await getTopSellingProducts(2);
-      }
-
-      const { data: allItems } = await supabase
-        .from("order_items")
-        .select("order_id, product_id, product_name, unit_price")
-        .not("product_id", "is", null);
-
-      if (!allItems || !allItems.length) {
-        return await getTopSellingProducts(2, currentIds);
-      }
-
-      const grouped = {};
-      allItems.forEach(i => {
-        if (!grouped[i.order_id]) grouped[i.order_id] = [];
-        grouped[i.order_id].push(i);
-      });
-
-      const scoreMap = {};
-
-      Object.values(grouped).forEach(group => {
-        const ids = group.map(g => g.product_id);
-        const intersects = currentIds.some(id => ids.includes(id));
-        if (!intersects) return;
-
-        group.forEach(g => {
-          if (currentIds.includes(g.product_id)) return;
-          if (!scoreMap[g.product_id]) {
-            scoreMap[g.product_id] = {
-              id: g.product_id,
-              name: g.product_name,
-              price: Number(g.unit_price || 0),
-              score: 0
-            };
-          }
-          scoreMap[g.product_id].score += 1;
-        });
-      });
-
-      const ranked = Object.values(scoreMap)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
-
-      if (ranked.length) return ranked;
-
-      return await getTopSellingProducts(3, currentIds);
-    }
-
-    async function getTopSellingProducts(limit = 3, excludeIds = []) {
-      const { data: items } = await supabase
-        .from("order_items")
-        .select("product_id, product_name, unit_price, quantity")
-        .not("product_id", "is", null);
-
-      const map = {};
-      (items || []).forEach(i => {
-        if (excludeIds.includes(i.product_id)) return;
-        if (!map[i.product_id]) {
-          map[i.product_id] = {
-            id: i.product_id,
-            name: i.product_name,
-            price: Number(i.unit_price || 0),
-            qty: 0
-          };
-        }
-        map[i.product_id].qty += Number(i.quantity || 0);
-      });
-
-      return Object.values(map)
-        .sort((a, b) => b.qty - a.qty)
-        .slice(0, limit);
-    }
-
-    async function loadPublicTableSelect() {
-      await loadTables();
-    }
+    async function loadPublicTableSelect() { await loadTables(); }
 
     async function loadPublicMenu() {
       const menu = document.getElementById("public_menu");
-
-      const { data: categories } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("store_id", currentStore.id)
-        .eq("active", true)
-        .order("name", { ascending: true });
-
-      const { data: products } = await supabase
-        .from("products")
-        .select("*")
-        .eq("store_id", currentStore.id)
-        .eq("active", true)
-        .order("name", { ascending: true });
+      const { data: categories } = await supabase.from("categories").select("*").eq("store_id", currentStore.id).eq("active", true).order("name", { ascending: true });
+      const { data: products } = await supabase.from("products").select("*").eq("store_id", currentStore.id).eq("active", true).order("name", { ascending: true });
 
       if (!products || !products.length) {
         menu.innerHTML = `<div class="item">Nenhum produto disponível.</div>`;
@@ -1397,11 +1101,9 @@
       }
 
       menu.innerHTML = "";
-
       (categories || []).forEach(c => {
         const items = products.filter(p => p.category_id === c.id);
         if (!items.length) return;
-
         menu.innerHTML += `<div class="card" style="background:#0f172a;"><h3>${c.name}</h3><div class="menu-grid">`;
         items.forEach(p => {
           menu.innerHTML += `
@@ -1410,11 +1112,10 @@
               <span class="muted">${p.description || ""}</span><br>
               <span class="badge">${money(p.price)}</span>
               <div class="row" style="margin-top:10px;">
-                <input id="qty_${p.id}" type="number" min="1" value="1" />
+                <input id="qty_${p.id}" type="number" min="1" value="1" style="width:70px;" />
                 <button class="primary" onclick="addToPublicCart('${p.id}','${escapeHtml(p.name)}',${Number(p.price || 0)},document.getElementById('qty_${p.id}').value)">Adicionar</button>
               </div>
-            </div>
-          `;
+            </div>`;
         });
         menu.innerHTML += `</div></div>`;
       });
@@ -1429,35 +1130,25 @@
               <span class="muted">${p.description || ""}</span><br>
               <span class="badge">${money(p.price)}</span>
               <div class="row" style="margin-top:10px;">
-                <input id="qty_${p.id}" type="number" min="1" value="1" />
+                <input id="qty_${p.id}" type="number" min="1" value="1" style="width:70px;" />
                 <button class="primary" onclick="addToPublicCart('${p.id}','${escapeHtml(p.name)}',${Number(p.price || 0)},document.getElementById('qty_${p.id}').value)">Adicionar</button>
               </div>
-            </div>
-          `;
+            </div>`;
         });
         menu.innerHTML += `</div></div>`;
       }
-
       renderPublicCart();
     }
 
     function escapeHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+      return String(str || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
     function addToPublicCart(id, name, price, qty) {
       const quantity = Number(qty || 1);
       const existing = publicCart.find(i => i.id === id);
-      if (existing) {
-        existing.quantity += quantity;
-      } else {
-        publicCart.push({ id, name, price: Number(price || 0), quantity });
-      }
+      if (existing) existing.quantity += quantity;
+      else publicCart.push({ id, name, price: Number(price || 0), quantity });
       renderPublicCart();
     }
 
@@ -1472,9 +1163,6 @@
         box.innerHTML = `<div class="item">Carrinho vazio.</div>`;
         return;
       }
-
-      const suggestions = await getAISuggestionsForPublicCart();
-
       box.innerHTML = publicCart.map(i => `
         <div class="item">
           <b>${i.name}</b><br>
@@ -1484,23 +1172,8 @@
           </div>
         </div>
       `).join("");
-
       const total = publicCart.reduce((acc, i) => acc + (i.quantity * i.price), 0);
       box.innerHTML += `<div class="item"><b>Total:</b> ${money(total)}</div>`;
-
-      if (suggestions.length) {
-        box.innerHTML += `
-          <div class="item">
-            <b>IA sugere para complementar:</b><br>
-            ${suggestions.map(s => `${s.name} — ${money(s.price)}`).join("<br>")}
-          </div>
-        `;
-      }
-    }
-
-    async function getAISuggestionsForPublicCart() {
-      const fakeItems = publicCart.map(i => ({ product_id: i.id }));
-      return await getAISuggestionsForOrder(fakeItems);
     }
 
     async function submitPublicOrder() {
@@ -1513,8 +1186,6 @@
         return;
       }
 
-      const user = await getUser();
-
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
@@ -1523,7 +1194,7 @@
           order_type: tableId ? "table" : "pickup",
           order_source: "table_qr",
           notes: customerName ? `Cliente: ${customerName}` : null,
-          created_by: user.id
+          created_by: "cliente_mesa" // Permite inserção sem usuário logado
         })
         .select("*")
         .single();
@@ -1543,17 +1214,10 @@
         });
       }
 
-      await supabase.rpc("add_order_history", {
-        p_order_id: order.id,
-        p_action: "created_public_menu",
-        p_description: "Pedido criado pelo cardápio online / QR da mesa."
-      });
-
       publicCart = [];
       document.getElementById("public_customer_name").value = "";
       renderPublicCart();
-      box.innerHTML = `<div class="item">Pedido enviado com sucesso para a cozinha.</div>`;
-
+      box.innerHTML = `<div class="item" style="color:#22c55e;">Pedido enviado com sucesso para a cozinha!</div>`;
       await loadOrders();
       await loadStats();
       await loadDailySummary();
@@ -1571,14 +1235,7 @@
         return;
       }
 
-      const user = await getUser();
-
-      const { data: product } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", productId)
-        .single();
-
+      const { data: product } = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
       const { data: order, error } = await supabase
         .from("orders")
         .insert({
@@ -1586,7 +1243,7 @@
           table_id: tableId,
           order_type: "table",
           order_source: "waiter",
-          created_by: user.id
+          created_by: "admin"
         })
         .select("*")
         .single();
@@ -1605,40 +1262,18 @@
         notes: notes || null
       });
 
-      await supabase.rpc("add_order_history", {
-        p_order_id: order.id,
-        p_action: "created_waiter",
-        p_description: "Pedido criado pelo modo garçom."
-      });
-
       document.getElementById("waiter_quantity").value = "1";
       document.getElementById("waiter_notes").value = "";
       box.innerHTML = `<div class="item">Pedido enviado para a cozinha.</div>`;
-
       await loadOrders();
       await loadStats();
       await loadDailySummary();
     }
 
-    async function printOrder(orderId) {
+    function printOrder(orderId) {
       const card = document.getElementById(`order-card-${orderId}`);
       if (!card) return;
-
-      const html = `
-        <html>
-          <head>
-            <title>Pedido</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              .box { border: 1px solid #ddd; padding: 14px; border-radius: 8px; }
-            </style>
-          </head>
-          <body>
-            <div class="box">${card.innerHTML.replace(/class="row no-print"[\s\S]*?<\/div>/g, "")}</div>
-          </body>
-        </html>
-      `;
-
+      const html = `<html><head><title>Pedido</title><style>body { font-family: Arial, sans-serif; padding: 20px; } .box { border: 1px solid #ddd; padding: 14px; border-radius: 8px; }</style></head><body><div class="box">${card.innerHTML.replace(/class="row no-print"[\s\S]*?<\/div>/g, "")}</div></body></html>`;
       const win = window.open("", "_blank");
       win.document.write(html);
       win.document.close();
@@ -1648,20 +1283,7 @@
 
     function printKitchen() {
       const content = document.getElementById("tab_kitchen").innerHTML;
-      const html = `
-        <html>
-          <head>
-            <title>Cozinha</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              .item { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
-              .kitchen-board { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-              .kitchen-col { border:1px solid #ddd; border-radius:8px; padding:12px; }
-            </style>
-          </head>
-          <body>${content}</body>
-        </html>
-      `;
+      const html = `<html><head><title>Cozinha</title><style>body { font-family: Arial, sans-serif; padding: 20px; } .item { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 10px; } .kitchen-board { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; } .kitchen-col { border:1px solid #ddd; border-radius:8px; padding:12px; }</style></head><body>${content}</body></html>`;
       const win = window.open("", "_blank");
       win.document.write(html);
       win.document.close();
@@ -1682,15 +1304,14 @@
       toggleTableField();
     }
 
-    // BOOTSTRAP REESCRITO PARA USAR A CHAVE EM VEZ DA SESSÃO DO SUPABASE
     async function bootstrap() {
-      const autorizado = localStorage.getItem("anote_autorizado") === "sim";
+      const hasAccess = sessionStorage.getItem("app_access_key") === ACCESS_KEY;
 
       document.getElementById("auth_screen").classList.add("hidden");
       document.getElementById("store_setup_screen").classList.add("hidden");
       document.getElementById("app_screen").classList.add("hidden");
 
-      if (!autorizado) {
+      if (!hasAccess) {
         document.getElementById("auth_screen").classList.remove("hidden");
         return;
       }
@@ -1711,10 +1332,11 @@
       await loadAll();
     }
 
+    // Inicialização
     bootstrap();
 
+    // Expor funções globalmente para os onclick do HTML
     window.login = login;
-    window.signup = signup;
     window.logout = logout;
     window.createStore = createStore;
     window.createCategory = createCategory;
@@ -1729,7 +1351,6 @@
     window.closeCashSession = closeCashSession;
     window.openTab = openTab;
     window.toggleTableField = toggleTableField;
-    window.toggleSignup = toggleSignup;
     window.enterWaiterMode = enterWaiterMode;
     window.exitWaiterMode = exitWaiterMode;
     window.createQuickWaiterOrder = createQuickWaiterOrder;
@@ -1740,6 +1361,6 @@
     window.removeFromPublicCart = removeFromPublicCart;
     window.submitPublicOrder = submitPublicOrder;
     window.loadAll = loadAll;
-    </script>
+  </script>
 </body>
 </html>
