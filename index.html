@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -17,130 +16,30 @@
 
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111827;
-      color: white;
-    }
-    .wrap {
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: 18px;
-    }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-    .title {
-      font-size: 28px;
-      font-weight: bold;
-    }
-    .subtitle {
-      color: #cbd5e1;
-      font-size: 14px;
-      margin-top: 4px;
-    }
-    .card {
-      background: #1f2937;
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.18);
-    }
-    .grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: 1fr 1fr;
-    }
-    .stats {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(6, 1fr);
-    }
-    .stat {
-      background: #0f172a;
-      border-radius: 12px;
-      padding: 14px;
-      border: 1px solid rgba(255,255,255,.06);
-    }
-    .stat strong {
-      display: block;
-      margin-top: 6px;
-      font-size: 24px;
-    }
-    .item {
-      background: #0f172a;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,.06);
-      margin-top: 10px;
-    }
-    .row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .row > * {
-      flex: 1;
-      min-width: 140px;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 11px 12px;
-      border: none;
-      border-radius: 8px;
-      margin-top: 8px;
-      margin-bottom: 10px;
-      background: white;
-      color: black;
-      font-size: 15px;
-    }
-    textarea {
-      min-height: 90px;
-      resize: vertical;
-    }
-    button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 46px;
-      padding: 10px 14px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 15px;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: #111827; color: white; }
+    .wrap { max-width: 1320px; margin: 0 auto; padding: 18px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+    .title { font-size: 28px; font-weight: bold; }
+    .subtitle { color: #cbd5e1; font-size: 14px; margin-top: 4px; }
+    .card { background: #1f2937; border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+    .grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+    .stats { display: grid; gap: 12px; grid-template-columns: repeat(6, 1fr); }
+    .stat { background: #0f172a; border-radius: 12px; padding: 14px; border: 1px solid rgba(255,255,255,.06); }
+    .stat strong { display: block; margin-top: 6px; font-size: 24px; }
+    .item { background: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.06); margin-top: 10px; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .row > * { flex: 1; min-width: 140px; }
+    input, select, textarea { width: 100%; padding: 11px 12px; border: none; border-radius: 8px; margin-top: 8px; margin-bottom: 10px; background: white; color: black; font-size: 15px; }
+    textarea { min-height: 90px; resize: vertical; }
+    button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 15px; }
     .primary { background: #22c55e; color: black; }
     .ghost { background: #334155; color: white; }
     .danger { background: #ef4444; color: white; }
     .warning { background: #f59e0b; color: black; }
-    .tabs {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    .tab-btn.active {
-      background: #22c55e;
-      color: black;
-    }
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tab-btn.active { background: #22c55e; color: black; }
     .hidden { display: none; }
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: bold;
-      margin-top: 6px;
-      background: #22c55e;
-      color: black;
-    }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: bold; margin-top: 6px; background: #22c55e; color: black; }
     .badge.new { background: #60a5fa; color: black; }
     .badge.preparing { background: #f59e0b; color: black; }
     .badge.ready { background: #22c55e; color: black; }
@@ -148,60 +47,17 @@
     .badge.cancelled { background: #ef4444; color: white; }
     .badge.open { background: #f59e0b; color: black; }
     .badge.paid { background: #22c55e; color: black; }
-    .muted {
-      color: #cbd5e1;
-      font-size: 14px;
-    }
-    .menu-grid {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .product-card {
-      background: #0f172a;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.06);
-    }
-    .kitchen-board {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(3, 1fr);
-    }
-    .kitchen-col {
-      background: #0f172a;
-      border-radius: 12px;
-      padding: 12px;
-      min-height: 200px;
-    }
+    .muted { color: #cbd5e1; font-size: 14px; }
+    .menu-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); }
+    .product-card { background: #0f172a; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.06); }
+    .kitchen-board { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
+    .kitchen-col { background: #0f172a; border-radius: 12px; padding: 12px; min-height: 200px; }
     .center { text-align: center; }
-
-    .auth-shell {
-      max-width: 420px;
-      margin: 80px auto 0;
-    }
-    .auth-title {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    #loading_screen {
-      text-align: center;
-      padding: 60px 20px;
-    }
-    .spinner {
-      display: inline-block;
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255,255,255,.2);
-      border-top-color: #22c55e;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
+    .auth-shell { max-width: 420px; margin: 80px auto 0; }
+    .auth-title { text-align: center; margin-bottom: 20px; }
+    #loading_screen { text-align: center; padding: 60px 20px; }
+    .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(255,255,255,.2); border-top-color: #22c55e; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     @media (max-width: 1100px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
       .grid, .menu-grid, .kitchen-board { grid-template-columns: 1fr; }
@@ -209,31 +65,25 @@
     @media (max-width: 640px) {
       .stats { grid-template-columns: 1fr; }
       .title { font-size: 24px; }
-      .auth-shell {
-        max-width: 100%;
-        margin-top: 40px;
-      }
+      .auth-shell { max-width: 100%; margin-top: 40px; }
     }
     @media print {
       body { background: white; color: black; }
       .no-print { display: none !important; }
-      .card, .item, .product-card, .kitchen-col {
-        box-shadow: none;
-        border: 1px solid #ddd;
-        background: white;
-        color: black;
-      }
+      .card, .item, .product-card, .kitchen-col { box-shadow: none; border: 1px solid #ddd; background: white; color: black; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div id="loading_screen">
+    <!-- TELA DE LOADING (enquanto carrega os dados após o login) -->
+    <div id="loading_screen" class="hidden">
       <div class="spinner"></div>
       <p class="muted" style="margin-top:20px;">Carregando sistema...</p>
     </div>
 
-    <div id="auth_screen" class="hidden">
+    <!-- TELA DE ACESSO POR CHAVE -->
+    <div id="auth_screen">
       <div class="auth-shell">
         <div class="topbar auth-title" style="justify-content:center;">
           <div>
@@ -253,6 +103,7 @@
       </div>
     </div>
 
+    <!-- TELA DE CONFIGURAÇÃO DA LOJA -->
     <div id="store_setup_screen" class="hidden">
       <div class="topbar">
         <div>
@@ -272,6 +123,7 @@
       </div>
     </div>
 
+    <!-- TELA PRINCIPAL DO APP -->
     <div id="app_screen" class="hidden">
       <div class="topbar">
         <div>
@@ -296,19 +148,10 @@
       </div>
 
       <div id="tab_dashboard">
-        <div class="card">
-          <h3>Resumo geral</h3>
-          <div class="stats" id="stats"></div>
-        </div>
+        <div class="card"><h3>Resumo geral</h3><div class="stats" id="stats"></div></div>
         <div class="grid">
-          <div class="card">
-            <h3>Pedidos recentes</h3>
-            <div id="recent_orders"></div>
-          </div>
-          <div class="card">
-            <h3>Resumo do dia</h3>
-            <div id="daily_summary"></div>
-          </div>
+          <div class="card"><h3>Pedidos recentes</h3><div id="recent_orders"></div></div>
+          <div class="card"><h3>Resumo do dia</h3><div id="daily_summary"></div></div>
         </div>
       </div>
 
@@ -493,62 +336,24 @@
   </div>
 
   <script>
-    // ============================================================
-    // 🔐 SISTEMA DE CRIPTOGRAFIA DA CHAVE (XOR + Base64)
-    // ============================================================
-    // A chave original foi ofuscada usando XOR com uma chave secreta
-    // e depois convertida para Base64. Em runtime, o processo é revertido.
-    // Para mudar a chave, gere um novo valor criptografado usando a
-    // função encryptKey() no console do navegador.
-    // ============================================================
-
-    const ENCRYPTED_KEY = "Fh4eFh57Zm4WZxtjBw=="; // Chave criptografada (não é texto puro!)
-    const CIPHER_SECRET = "ANOTE2026";           // Chave secreta para XOR
-
-    // Função de descriptografia (reverte o processo)
-    function decryptKey(encrypted, secret) {
-      try {
-        // Decodifica Base64 para bytes
-        const bytes = Uint8Array.from(atob(encrypted), c => c.charCodeAt(0));
-        // Aplica XOR reverso com a chave secreta (cíclica)
-        let result = "";
-        for (let i = 0; i < bytes.length; i++) {
-          const secretChar = secret.charCodeAt(i % secret.length);
-          result += String.fromCharCode(bytes[i] ^ secretChar);
-        }
-        return result;
-      } catch (e) {
-        console.error("Erro ao descriptografar chave:", e);
-        return null;
-      }
-    }
-
-    // Função auxiliar para gerar nova chave criptografada (use no console)
-    // Para mudar a senha, execute no console:
-    //   encryptKey("NOVA_SENHA_AQUI", "ANOTE2026")
-    // Depois copie o resultado e cole em ENCRYPTED_KEY acima.
-    function encryptKey(plainText, secret) {
-      const bytes = new Uint8Array(plainText.length);
-      for (let i = 0; i < plainText.length; i++) {
-        const secretChar = secret.charCodeAt(i % secret.length);
-        bytes[i] = plainText.charCodeAt(i) ^ secretChar;
-      }
-      // Converte bytes para string e depois para Base64
-      let binary = "";
-      bytes.forEach(b => binary += String.fromCharCode(b));
-      return btoa(binary);
-    }
-
-    // Descriptografa a chave no carregamento
-    const ACCESS_KEY = decryptKey(ENCRYPTED_KEY, CIPHER_SECRET);
-
-    // ============================================================
-    // VARIÁVEIS GLOBAIS E FUNÇÕES AUXILIARES
-    // ============================================================
     let currentStore = null;
     let currentCashSession = null;
     let publicCart = [];
     let kitchenAutoTimer = null;
+
+    // ============================================================
+    // CHAVE DE ACESSO OFUSCADA (não aparece em texto puro no código)
+    // A chave real é reconstruída apenas em memória na validação.
+    // ============================================================
+    function getAccessKey() {
+      const d = [124, 1, 68, 114, 24, 112, 35, 118, 123, 11, 70, 6, 25, 120, 72, 113];
+      const k = "K9pD";
+      let s = "";
+      for (let i = 0; i < d.length; i++) {
+        s += String.fromCharCode(d[i] ^ k.charCodeAt(i % k.length));
+      }
+      return s;
+    }
 
     function money(v) {
       return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -558,15 +363,11 @@
       return status || "";
     }
 
+    // Aguarda o Supabase carregar (necessário apenas para os dados, não para o login)
     function waitForSupabase() {
       return new Promise((resolve, reject) => {
-        if (window.supabase) {
-          resolve(window.supabase);
-          return;
-        }
-        const timeout = setTimeout(() => {
-          reject(new Error("Supabase não carregou em 10 segundos"));
-        }, 10000);
+        if (window.supabase) { resolve(window.supabase); return; }
+        const timeout = setTimeout(() => reject(new Error("Supabase não carregou em 10 segundos")), 10000);
         window.addEventListener("supabase-ready", () => {
           clearTimeout(timeout);
           resolve(window.supabase);
@@ -601,36 +402,60 @@
       else tableField.classList.add("hidden");
     }
 
-    // ============================================================
-    // LOGIN COM CHAVE CRIPTOGRAFADA
-    // ============================================================
-    async function login() {
+    // --- LOGIN INSTANTÂNEO (valida contra a chave ofuscada) ---
+    function login() {
       const key = document.getElementById("access_key").value.trim();
       const box = document.getElementById("login_result");
-      box.innerHTML = `<div class="item">Verificando...</div>`;
+      box.innerHTML = "";
 
-      if (!ACCESS_KEY) {
-        box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
-          Erro interno: chave de acesso não pôde ser carregada.
-        </div>`;
-        return;
-      }
-
-      if (key === ACCESS_KEY) {
+      if (key === getAccessKey()) {
         sessionStorage.setItem("app_access_key", key);
-        sessionStorage.setItem("app_access_granted_at", Date.now().toString());
-        bootstrap();
+        enterApp();
       } else {
-        box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
-          Chave de acesso inválida.
-        </div>`;
+        box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">Chave de acesso inválida.</div>`;
       }
     }
 
     function logout() {
       sessionStorage.removeItem("app_access_key");
-      sessionStorage.removeItem("app_access_granted_at");
       location.reload();
+    }
+
+    // --- ENTRA NO APP E CARREGA OS DADOS ---
+    async function enterApp() {
+      document.getElementById("auth_screen").classList.add("hidden");
+      document.getElementById("store_setup_screen").classList.add("hidden");
+      document.getElementById("app_screen").classList.add("hidden");
+      document.getElementById("loading_screen").classList.remove("hidden");
+
+      try {
+        await waitForSupabase();
+        currentStore = await getCurrentStore();
+
+        document.getElementById("loading_screen").classList.add("hidden");
+
+        if (!currentStore) {
+          document.getElementById("store_setup_screen").classList.remove("hidden");
+          return;
+        }
+
+        document.getElementById("app_screen").classList.remove("hidden");
+        document.getElementById("store_label").textContent =
+          currentStore.name +
+          (currentStore.phone ? " • " + currentStore.phone : "") +
+          (currentStore.address ? " • " + currentStore.address : "");
+
+        await loadAll();
+      } catch (e) {
+        console.error("Erro ao entrar no app:", e);
+        document.getElementById("loading_screen").innerHTML = `
+          <div class="item" style="color:#ef4444; border-color:#ef4444; max-width:500px; margin:40px auto;">
+            <b>Falha ao conectar com o servidor</b><br>
+            ${e.message}<br><br>
+            <button class="ghost" onclick="location.reload()">Tentar novamente</button>
+          </div>
+        `;
+      }
     }
 
     async function getCurrentStore() {
@@ -648,31 +473,22 @@
       const phone = document.getElementById("store_phone").value.trim();
       const address = document.getElementById("store_address").value.trim();
       const box = document.getElementById("store_result");
+
       const { error } = await supabase.from("stores").insert({
-        name,
-        phone: phone || null,
-        address: address || null,
-        created_by: "admin"
+        name, phone: phone || null, address: address || null, created_by: "admin"
       });
-      if (error) {
-        box.innerHTML = `<div class="item">${error.message}</div>`;
-        return;
-      }
-      bootstrap();
+
+      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
+      enterApp();
     }
 
     async function createCategory() {
       const name = document.getElementById("category_name").value.trim();
       const box = document.getElementById("category_result");
       const { error } = await supabase.from("categories").insert({
-        store_id: currentStore.id,
-        name,
-        created_by: "admin"
+        store_id: currentStore.id, name, created_by: "admin"
       });
-      if (error) {
-        box.innerHTML = `<div class="item">${error.message}</div>`;
-        return;
-      }
+      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
       document.getElementById("category_name").value = "";
       box.innerHTML = `<div class="item">Categoria criada.</div>`;
       await loadCategories();
@@ -685,18 +501,13 @@
       const price = Number(document.getElementById("product_price").value || 0);
       const description = document.getElementById("product_description").value.trim();
       const box = document.getElementById("product_result");
+
       const { error } = await supabase.from("products").insert({
-        store_id: currentStore.id,
-        category_id: categoryId,
-        name,
-        price,
-        description: description || null,
-        created_by: "admin"
+        store_id: currentStore.id, category_id: categoryId, name, price,
+        description: description || null, created_by: "admin"
       });
-      if (error) {
-        box.innerHTML = `<div class="item">${error.message}</div>`;
-        return;
-      }
+      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
+
       document.getElementById("product_name").value = "";
       document.getElementById("product_price").value = "";
       document.getElementById("product_description").value = "";
@@ -709,19 +520,13 @@
       const tableNumber = document.getElementById("table_number").value.trim();
       const box = document.getElementById("table_result");
       const { error } = await supabase.from("tables").insert({
-        store_id: currentStore.id,
-        table_number: tableNumber,
-        qr_code: `mesa-${tableNumber}`,
-        created_by: "admin"
+        store_id: currentStore.id, table_number: tableNumber,
+        qr_code: `mesa-${tableNumber}`, created_by: "admin"
       });
-      if (error) {
-        box.innerHTML = `<div class="item">${error.message}</div>`;
-        return;
-      }
+      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
       document.getElementById("table_number").value = "";
       box.innerHTML = `<div class="item">Mesa criada.</div>`;
       await loadTables();
-      await loadPublicTableSelect();
     }
 
     async function createCustomer() {
@@ -730,18 +535,13 @@
       const address = document.getElementById("customer_address").value.trim();
       const notes = document.getElementById("customer_notes").value.trim();
       const box = document.getElementById("customer_result");
+
       const { error } = await supabase.from("customers").insert({
-        store_id: currentStore.id,
-        full_name: fullName,
-        phone: phone || null,
-        address: address || null,
-        notes: notes || null,
-        created_by: "admin"
+        store_id: currentStore.id, full_name: fullName, phone: phone || null,
+        address: address || null, notes: notes || null, created_by: "admin"
       });
-      if (error) {
-        box.innerHTML = `<div class="item">${error.message}</div>`;
-        return;
-      }
+      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
+
       document.getElementById("customer_name").value = "";
       document.getElementById("customer_phone").value = "";
       document.getElementById("customer_address").value = "";
@@ -756,23 +556,17 @@
       const tableId = orderType === "table" ? (document.getElementById("order_table").value || null) : null;
       const notes = document.getElementById("order_notes").value.trim();
       const box = document.getElementById("order_result");
+
       const { data, error } = await supabase
         .from("orders")
         .insert({
-          store_id: currentStore.id,
-          customer_id: customerId,
-          table_id: tableId,
-          order_type: orderType,
-          order_source: "counter",
-          notes: notes || null,
-          created_by: "admin"
+          store_id: currentStore.id, customer_id: customerId, table_id: tableId,
+          order_type: orderType, order_source: "counter", notes: notes || null, created_by: "admin"
         })
-        .select("*")
-        .single();
-      if (error) {
-        box.innerHTML = `<div class="item">${error.message}</div>`;
-        return;
-      }
+        .select("*").single();
+
+      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
+
       document.getElementById("order_notes").value = "";
       box.innerHTML = `<div class="item">Pedido criado.</div>`;
       await loadOrders();
@@ -786,27 +580,16 @@
       const quantity = Number(document.getElementById("item_quantity").value || 1);
       const notes = document.getElementById("item_notes").value.trim();
       const box = document.getElementById("item_result");
-      const { data: product } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", productId)
-        .maybeSingle();
-      if (!product) {
-        box.innerHTML = `<div class="item">Produto inválido.</div>`;
-        return;
-      }
+
+      const { data: product } = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
+      if (!product) { box.innerHTML = `<div class="item">Produto inválido.</div>`; return; }
+
       const { error } = await supabase.from("order_items").insert({
-        order_id: orderId,
-        product_id: product.id,
-        product_name: product.name,
-        unit_price: product.price,
-        quantity,
-        notes: notes || null
+        order_id: orderId, product_id: product.id, product_name: product.name,
+        unit_price: product.price, quantity, notes: notes || null
       });
-      if (error) {
-        box.innerHTML = `<div class="item">${error.message}</div>`;
-        return;
-      }
+      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
+
       document.getElementById("item_quantity").value = "1";
       document.getElementById("item_notes").value = "";
       box.innerHTML = `<div class="item">Item adicionado.</div>`;
@@ -834,27 +617,21 @@
     async function openCashSession() {
       const openingAmount = Number(document.getElementById("opening_amount").value || 0);
       const box = document.getElementById("cash_result");
-      const { data: existing } = await supabase
-        .from("cash_sessions")
-        .select("*")
-        .eq("store_id", currentStore.id)
-        .eq("status", "open")
-        .maybeSingle();
+
+      const { data: existing } = await supabase.from("cash_sessions").select("*")
+        .eq("store_id", currentStore.id).eq("status", "open").maybeSingle();
+
       if (existing) {
         box.innerHTML = `<div class="item">Já existe um caixa aberto.</div>`;
         await loadCashSession();
         return;
       }
+
       const { error } = await supabase.from("cash_sessions").insert({
-        store_id: currentStore.id,
-        opened_by: "admin",
-        opening_amount: openingAmount,
-        status: "open"
+        store_id: currentStore.id, opened_by: "admin", opening_amount: openingAmount, status: "open"
       });
-      if (error) {
-        box.innerHTML = `<div class="item">${error.message}</div>`;
-        return;
-      }
+      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
+
       box.innerHTML = `<div class="item">Caixa aberto com sucesso.</div>`;
       document.getElementById("opening_amount").value = "";
       await loadCashSession();
@@ -862,57 +639,40 @@
 
     async function closeCashSession() {
       const box = document.getElementById("cash_result");
-      if (!currentCashSession) {
-        box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`;
-        return;
-      }
-      const { data: deliveredOrders } = await supabase
-        .from("orders")
-        .select("total")
-        .eq("store_id", currentStore.id)
-        .eq("status", "delivered")
-        .eq("payment_status", "paid");
+      if (!currentCashSession) { box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`; return; }
+
+      const { data: deliveredOrders } = await supabase.from("orders").select("total")
+        .eq("store_id", currentStore.id).eq("status", "delivered").eq("payment_status", "paid");
+
       const salesTotal = (deliveredOrders || []).reduce((acc, o) => acc + Number(o.total || 0), 0);
       const closingAmount = Number(currentCashSession.opening_amount || 0) + salesTotal;
-      const { error } = await supabase
-        .from("cash_sessions")
-        .update({
-          closed_by: "admin",
-          closing_amount: closingAmount,
-          sales_total: salesTotal,
-          status: "closed",
-          closed_at: new Date().toISOString()
-        })
-        .eq("id", currentCashSession.id);
-      if (error) {
-        box.innerHTML = `<div class="item">${error.message}</div>`;
-        return;
-      }
+
+      const { error } = await supabase.from("cash_sessions").update({
+        closed_by: "admin", closing_amount: closingAmount, sales_total: salesTotal,
+        status: "closed", closed_at: new Date().toISOString()
+      }).eq("id", currentCashSession.id);
+
+      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
+
       box.innerHTML = `<div class="item">Caixa fechado com sucesso.</div>`;
       await loadCashSession();
     }
 
     async function loadCashSession() {
       const box = document.getElementById("cash_session_info");
-      const { data } = await supabase
-        .from("cash_sessions")
-        .select("*")
-        .eq("store_id", currentStore.id)
-        .eq("status", "open")
-        .maybeSingle();
+      const { data } = await supabase.from("cash_sessions").select("*")
+        .eq("store_id", currentStore.id).eq("status", "open").maybeSingle();
+
       currentCashSession = data || null;
-      if (!data) {
-        box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`;
-        return;
-      }
+      if (!data) { box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`; return; }
+
       box.innerHTML = `
         <div class="item">
           <b>Caixa aberto</b><br>
           Abertura: ${money(data.opening_amount)}<br>
           Aberto em: ${new Date(data.opened_at).toLocaleString("pt-BR")}<br>
           <span class="badge open">aberto</span>
-        </div>
-      `;
+        </div>`;
     }
 
     async function loadCategories() {
@@ -921,10 +681,7 @@
       const select = document.getElementById("product_category");
       list.innerHTML = "";
       select.innerHTML = `<option value="">Sem categoria</option>`;
-      if (!data || !data.length) {
-        list.innerHTML = `<div class="item">Nenhuma categoria.</div>`;
-        return;
-      }
+      if (!data || !data.length) { list.innerHTML = `<div class="item">Nenhuma categoria.</div>`; return; }
       data.forEach(c => {
         list.innerHTML += `<div class="item"><b>${c.name}</b><br><span class="badge">${c.active ? "ativa" : "inativa"}</span></div>`;
         select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
@@ -936,13 +693,8 @@
       const list = document.getElementById("products_list");
       const select = document.getElementById("item_product");
       const waiterSelect = document.getElementById("waiter_product");
-      list.innerHTML = "";
-      select.innerHTML = "";
-      waiterSelect.innerHTML = "";
-      if (!data || !data.length) {
-        list.innerHTML = `<div class="item">Nenhum produto.</div>`;
-        return;
-      }
+      list.innerHTML = ""; select.innerHTML = ""; waiterSelect.innerHTML = "";
+      if (!data || !data.length) { list.innerHTML = `<div class="item">Nenhum produto.</div>`; return; }
       data.forEach(p => {
         list.innerHTML += `<div class="item"><b>${p.name}</b><br>Categoria: ${p.categories?.name || "-"}<br>Preço: ${money(p.price)}<br>${p.description || ""}</div>`;
         select.innerHTML += `<option value="${p.id}">${p.name} — ${money(p.price)}</option>`;
@@ -966,16 +718,18 @@
       const publicSelect = document.getElementById("public_table_select");
       const waiterSelect = document.getElementById("waiter_table");
       const qrList = document.getElementById("table_qr_list");
-      list.innerHTML = "";
-      qrList.innerHTML = "";
+
+      list.innerHTML = ""; qrList.innerHTML = "";
       orderSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
       publicSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
       waiterSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
+
       if (!data || !data.length) {
         list.innerHTML = `<div class="item">Nenhuma mesa.</div>`;
         qrList.innerHTML = `<div class="item">Nenhuma mesa cadastrada.</div>`;
         return;
       }
+
       const baseUrl = location.origin + location.pathname;
       data.forEach(t => {
         list.innerHTML += `<div class="item"><b>Mesa ${t.table_number}</b><br><span class="badge">${t.active ? "ativa" : "inativa"}</span></div>`;
@@ -994,25 +748,27 @@
       let query = supabase.from("orders").select("*, customers(full_name), tables(table_number)").order("created_at", { ascending: false });
       if (filterStatus) query = query.eq("status", filterStatus);
       if (filterType) query = query.eq("order_type", filterType);
+
       const { data: orders } = await query;
       const list = document.getElementById("orders_list");
       const recent = document.getElementById("recent_orders");
       const itemOrder = document.getElementById("item_order");
-      list.innerHTML = "";
-      recent.innerHTML = "";
-      itemOrder.innerHTML = "";
+      list.innerHTML = ""; recent.innerHTML = ""; itemOrder.innerHTML = "";
+
       if (!orders || !orders.length) {
         list.innerHTML = `<div class="item">Nenhum pedido.</div>`;
         recent.innerHTML = `<div class="item">Nenhum pedido recente.</div>`;
         renderKitchenBoard([]);
         return;
       }
+
       for (const o of orders) {
         const { data: items } = await supabase.from("order_items").select("*").eq("order_id", o.id).order("created_at", { ascending: true });
         const itemsHtml = (items || []).map(i => {
           const lineTotal = (Number(i.unit_price) || 0) * (Number(i.quantity) || 0);
           return `<div style="margin-top:6px;">${i.quantity}x ${i.product_name} — ${money(lineTotal)}${i.notes ? `<br><span class="muted">${i.notes}</span>` : ""}</div>`;
         }).join("");
+
         const orderHeader = `
           <b>Pedido #${o.order_number || o.id.slice(0,4)}</b><br>
           Cliente: ${o.customers?.full_name || "Balcão"}<br>
@@ -1020,8 +776,8 @@
           Origem: ${o.order_source}<br>
           Total: ${money(o.total)}<br>
           Pagamento: <span class="badge ${o.payment_status || 'open'}">${o.payment_status || 'aberto'}</span><br>
-          <span class="badge ${badgeClass(o.status)}">${o.status}</span>
-        `;
+          <span class="badge ${badgeClass(o.status)}">${o.status}</span>`;
+
         const actionsHtml = `
           <div class="row no-print" style="margin-top:10px;">
             <button class="ghost" onclick="updateOrderStatus('${o.id}','new')">Novo</button>
@@ -1034,20 +790,21 @@
             <button class="ghost" onclick="updatePaymentStatus('${o.id}','open')">Pagamento aberto</button>
             <button class="primary" onclick="updatePaymentStatus('${o.id}','paid')">Marcar pago</button>
             <button class="ghost" onclick="printOrder('${o.id}')">Imprimir</button>
-          </div>
-        `;
+          </div>`;
+
         const html = `<div class="item" id="order-card-${o.id}">${orderHeader}<div style="margin-top:10px;">${itemsHtml || "<span class='muted'>Sem itens</span>"}</div>${o.notes ? `<div class="muted" style="margin-top:8px;">Obs: ${o.notes}</div>` : ""}${actionsHtml}</div>`;
         list.innerHTML += html;
         itemOrder.innerHTML += `<option value="${o.id}">#${o.order_number || o.id.slice(0,4)} — ${o.customers?.full_name || "Balcão"}</option>`;
       }
+
       recent.innerHTML = orders.slice(0, 5).map(o => `
         <div class="item">
           <b>Pedido #${o.order_number || o.id.slice(0,4)}</b><br>
           Cliente: ${o.customers?.full_name || "Balcão"}<br>
           Total: ${money(o.total)}<br>
           <span class="badge ${o.status}">${o.status}</span>
-        </div>
-      `).join("");
+        </div>`).join("");
+
       renderKitchenBoard(orders);
     }
 
@@ -1077,7 +834,6 @@
       if (kitchenAutoTimer) return;
       kitchenAutoTimer = setInterval(async () => { await loadOrders(); }, 5000);
     }
-
     function stopKitchenAutoRefresh() {
       if (!kitchenAutoTimer) return;
       clearInterval(kitchenAutoTimer);
@@ -1091,14 +847,14 @@
       const openRes = await supabase.from("orders").select("*", { count: "exact", head: true }).in("status", ["new", "preparing", "ready"]);
       const tablesRes = await supabase.from("tables").select("*", { count: "exact", head: true });
       const deliveredRes = await supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "delivered");
+
       document.getElementById("stats").innerHTML = `
         <div class="stat">Produtos<strong>${productsRes.count || 0}</strong></div>
         <div class="stat">Clientes<strong>${customersRes.count || 0}</strong></div>
         <div class="stat">Pedidos<strong>${ordersRes.count || 0}</strong></div>
         <div class="stat">Abertos<strong>${openRes.count || 0}</strong></div>
         <div class="stat">Mesas<strong>${tablesRes.count || 0}</strong></div>
-        <div class="stat">Entregues<strong>${deliveredRes.count || 0}</strong></div>
-      `;
+        <div class="stat">Entregues<strong>${deliveredRes.count || 0}</strong></div>`;
     }
 
     async function loadDailySummary() {
@@ -1111,6 +867,7 @@
       const delivered = (orders || []).filter(o => o.status === "delivered").length;
       const cancelled = (orders || []).filter(o => o.status === "cancelled").length;
       const open = (orders || []).filter(o => ["new", "preparing", "ready"].includes(o.status)).length;
+
       document.getElementById("daily_summary").innerHTML = `
         <div class="item">
           <b>Pedidos hoje:</b> ${totalOrders}<br>
@@ -1118,20 +875,16 @@
           <b>Entregues:</b> ${delivered}<br>
           <b>Em aberto:</b> ${open}<br>
           <b>Cancelados:</b> ${cancelled}
-        </div>
-      `;
+        </div>`;
     }
-
-    async function loadPublicTableSelect() { await loadTables(); }
 
     async function loadPublicMenu() {
       const menu = document.getElementById("public_menu");
       const { data: categories } = await supabase.from("categories").select("*").eq("store_id", currentStore.id).eq("active", true).order("name", { ascending: true });
       const { data: products } = await supabase.from("products").select("*").eq("store_id", currentStore.id).eq("active", true).order("name", { ascending: true });
-      if (!products || !products.length) {
-        menu.innerHTML = `<div class="item">Nenhum produto disponível.</div>`;
-        return;
-      }
+
+      if (!products || !products.length) { menu.innerHTML = `<div class="item">Nenhum produto disponível.</div>`; return; }
+
       menu.innerHTML = "";
       (categories || []).forEach(c => {
         const items = products.filter(p => p.category_id === c.id);
@@ -1151,6 +904,7 @@
         });
         menu.innerHTML += `</div></div>`;
       });
+
       const uncategorized = products.filter(p => !p.category_id);
       if (uncategorized.length) {
         menu.innerHTML += `<div class="card" style="background:#0f172a;"><h3>Outros</h3><div class="menu-grid">`;
@@ -1188,12 +942,9 @@
       renderPublicCart();
     }
 
-    async function renderPublicCart() {
+    function renderPublicCart() {
       const box = document.getElementById("public_cart");
-      if (!publicCart.length) {
-        box.innerHTML = `<div class="item">Carrinho vazio.</div>`;
-        return;
-      }
+      if (!publicCart.length) { box.innerHTML = `<div class="item">Carrinho vazio.</div>`; return; }
       box.innerHTML = publicCart.map(i => `
         <div class="item">
           <b>${i.name}</b><br>
@@ -1201,8 +952,7 @@
           <div class="row" style="margin-top:10px;">
             <button class="danger" onclick="removeFromPublicCart('${i.id}')">Remover</button>
           </div>
-        </div>
-      `).join("");
+        </div>`).join("");
       const total = publicCart.reduce((acc, i) => acc + (i.quantity * i.price), 0);
       box.innerHTML += `<div class="item"><b>Total:</b> ${money(total)}</div>`;
     }
@@ -1211,35 +961,27 @@
       const box = document.getElementById("public_order_result");
       const tableId = document.getElementById("public_table_select").value || null;
       const customerName = document.getElementById("public_customer_name").value.trim();
-      if (!publicCart.length) {
-        box.innerHTML = `<div class="item">Adicione itens ao carrinho.</div>`;
-        return;
-      }
+
+      if (!publicCart.length) { box.innerHTML = `<div class="item">Adicione itens ao carrinho.</div>`; return; }
+
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
-          store_id: currentStore.id,
-          table_id: tableId,
-          order_type: tableId ? "table" : "pickup",
-          order_source: "table_qr",
-          notes: customerName ? `Cliente: ${customerName}` : null,
-          created_by: "cliente_mesa"
+          store_id: currentStore.id, table_id: tableId,
+          order_type: tableId ? "table" : "pickup", order_source: "table_qr",
+          notes: customerName ? `Cliente: ${customerName}` : null, created_by: "cliente_mesa"
         })
-        .select("*")
-        .single();
-      if (orderError) {
-        box.innerHTML = `<div class="item">${orderError.message}</div>`;
-        return;
-      }
+        .select("*").single();
+
+      if (orderError) { box.innerHTML = `<div class="item">${orderError.message}</div>`; return; }
+
       for (const item of publicCart) {
         await supabase.from("order_items").insert({
-          order_id: order.id,
-          product_id: item.id,
-          product_name: item.name,
-          unit_price: item.price,
-          quantity: item.quantity
+          order_id: order.id, product_id: item.id, product_name: item.name,
+          unit_price: item.price, quantity: item.quantity
         });
       }
+
       publicCart = [];
       document.getElementById("public_customer_name").value = "";
       renderPublicCart();
@@ -1255,34 +997,25 @@
       const quantity = Number(document.getElementById("waiter_quantity").value || 1);
       const notes = document.getElementById("waiter_notes").value.trim();
       const box = document.getElementById("waiter_result");
-      if (!tableId || !productId) {
-        box.innerHTML = `<div class="item">Selecione mesa e produto.</div>`;
-        return;
-      }
+
+      if (!tableId || !productId) { box.innerHTML = `<div class="item">Selecione mesa e produto.</div>`; return; }
+
       const { data: product } = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
       const { data: order, error } = await supabase
         .from("orders")
         .insert({
-          store_id: currentStore.id,
-          table_id: tableId,
-          order_type: "table",
-          order_source: "waiter",
-          created_by: "admin"
+          store_id: currentStore.id, table_id: tableId,
+          order_type: "table", order_source: "waiter", created_by: "admin"
         })
-        .select("*")
-        .single();
-      if (error) {
-        box.innerHTML = `<div class="item">${error.message}</div>`;
-        return;
-      }
+        .select("*").single();
+
+      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
+
       await supabase.from("order_items").insert({
-        order_id: order.id,
-        product_id: product.id,
-        product_name: product.name,
-        unit_price: product.price,
-        quantity,
-        notes: notes || null
+        order_id: order.id, product_id: product.id, product_name: product.name,
+        unit_price: product.price, quantity, notes: notes || null
       });
+
       document.getElementById("waiter_quantity").value = "1";
       document.getElementById("waiter_notes").value = "";
       box.innerHTML = `<div class="item">Pedido enviado para a cozinha.</div>`;
@@ -1325,60 +1058,25 @@
       toggleTableField();
     }
 
-    async function bootstrap() {
-      try {
-        const savedKey = sessionStorage.getItem("app_access_key");
-        document.getElementById("loading_screen").classList.add("hidden");
-        document.getElementById("auth_screen").classList.add("hidden");
-        document.getElementById("store_setup_screen").classList.add("hidden");
-        document.getElementById("app_screen").classList.add("hidden");
-
-        if (!savedKey || savedKey !== ACCESS_KEY) {
-          document.getElementById("auth_screen").classList.remove("hidden");
-          return;
-        }
-
-        currentStore = await getCurrentStore();
-        if (!currentStore) {
-          document.getElementById("store_setup_screen").classList.remove("hidden");
-          return;
-        }
-
-        document.getElementById("app_screen").classList.remove("hidden");
-        document.getElementById("store_label").textContent =
-          currentStore.name +
-          (currentStore.phone ? " • " + currentStore.phone : "") +
-          (currentStore.address ? " • " + currentStore.address : "");
-
-        await loadAll();
-      } catch (e) {
-        console.error("Erro no bootstrap:", e);
-        document.getElementById("loading_screen").innerHTML = `
-          <div class="item" style="color:#ef4444; border-color:#ef4444; max-width:500px; margin:40px auto;">
-            <b>Erro ao inicializar o sistema</b><br>
-            ${e.message}<br><br>
-            <button class="ghost" onclick="location.reload()">Tentar novamente</button>
-          </div>
-        `;
+    // ============================================================
+    // INICIALIZAÇÃO
+    // Login é instantâneo (não depende do Supabase).
+    // Se já houver sessão válida, entra direto no app.
+    // ============================================================
+    document.addEventListener("DOMContentLoaded", () => {
+      const saved = sessionStorage.getItem("app_access_key");
+      if (saved && saved === getAccessKey()) {
+        enterApp();
       }
-    }
+      // Caso contrário, a tela de acesso já está visível por padrão.
+    });
 
-    // Inicialização
-    waitForSupabase()
-      .then(() => {
-        console.log("✅ Supabase carregado com sucesso");
-        bootstrap();
-      })
-      .catch((err) => {
-        console.error("❌ Falha ao carregar Supabase:", err);
-        document.getElementById("loading_screen").innerHTML = `
-          <div class="item" style="color:#ef4444; border-color:#ef4444; max-width:500px; margin:40px auto;">
-            <b>Falha ao conectar com o servidor</b><br>
-            ${err.message}<br><br>
-            <button class="ghost" onclick="location.reload()">Tentar novamente</button>
-          </div>
-        `;
-      });
+    // Permite entrar pressionando Enter no campo da chave
+    document.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && document.activeElement && document.activeElement.id === "access_key") {
+        login();
+      }
+    });
 
     // Expor funções globalmente
     window.login = login;
@@ -1406,10 +1104,6 @@
     window.removeFromPublicCart = removeFromPublicCart;
     window.submitPublicOrder = submitPublicOrder;
     window.loadAll = loadAll;
-
-    // 🔧 UTILITÁRIO: expõe a função de criptografia no console para facilitar
-    // a troca de senha no futuro. Use: encryptKey("NOVA_SENHA", "ANOTE2026")
-    window.encryptKey = encryptKey;
   </script>
 </body>
 </html>
