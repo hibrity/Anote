@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -11,7 +12,6 @@
       "https://zbxrpprwjrholrycwsqa.supabase.co",
       "sb_publishable_c4O2UN_u487qWsu4TNwG0Q_OGj3aHNM"
     );
-    // Dispara evento quando o Supabase estiver pronto
     window.dispatchEvent(new Event("supabase-ready"));
   </script>
 
@@ -228,13 +228,11 @@
 </head>
 <body>
   <div class="wrap">
-    <!-- TELA DE LOADING (enquanto o Supabase carrega) -->
     <div id="loading_screen">
       <div class="spinner"></div>
       <p class="muted" style="margin-top:20px;">Carregando sistema...</p>
     </div>
 
-    <!-- TELA DE ACESSO POR CHAVE -->
     <div id="auth_screen" class="hidden">
       <div class="auth-shell">
         <div class="topbar auth-title" style="justify-content:center;">
@@ -255,7 +253,6 @@
       </div>
     </div>
 
-    <!-- TELA DE CONFIGURAÇÃO DA LOJA (Primeiro acesso) -->
     <div id="store_setup_screen" class="hidden">
       <div class="topbar">
         <div>
@@ -275,7 +272,6 @@
       </div>
     </div>
 
-    <!-- TELA PRINCIPAL DO APP -->
     <div id="app_screen" class="hidden">
       <div class="topbar">
         <div>
@@ -497,8 +493,58 @@
   </div>
 
   <script>
-    // Variáveis globais
-    let ACCESS_KEY = null;
+    // ============================================================
+    // 🔐 SISTEMA DE CRIPTOGRAFIA DA CHAVE (XOR + Base64)
+    // ============================================================
+    // A chave original foi ofuscada usando XOR com uma chave secreta
+    // e depois convertida para Base64. Em runtime, o processo é revertido.
+    // Para mudar a chave, gere um novo valor criptografado usando a
+    // função encryptKey() no console do navegador.
+    // ============================================================
+
+    const ENCRYPTED_KEY = "Fh4eFh57Zm4WZxtjBw=="; // Chave criptografada (não é texto puro!)
+    const CIPHER_SECRET = "ANOTE2026";           // Chave secreta para XOR
+
+    // Função de descriptografia (reverte o processo)
+    function decryptKey(encrypted, secret) {
+      try {
+        // Decodifica Base64 para bytes
+        const bytes = Uint8Array.from(atob(encrypted), c => c.charCodeAt(0));
+        // Aplica XOR reverso com a chave secreta (cíclica)
+        let result = "";
+        for (let i = 0; i < bytes.length; i++) {
+          const secretChar = secret.charCodeAt(i % secret.length);
+          result += String.fromCharCode(bytes[i] ^ secretChar);
+        }
+        return result;
+      } catch (e) {
+        console.error("Erro ao descriptografar chave:", e);
+        return null;
+      }
+    }
+
+    // Função auxiliar para gerar nova chave criptografada (use no console)
+    // Para mudar a senha, execute no console:
+    //   encryptKey("NOVA_SENHA_AQUI", "ANOTE2026")
+    // Depois copie o resultado e cole em ENCRYPTED_KEY acima.
+    function encryptKey(plainText, secret) {
+      const bytes = new Uint8Array(plainText.length);
+      for (let i = 0; i < plainText.length; i++) {
+        const secretChar = secret.charCodeAt(i % secret.length);
+        bytes[i] = plainText.charCodeAt(i) ^ secretChar;
+      }
+      // Converte bytes para string e depois para Base64
+      let binary = "";
+      bytes.forEach(b => binary += String.fromCharCode(b));
+      return btoa(binary);
+    }
+
+    // Descriptografa a chave no carregamento
+    const ACCESS_KEY = decryptKey(ENCRYPTED_KEY, CIPHER_SECRET);
+
+    // ============================================================
+    // VARIÁVEIS GLOBAIS E FUNÇÕES AUXILIARES
+    // ============================================================
     let currentStore = null;
     let currentCashSession = null;
     let publicCart = [];
@@ -512,18 +558,15 @@
       return status || "";
     }
 
-    // --- AGUARDA O SUPABASE CARREGAR COMPLETAMENTE ---
     function waitForSupabase() {
       return new Promise((resolve, reject) => {
         if (window.supabase) {
           resolve(window.supabase);
           return;
         }
-
         const timeout = setTimeout(() => {
           reject(new Error("Supabase não carregou em 10 segundos"));
         }, 10000);
-
         window.addEventListener("supabase-ready", () => {
           clearTimeout(timeout);
           resolve(window.supabase);
@@ -531,43 +574,13 @@
       });
     }
 
-    // --- BUSCA A CHAVE DE ACESSO DO SUPABASE ---
-    async function loadAccessKey() {
-      try {
-        const sb = await waitForSupabase();
-        
-        const { data, error } = await sb
-          .from("system_config")
-          .select("config_value")
-          .eq("config_key", "access_key")
-          .maybeSingle();
-
-        if (error) {
-          console.error("Erro Supabase:", error);
-          return null;
-        }
-        
-        if (!data) {
-          console.warn("Chave não encontrada no banco");
-          return null;
-        }
-        
-        return data.config_value;
-      } catch (e) {
-        console.error("Falha ao carregar chave:", e);
-        return null;
-      }
-    }
-
     function openTab(name, btn) {
       ["dashboard", "catalog", "orders", "kitchen", "cashier", "menu"].forEach(id => {
         document.getElementById(`tab_${id}`).classList.add("hidden");
       });
       document.getElementById(`tab_${name}`).classList.remove("hidden");
-
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-
       if (name === "kitchen") startKitchenAutoRefresh();
       else stopKitchenAutoRefresh();
     }
@@ -588,35 +601,28 @@
       else tableField.classList.add("hidden");
     }
 
-    // --- LOGIN BUSCA A CHAVE DO BANCO ---
+    // ============================================================
+    // LOGIN COM CHAVE CRIPTOGRAFADA
+    // ============================================================
     async function login() {
       const key = document.getElementById("access_key").value.trim();
       const box = document.getElementById("login_result");
       box.innerHTML = `<div class="item">Verificando...</div>`;
 
-      try {
-        const storedKey = await loadAccessKey();
-
-        if (!storedKey) {
-          box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
-            Erro ao conectar com o servidor. Verifique o console (F12) para detalhes.
-          </div>`;
-          return;
-        }
-
-        if (key === storedKey) {
-          sessionStorage.setItem("app_access_key", key);
-          sessionStorage.setItem("app_access_granted_at", Date.now().toString());
-          bootstrap();
-        } else {
-          box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
-            Chave de acesso inválida.
-          </div>`;
-        }
-      } catch (e) {
-        console.error("Erro no login:", e);
+      if (!ACCESS_KEY) {
         box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
-          Erro inesperado: ${e.message}
+          Erro interno: chave de acesso não pôde ser carregada.
+        </div>`;
+        return;
+      }
+
+      if (key === ACCESS_KEY) {
+        sessionStorage.setItem("app_access_key", key);
+        sessionStorage.setItem("app_access_granted_at", Date.now().toString());
+        bootstrap();
+      } else {
+        box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
+          Chave de acesso inválida.
         </div>`;
       }
     }
@@ -633,7 +639,6 @@
         .select("*")
         .limit(1)
         .maybeSingle();
-
       if (error || !data) return null;
       return data;
     }
@@ -643,37 +648,31 @@
       const phone = document.getElementById("store_phone").value.trim();
       const address = document.getElementById("store_address").value.trim();
       const box = document.getElementById("store_result");
-
       const { error } = await supabase.from("stores").insert({
         name,
         phone: phone || null,
         address: address || null,
         created_by: "admin"
       });
-
       if (error) {
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
       bootstrap();
     }
 
     async function createCategory() {
       const name = document.getElementById("category_name").value.trim();
       const box = document.getElementById("category_result");
-
       const { error } = await supabase.from("categories").insert({
         store_id: currentStore.id,
         name,
         created_by: "admin"
       });
-
       if (error) {
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
       document.getElementById("category_name").value = "";
       box.innerHTML = `<div class="item">Categoria criada.</div>`;
       await loadCategories();
@@ -686,7 +685,6 @@
       const price = Number(document.getElementById("product_price").value || 0);
       const description = document.getElementById("product_description").value.trim();
       const box = document.getElementById("product_result");
-
       const { error } = await supabase.from("products").insert({
         store_id: currentStore.id,
         category_id: categoryId,
@@ -695,12 +693,10 @@
         description: description || null,
         created_by: "admin"
       });
-
       if (error) {
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
       document.getElementById("product_name").value = "";
       document.getElementById("product_price").value = "";
       document.getElementById("product_description").value = "";
@@ -712,19 +708,16 @@
     async function createTable() {
       const tableNumber = document.getElementById("table_number").value.trim();
       const box = document.getElementById("table_result");
-
       const { error } = await supabase.from("tables").insert({
         store_id: currentStore.id,
         table_number: tableNumber,
         qr_code: `mesa-${tableNumber}`,
         created_by: "admin"
       });
-
       if (error) {
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
       document.getElementById("table_number").value = "";
       box.innerHTML = `<div class="item">Mesa criada.</div>`;
       await loadTables();
@@ -737,7 +730,6 @@
       const address = document.getElementById("customer_address").value.trim();
       const notes = document.getElementById("customer_notes").value.trim();
       const box = document.getElementById("customer_result");
-
       const { error } = await supabase.from("customers").insert({
         store_id: currentStore.id,
         full_name: fullName,
@@ -746,12 +738,10 @@
         notes: notes || null,
         created_by: "admin"
       });
-
       if (error) {
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
       document.getElementById("customer_name").value = "";
       document.getElementById("customer_phone").value = "";
       document.getElementById("customer_address").value = "";
@@ -766,7 +756,6 @@
       const tableId = orderType === "table" ? (document.getElementById("order_table").value || null) : null;
       const notes = document.getElementById("order_notes").value.trim();
       const box = document.getElementById("order_result");
-
       const { data, error } = await supabase
         .from("orders")
         .insert({
@@ -780,12 +769,10 @@
         })
         .select("*")
         .single();
-
       if (error) {
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
       document.getElementById("order_notes").value = "";
       box.innerHTML = `<div class="item">Pedido criado.</div>`;
       await loadOrders();
@@ -799,18 +786,15 @@
       const quantity = Number(document.getElementById("item_quantity").value || 1);
       const notes = document.getElementById("item_notes").value.trim();
       const box = document.getElementById("item_result");
-
       const { data: product } = await supabase
         .from("products")
         .select("*")
         .eq("id", productId)
         .maybeSingle();
-
       if (!product) {
         box.innerHTML = `<div class="item">Produto inválido.</div>`;
         return;
       }
-
       const { error } = await supabase.from("order_items").insert({
         order_id: orderId,
         product_id: product.id,
@@ -819,12 +803,10 @@
         quantity,
         notes: notes || null
       });
-
       if (error) {
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
       document.getElementById("item_quantity").value = "1";
       document.getElementById("item_notes").value = "";
       box.innerHTML = `<div class="item">Item adicionado.</div>`;
@@ -852,32 +834,27 @@
     async function openCashSession() {
       const openingAmount = Number(document.getElementById("opening_amount").value || 0);
       const box = document.getElementById("cash_result");
-
       const { data: existing } = await supabase
         .from("cash_sessions")
         .select("*")
         .eq("store_id", currentStore.id)
         .eq("status", "open")
         .maybeSingle();
-
       if (existing) {
         box.innerHTML = `<div class="item">Já existe um caixa aberto.</div>`;
         await loadCashSession();
         return;
       }
-
       const { error } = await supabase.from("cash_sessions").insert({
         store_id: currentStore.id,
         opened_by: "admin",
         opening_amount: openingAmount,
         status: "open"
       });
-
       if (error) {
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
       box.innerHTML = `<div class="item">Caixa aberto com sucesso.</div>`;
       document.getElementById("opening_amount").value = "";
       await loadCashSession();
@@ -889,17 +866,14 @@
         box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`;
         return;
       }
-
       const { data: deliveredOrders } = await supabase
         .from("orders")
         .select("total")
         .eq("store_id", currentStore.id)
         .eq("status", "delivered")
         .eq("payment_status", "paid");
-
       const salesTotal = (deliveredOrders || []).reduce((acc, o) => acc + Number(o.total || 0), 0);
       const closingAmount = Number(currentCashSession.opening_amount || 0) + salesTotal;
-
       const { error } = await supabase
         .from("cash_sessions")
         .update({
@@ -910,12 +884,10 @@
           closed_at: new Date().toISOString()
         })
         .eq("id", currentCashSession.id);
-
       if (error) {
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
       box.innerHTML = `<div class="item">Caixa fechado com sucesso.</div>`;
       await loadCashSession();
     }
@@ -928,14 +900,11 @@
         .eq("store_id", currentStore.id)
         .eq("status", "open")
         .maybeSingle();
-
       currentCashSession = data || null;
-
       if (!data) {
         box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`;
         return;
       }
-
       box.innerHTML = `
         <div class="item">
           <b>Caixa aberto</b><br>
@@ -952,12 +921,10 @@
       const select = document.getElementById("product_category");
       list.innerHTML = "";
       select.innerHTML = `<option value="">Sem categoria</option>`;
-
       if (!data || !data.length) {
         list.innerHTML = `<div class="item">Nenhuma categoria.</div>`;
         return;
       }
-
       data.forEach(c => {
         list.innerHTML += `<div class="item"><b>${c.name}</b><br><span class="badge">${c.active ? "ativa" : "inativa"}</span></div>`;
         select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
@@ -972,12 +939,10 @@
       list.innerHTML = "";
       select.innerHTML = "";
       waiterSelect.innerHTML = "";
-
       if (!data || !data.length) {
         list.innerHTML = `<div class="item">Nenhum produto.</div>`;
         return;
       }
-
       data.forEach(p => {
         list.innerHTML += `<div class="item"><b>${p.name}</b><br>Categoria: ${p.categories?.name || "-"}<br>Preço: ${money(p.price)}<br>${p.description || ""}</div>`;
         select.innerHTML += `<option value="${p.id}">${p.name} — ${money(p.price)}</option>`;
@@ -1001,65 +966,53 @@
       const publicSelect = document.getElementById("public_table_select");
       const waiterSelect = document.getElementById("waiter_table");
       const qrList = document.getElementById("table_qr_list");
-
       list.innerHTML = "";
       qrList.innerHTML = "";
       orderSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
       publicSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
       waiterSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
-
       if (!data || !data.length) {
         list.innerHTML = `<div class="item">Nenhuma mesa.</div>`;
         qrList.innerHTML = `<div class="item">Nenhuma mesa cadastrada.</div>`;
         return;
       }
-
       const baseUrl = location.origin + location.pathname;
       data.forEach(t => {
         list.innerHTML += `<div class="item"><b>Mesa ${t.table_number}</b><br><span class="badge">${t.active ? "ativa" : "inativa"}</span></div>`;
         orderSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
         publicSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
         waiterSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
-
         const link = `${baseUrl}?menu=1&table=${encodeURIComponent(t.id)}`;
         qrList.innerHTML += `<div class="item"><b>Mesa ${t.table_number}</b><br>QR/link: <br><span class="muted">${link}</span></div>`;
       });
-
       document.getElementById("menu_public_link").innerHTML = `${baseUrl}?menu=1`;
     }
 
     async function loadOrders() {
       const filterStatus = document.getElementById("filter_status").value;
       const filterType = document.getElementById("filter_type").value;
-
       let query = supabase.from("orders").select("*, customers(full_name), tables(table_number)").order("created_at", { ascending: false });
       if (filterStatus) query = query.eq("status", filterStatus);
       if (filterType) query = query.eq("order_type", filterType);
-
       const { data: orders } = await query;
       const list = document.getElementById("orders_list");
       const recent = document.getElementById("recent_orders");
       const itemOrder = document.getElementById("item_order");
-
       list.innerHTML = "";
       recent.innerHTML = "";
       itemOrder.innerHTML = "";
-
       if (!orders || !orders.length) {
         list.innerHTML = `<div class="item">Nenhum pedido.</div>`;
         recent.innerHTML = `<div class="item">Nenhum pedido recente.</div>`;
         renderKitchenBoard([]);
         return;
       }
-
       for (const o of orders) {
         const { data: items } = await supabase.from("order_items").select("*").eq("order_id", o.id).order("created_at", { ascending: true });
-
         const itemsHtml = (items || []).map(i => {
           const lineTotal = (Number(i.unit_price) || 0) * (Number(i.quantity) || 0);
           return `<div style="margin-top:6px;">${i.quantity}x ${i.product_name} — ${money(lineTotal)}${i.notes ? `<br><span class="muted">${i.notes}</span>` : ""}</div>`;
         }).join("");
-
         const orderHeader = `
           <b>Pedido #${o.order_number || o.id.slice(0,4)}</b><br>
           Cliente: ${o.customers?.full_name || "Balcão"}<br>
@@ -1069,7 +1022,6 @@
           Pagamento: <span class="badge ${o.payment_status || 'open'}">${o.payment_status || 'aberto'}</span><br>
           <span class="badge ${badgeClass(o.status)}">${o.status}</span>
         `;
-
         const actionsHtml = `
           <div class="row no-print" style="margin-top:10px;">
             <button class="ghost" onclick="updateOrderStatus('${o.id}','new')">Novo</button>
@@ -1084,12 +1036,10 @@
             <button class="ghost" onclick="printOrder('${o.id}')">Imprimir</button>
           </div>
         `;
-
         const html = `<div class="item" id="order-card-${o.id}">${orderHeader}<div style="margin-top:10px;">${itemsHtml || "<span class='muted'>Sem itens</span>"}</div>${o.notes ? `<div class="muted" style="margin-top:8px;">Obs: ${o.notes}</div>` : ""}${actionsHtml}</div>`;
         list.innerHTML += html;
         itemOrder.innerHTML += `<option value="${o.id}">#${o.order_number || o.id.slice(0,4)} — ${o.customers?.full_name || "Balcão"}</option>`;
       }
-
       recent.innerHTML = orders.slice(0, 5).map(o => `
         <div class="item">
           <b>Pedido #${o.order_number || o.id.slice(0,4)}</b><br>
@@ -1098,7 +1048,6 @@
           <span class="badge ${o.status}">${o.status}</span>
         </div>
       `).join("");
-
       renderKitchenBoard(orders);
     }
 
@@ -1107,21 +1056,18 @@
       const preparingBox = document.getElementById("kitchen_preparing");
       const readyBox = document.getElementById("kitchen_ready");
       newBox.innerHTML = ""; preparingBox.innerHTML = ""; readyBox.innerHTML = "";
-
       if (!orders || !orders.length) {
         newBox.innerHTML = `<div class="item">Sem pedidos.</div>`;
         preparingBox.innerHTML = `<div class="item">Sem pedidos.</div>`;
         readyBox.innerHTML = `<div class="item">Sem pedidos.</div>`;
         return;
       }
-
       orders.forEach(o => {
         const html = `<div class="item"><b>#${o.order_number || o.id.slice(0,4)}</b><br>${o.customers?.full_name || "Balcão"}<br>${o.tables?.table_number ? `Mesa ${o.tables.table_number}<br>` : ""}<span class="badge ${o.status}">${o.status}</span></div>`;
         if (o.status === "new") newBox.innerHTML += html;
         if (o.status === "preparing") preparingBox.innerHTML += html;
         if (o.status === "ready") readyBox.innerHTML += html;
       });
-
       if (!newBox.innerHTML) newBox.innerHTML = `<div class="item">Sem pedidos novos.</div>`;
       if (!preparingBox.innerHTML) preparingBox.innerHTML = `<div class="item">Sem pedidos preparando.</div>`;
       if (!readyBox.innerHTML) readyBox.innerHTML = `<div class="item">Sem pedidos prontos.</div>`;
@@ -1145,7 +1091,6 @@
       const openRes = await supabase.from("orders").select("*", { count: "exact", head: true }).in("status", ["new", "preparing", "ready"]);
       const tablesRes = await supabase.from("tables").select("*", { count: "exact", head: true });
       const deliveredRes = await supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "delivered");
-
       document.getElementById("stats").innerHTML = `
         <div class="stat">Produtos<strong>${productsRes.count || 0}</strong></div>
         <div class="stat">Clientes<strong>${customersRes.count || 0}</strong></div>
@@ -1160,14 +1105,12 @@
       const today = new Date();
       const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
       const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
-
       const { data: orders } = await supabase.from("orders").select("*").gte("created_at", start).lt("created_at", end);
       const totalOrders = (orders || []).length;
       const totalRevenue = (orders || []).filter(o => o.status === "delivered").reduce((acc, o) => acc + Number(o.total || 0), 0);
       const delivered = (orders || []).filter(o => o.status === "delivered").length;
       const cancelled = (orders || []).filter(o => o.status === "cancelled").length;
       const open = (orders || []).filter(o => ["new", "preparing", "ready"].includes(o.status)).length;
-
       document.getElementById("daily_summary").innerHTML = `
         <div class="item">
           <b>Pedidos hoje:</b> ${totalOrders}<br>
@@ -1185,12 +1128,10 @@
       const menu = document.getElementById("public_menu");
       const { data: categories } = await supabase.from("categories").select("*").eq("store_id", currentStore.id).eq("active", true).order("name", { ascending: true });
       const { data: products } = await supabase.from("products").select("*").eq("store_id", currentStore.id).eq("active", true).order("name", { ascending: true });
-
       if (!products || !products.length) {
         menu.innerHTML = `<div class="item">Nenhum produto disponível.</div>`;
         return;
       }
-
       menu.innerHTML = "";
       (categories || []).forEach(c => {
         const items = products.filter(p => p.category_id === c.id);
@@ -1210,7 +1151,6 @@
         });
         menu.innerHTML += `</div></div>`;
       });
-
       const uncategorized = products.filter(p => !p.category_id);
       if (uncategorized.length) {
         menu.innerHTML += `<div class="card" style="background:#0f172a;"><h3>Outros</h3><div class="menu-grid">`;
@@ -1271,12 +1211,10 @@
       const box = document.getElementById("public_order_result");
       const tableId = document.getElementById("public_table_select").value || null;
       const customerName = document.getElementById("public_customer_name").value.trim();
-
       if (!publicCart.length) {
         box.innerHTML = `<div class="item">Adicione itens ao carrinho.</div>`;
         return;
       }
-
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
@@ -1289,12 +1227,10 @@
         })
         .select("*")
         .single();
-
       if (orderError) {
         box.innerHTML = `<div class="item">${orderError.message}</div>`;
         return;
       }
-
       for (const item of publicCart) {
         await supabase.from("order_items").insert({
           order_id: order.id,
@@ -1304,7 +1240,6 @@
           quantity: item.quantity
         });
       }
-
       publicCart = [];
       document.getElementById("public_customer_name").value = "";
       renderPublicCart();
@@ -1320,12 +1255,10 @@
       const quantity = Number(document.getElementById("waiter_quantity").value || 1);
       const notes = document.getElementById("waiter_notes").value.trim();
       const box = document.getElementById("waiter_result");
-
       if (!tableId || !productId) {
         box.innerHTML = `<div class="item">Selecione mesa e produto.</div>`;
         return;
       }
-
       const { data: product } = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
       const { data: order, error } = await supabase
         .from("orders")
@@ -1338,12 +1271,10 @@
         })
         .select("*")
         .single();
-
       if (error) {
         box.innerHTML = `<div class="item">${error.message}</div>`;
         return;
       }
-
       await supabase.from("order_items").insert({
         order_id: order.id,
         product_id: product.id,
@@ -1352,7 +1283,6 @@
         quantity,
         notes: notes || null
       });
-
       document.getElementById("waiter_quantity").value = "1";
       document.getElementById("waiter_notes").value = "";
       box.innerHTML = `<div class="item">Pedido enviado para a cozinha.</div>`;
@@ -1395,29 +1325,20 @@
       toggleTableField();
     }
 
-    // --- BOOTSTRAP VALIDA CONTRA A CHAVE DO BANCO ---
     async function bootstrap() {
       try {
-        // Busca a chave do banco se ainda não estiver em memória
-        if (!ACCESS_KEY) {
-          ACCESS_KEY = await loadAccessKey();
-        }
-
         const savedKey = sessionStorage.getItem("app_access_key");
-
         document.getElementById("loading_screen").classList.add("hidden");
         document.getElementById("auth_screen").classList.add("hidden");
         document.getElementById("store_setup_screen").classList.add("hidden");
         document.getElementById("app_screen").classList.add("hidden");
 
-        // Verifica se a sessão salva corresponde à chave atual do banco
         if (!savedKey || savedKey !== ACCESS_KEY) {
           document.getElementById("auth_screen").classList.remove("hidden");
           return;
         }
 
         currentStore = await getCurrentStore();
-
         if (!currentStore) {
           document.getElementById("store_setup_screen").classList.remove("hidden");
           return;
@@ -1442,7 +1363,7 @@
       }
     }
 
-    // Inicialização - aguarda o Supabase carregar antes de iniciar
+    // Inicialização
     waitForSupabase()
       .then(() => {
         console.log("✅ Supabase carregado com sucesso");
@@ -1485,6 +1406,10 @@
     window.removeFromPublicCart = removeFromPublicCart;
     window.submitPublicOrder = submitPublicOrder;
     window.loadAll = loadAll;
+
+    // 🔧 UTILITÁRIO: expõe a função de criptografia no console para facilitar
+    // a troca de senha no futuro. Use: encryptKey("NOVA_SENHA", "ANOTE2026")
+    window.encryptKey = encryptKey;
   </script>
 </body>
 </html>
