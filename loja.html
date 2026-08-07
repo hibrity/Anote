@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Anote — Loja</title>
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  window.supabase = createClient(
+    "https://zbxrpprwjrholrycwsqa.supabase.co",
+    "sb_publishable_c4O2UN_u487qWsu4TNwG0Q_OGj3aHNM"
+  );
+  window.dispatchEvent(new Event("supabase-ready"));
+</script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a78bfa;--radius:14px}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+  .wrap{max-width:1280px;margin:0 auto;padding:18px}
+  .hidden{display:none!important}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+  h2{font-size:18px;margin-bottom:14px}
+  h3{font-size:15px;margin-bottom:10px;color:var(--mut)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s}
+  .btn:active{transform:scale(.97)}
+  .btn-green{background:var(--green);color:#052e16}
+  .btn-blue{background:var(--blue);color:#fff}
+  .btn-amber{background:var(--amber);color:#3b2503}
+  .btn-red{background:var(--red);color:#fff}
+  .btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
+  .btn-block{width:100%}
+  input,select,textarea{width:100%;padding:11px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:14px;margin-bottom:10px;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+  textarea{min-height:70px;resize:vertical}
+  label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weight:600}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .tab{padding:10px 16px;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--mut);cursor:pointer;font-weight:700;font-size:14px}
+  .tab.active{background:var(--green);color:#052e16;border-color:var(--green)}
+  .badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}
+  .b-new{background:#dbeafe;color:#1d4ed8}.b-preparing{background:#fef3c7;color:#b45309}
+  .b-ready{background:#dcfce7;color:#15803d}.b-delivered{background:#ede9fe;color:#6d28d9}
+  .b-cancelled{background:#fee2e2;color:#b91c1c}.b-open{background:#fef3c7;color:#b45309}.b-paid{background:#dcfce7;color:#15803d}
+  .item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:120px}
+  .muted{color:var(--mut);font-size:13px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .title{font-size:24px;font-weight:800}
+  .stat{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px}
+  .stat b{display:block;font-size:24px;margin-top:6px}
+  .msg{padding:11px;border-radius:10px;font-size:14px;margin-top:10px}
+  .msg.err{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d}
+  .msg.ok{background:#14351f;color:#86efac;border:1px solid #166534}
+  /* LOGIN */
+  .login-shell{max-width:420px;margin:60px auto 0}
+  .login-tabs{display:flex;gap:8px;margin-bottom:16px}
+  .login-tab{flex:1;padding:12px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--border);cursor:pointer;font-weight:700;color:var(--mut)}
+  .login-tab.active{background:var(--green);color:#052e16;border-color:var(--green)}
+  /* KANBAN COZINHA */
+  .kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .kcol{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px;min-height:200px}
+  .kcol h3{text-align:center;margin-bottom:10px}
+  .order-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+  .order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:sp .8s linear infinite;margin:40px auto}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media(max-width:900px){.grid2,.grid3,.kanban{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ TELA DE LOGIN ============ -->
+  <div id="screen_login">
+    <div class="login-shell">
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="title">Anote</div>
+        <div class="muted">Gestão de pedidos para sua loja</div>
+      </div>
+      <div class="card">
+        <div class="login-tabs">
+          <div class="login-tab active" id="lt_owner" onclick="switchLogin('owner')">👑 Sou Dono</div>
+          <div class="login-tab" id="lt_staff" onclick="switchLogin('staff')">👷 Sou Funcionário</div>
+        </div>
+
+        <!-- Login dono -->
+        <div id="login_owner">
+          <div id="owner_mode_login">
+            <label>Email</label><input id="o_email" type="email" placeholder="seu@email.com"/>
+            <label>Senha</label><input id="o_pass" type="password" placeholder="••••••••"/>
+            <button class="btn btn-green btn-block" onclick="ownerLogin()">Entrar</button>
+            <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="toggleSignup()">Não tem conta? Criar conta</button>
+            <div id="owner_signup" class="hidden" style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
+              <h3>Criar conta de dono</h3>
+              <label>Email</label><input id="s_email" type="email"/>
+              <label>Senha</label><input id="s_pass" type="password"/>
+              <button class="btn btn-blue btn-block" onclick="ownerSignup()">Criar conta</button>
+            </div>
+          </div>
+          <div id="owner_result"></div>
+        </div>
+
+        <!-- Login funcionário -->
+        <div id="login_staff" class="hidden">
+          <label>Código da loja</label>
+          <input id="st_code" placeholder="ANOTE-00000" style="text-transform:uppercase"/>
+          <button class="btn btn-green btn-block" onclick="staffLogin()">Entrar</button>
+          <div class="muted" style="margin-top:10px;text-align:center">Peça o código ao dono da loja.</div>
+          <div id="staff_result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CRIAR LOJA (dono sem loja) ============ -->
+  <div id="screen_setup" class="hidden">
+    <div class="topbar"><div class="title">Crie sua loja</div><button class="btn btn-red" onclick="logout()">Sair</button></div>
+    <div class="card" style="max-width:520px">
+      <label>Nome da loja</label><input id="setup_name"/>
+      <label>Telefone</label><input id="setup_phone"/>
+      <label>Endereço</label><input id="setup_address"/>
+      <button class="btn btn-green btn-block" onclick="createStore()">Criar loja</button>
+      <div id="setup_result"></div>
+    </div>
+  </div>
+
+  <!-- ============ APP ============ -->
+  <div id="screen_app" class="hidden">
+    <div class="topbar">
+      <div><div class="title" id="app_store_name">Loja</div><div class="muted" id="app_role_label"></div></div>
+      <div class="row" style="max-width:340px">
+        <button class="btn btn-ghost" onclick="loadData()">🔄 Atualizar</button>
+        <button class="btn btn-red" onclick="logout()">Sair</button>
+      </div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+
+    <!-- Painel (dono) -->
+    <div id="tab_painel" class="hidden">
+      <div class="card"><h2>Resumo</h2><div class="grid3" id="stats"></div></div>
+    </div>
+
+    <!-- Catálogo (dono) -->
+    <div id="tab_catalogo" class="hidden">
+      <div class="grid2">
+        <div>
+          <div class="card"><h3>Nova categoria</h3><input id="cat_name" placeholder="Nome"/><button class="btn btn-green" onclick="createCategory()">Salvar</button><div id="cat_res"></div></div>
+          <div class="card"><h3>Novo produto</h3>
+            <input id="prod_name" placeholder="Nome"/>
+            <select id="prod_cat"></select>
+            <input id="prod_price" type="number" step="0.01" placeholder="Preço"/>
+            <textarea id="prod_desc" placeholder="Descrição"></textarea>
+            <button class="btn btn-green" onclick="createProduct()">Salvar</button><div id="prod_res"></div>
+          </div>
+          <div class="card"><h3>Nova mesa</h3><input id="mesa_num" placeholder="Número/nome"/><button class="btn btn-blue" onclick="createTable()">Salvar</button><div id="mesa_res"></div></div>
+        </div>
+        <div>
+          <div class="card"><h3>Categorias</h3><div id="list_cats"></div></div>
+          <div class="card"><h3>Produtos</h3><div id="list_prods"></div></div>
+          <div class="card"><h3>Mesas</h3><div id="list_mesas"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pedidos -->
+    <div id="tab_pedidos" class="hidden">
+      <div class="grid2">
+        <div>
+          <div class="card"><h3>Novo cliente</h3>
+            <input id="cli_nome" placeholder="Nome"/><input id="cli_fone" placeholder="Telefone"/>
+            <input id="cli_end" placeholder="Endereço"/><textarea id="cli_obs" placeholder="Observações"></textarea>
+            <button class="btn btn-blue" onclick="createCustomer()">Salvar cliente</button><div id="cli_res"></div>
+          </div>
+          <div class="card"><h3>Novo pedido</h3>
+            <label>Cliente</label><select id="ord_cli"></select>
+            <label>Tipo</label><select id="ord_tipo" onchange="toggleMesa()">
+              <option value="counter">Balcão</option><option value="delivery">Delivery</option>
+              <option value="pickup">Retirada</option><option value="table">Mesa</option>
+            </select>
+            <select id="ord_mesa" class="hidden"></select>
+            <label>Observações</label><textarea id="ord_obs"></textarea>
+            <button class="btn btn-green btn-block" onclick="createOrder()">Criar pedido</button><div id="ord_res"></div>
+          </div>
+          <div class="card"><h3>Adicionar item</h3>
+            <label>Pedido</label><select id="item_ord"></select>
+            <label>Produto</label><select id="item_prod"></select>
+            <label>Qtd</label><input id="item_qtd" type="number" min="1" value="1"/>
+            <button class="btn btn-green btn-block" onclick="addItem()">Adicionar</button><div id="item_res"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card"><h3>Pedidos</h3><div id="list_orders"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cozinha -->
+    <div id="tab_cozinha" class="hidden">
+      <div class="card">
+        <h2>Cozinha</h2>
+        <div class="kanban">
+          <div class="kcol"><h3>🆕 Novos</h3><div id="k_new"></div></div>
+          <div class="kcol"><h3>👨‍🍳 Preparando</h3><div id="k_prep"></div></div>
+          <div class="kcol"><h3>🔔 Prontos</h3><div id="k_ready"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Garçom (staff) -->
+    <div id="tab_garcom" class="hidden">
+      <div class="card" style="max-width:520px">
+        <h2>🤵 Pedido rápido</h2>
+        <label>Mesa</label><select id="g_mesa"></select>
+        <label>Produto</label><select id="g_prod"></select>
+        <label>Quantidade</label><input id="g_qtd" type="number" min="1" value="1"/>
+        <label>Observações</label><textarea id="g_obs"></textarea>
+        <button class="btn btn-green btn-block" onclick="garcomOrder()">Enviar pra cozinha</button>
+        <div id="g_res"></div>
+      </div>
+    </div>
+
+    <!-- Caixa (dono) -->
+    <div id="tab_caixa" class="hidden">
+      <div class="grid2">
+        <div class="card"><h3>Controle de caixa</h3>
+          <label>Valor de abertura</label><input id="cx_valor" type="number" step="0.01"/>
+          <div class="row"><button class="btn btn-green" onclick="caixa('abrir')">Abrir caixa</button><button class="btn btn-red" onclick="caixa('fechar')">Fechar caixa</button></div>
+          <div id="cx_res"></div>
+        </div>
+        <div class="card"><h3>Caixa atual</h3><div id="cx_info"></div></div>
+      </div>
+    </div>
+
+    <!-- Equipe (dono) -->
+    <div id="tab_equipe" class="hidden">
+      <div class="card" style="max-width:520px">
+        <h2>🔑 Código da equipe</h2>
+        <p class="muted">Compartilhe este código com seus funcionários. Eles entram na aba “Sou Funcionário”.</p>
+        <div class="item" style="text-align:center;font-size:26px;font-weight:800;letter-spacing:2px" id="team_code">—</div>
+        <button class="btn btn-amber btn-block" onclick="regenCode()">🔄 Gerar novo código</button>
+        <div class="muted" style="margin-top:8px">Ao gerar um novo código, o antigo deixa de funcionar.</div>
+        <div id="team_res"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let role=null, store=null, staffCode=null;
+let D={categories:[],products:[],tables:[],customers:[],orders:[]};
+let cartItems=[]; let kitchenTimer=null;
+const STATUS={new:'Novo',preparing:'Preparando',ready:'Pronto',delivered:'Entregue',cancelled:'Cancelado'};
+const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res();},{once:true});});}
+
+/* ---------- LOGIN ---------- */
+function switchLogin(mode){
+  document.getElementById('lt_owner').classList.toggle('active',mode==='owner');
+  document.getElementById('lt_staff').classList.toggle('active',mode==='staff');
+  document.getElementById('login_owner').classList.toggle('hidden',mode!=='owner');
+  document.getElementById('login_staff').classList.toggle('hidden',mode!=='staff');
+}
+function toggleSignup(){document.getElementById('owner_signup').classList.toggle('hidden');}
+
+async function ownerSignup(){
+  const e=document.getElementById('s_email').value.trim(),p=document.getElementById('s_pass').value;
+  const box=document.getElementById('owner_result');box.innerHTML='';
+  const {error}=await supabase.auth.signUp({email:e,password:p});
+  if(error){box.innerHTML=`<div class="msg err">${error.message}</div>`;return;}
+  box.innerHTML=`<div class="msg ok">Conta criada! Agora faça login.</div>`;
+  document.getElementById('owner_signup').classList.add('hidden');
+}
+async function ownerLogin(){
+  const e=document.getElementById('o_email').value.trim(),p=document.getElementById('o_pass').value;
+  const box=document.getElementById('owner_result');box.innerHTML='<div class="msg ok">Entrando...</div>';
+  const {error}=await supabase.auth.signInWithPassword({email:e,password:p});
+  if(error){box.innerHTML=`<div class="msg err">${error.message}</div>`;return;}
+  await enterAsOwner();
+}
+async function enterAsOwner(){
+  const {data}=await supabase.rpc('dono_entrar');
+  if(!data||!data.ok){
+    if(data&&data.error==='no_store'){showScreen('setup');return;}
+    showScreen('login');return;
+  }
+  role='owner';store=data.store;staffCode=data.store.staff_code;
+  enterApp();
+}
+async function staffLogin(){
+  const code=document.getElementById('st_code').value.trim().toUpperCase();
+  const box=document.getElementById('staff_result');box.innerHTML='<div class="msg ok">Verificando...</div>';
+  const {data}=await supabase.rpc('staff_entrar',{p_codigo:code});
+  if(!data||!data.ok){box.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;return;}
+  role='staff';store=data.store;staffCode=data.store.staff_code;
+  enterApp();
+}
+function logout(){
+  supabase.auth.signOut();
+  sessionStorage.clear();role=null;store=null;staffCode=null;
+  showScreen('login');
+}
+
+/* ---------- SETUP LOJA ---------- */
+async function createStore(){
+  const n=document.getElementById('setup_name').value.trim();
+  const f=document.getElementById('setup_phone').value.trim();
+  const e=document.getElementById('setup_address').value.trim();
+  const box=document.getElementById('setup_result');
+  const {data}=await supabase.rpc('dono_criar_loja',{p_nome:n,p_telefone:f,p_endereco:e});
+  if(!data||!data.ok){box.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;return;}
+  await enterAsOwner();
+}
+
+/* ---------- APP ---------- */
+function showScreen(s){
+  ['login','setup','app'].forEach(x=>document.getElementById('screen_'+x).classList.add('hidden'));
+  document.getElementById('screen_'+s).classList.remove('hidden');
+}
+async function enterApp(){
+  showScreen('app');
+  document.getElementById('app_store_name').textContent=store.name;
+  document.getElementById('app_role_label').textContent= role==='owner' ? '👑 Dono' : '👷 Funcionário';
+  buildTabs();
+  await loadData();
+}
+function buildTabs(){
+  const t=document.getElementById('tabs');t.innerHTML='';
+  let tabs;
+  if(role==='owner') tabs=[['painel','📊 Painel'],['catalogo','🍔 Catálogo'],['pedidos','🧾 Pedidos'],['cozinha','👨‍🍳 Cozinha'],['caixa','💰 Caixa'],['equipe','🔑 Equipe']];
+  else tabs=[['pedidos','🧾 Pedidos'],['cozinha','👨‍🍳 Cozinha'],['garcom','🤵 Garçom']];
+  tabs.forEach(([id,lbl],i)=>{
+    const b=document.createElement('div');b.className='tab'+(i===0?' active':'');b.textContent=lbl;b.onclick=()=>openTab(id,b);t.appendChild(b);
+  });
+  openTab(tabs[0][0],t.firstChild);
+}
+function openTab(id,el){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  if(el)el.classList.add('active');
+  ['painel','catalogo','pedidos','cozinha','garcom','caixa','equipe'].forEach(x=>document.getElementById('tab_'+x).classList.add('hidden'));
+  document.getElementById('tab_'+id).classList.remove('hidden');
+  if(id==='cozinha')startKitchen();else stopKitchen();
+  if(id==='caixa')loadCaixa();
+  if(id==='equipe')document.getElementById('team_code').textContent=staffCode;
+}
+
+/* ---------- CARREGAR DADOS ---------- */
+async function loadData(){
+  const {data}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:staffCode});
+  if(!data||!data.ok){alert(data?.error||'Erro ao carregar');return;}
+  D=data;
+  renderAll();
+  if(role==='owner')loadDashboard();
+}
+function renderAll(){
+  renderCatalog();renderOrderSelects();renderOrders();renderKitchen();renderGarcomSelects();
+}
+
+/* ---------- PAINEL (dono) ---------- */
+async function loadDashboard(){
+  const {data}=await supabase.rpc('dono_dashboard',{p_store_id:store.id});
+  if(!data||!data.ok)return;
+  const s=data.stats;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat">Produtos<b>${s.total_products}</b></div>
+    <div class="stat">Clientes<b>${s.total_customers}</b></div>
+    <div class="stat">Pedidos<b>${s.total_orders}</b></div>
+    <div class="stat">Em aberto<b>${s.open_orders}</b></div>
+    <div class="stat">Pedidos hoje<b>${s.today_orders}</b></div>
+    <div class="stat">Faturamento hoje<b>${money(s.today_revenue)}</b></div>`;
+}
+
+/* ---------- CATÁLOGO (dono) ---------- */
+function renderCatalog(){
+  document.getElementById('list_cats').innerHTML=D.categories.map(c=>`<div class="item">${c.name}</div>`).join('')||'<div class="muted">Nenhuma</div>';
+  document.getElementById('list_prods').innerHTML=D.products.map(p=>`<div class="item"><b>${p.name}</b><br><span class="muted">${money(p.price)}</span></div>`).join('')||'<div class="muted">Nenhum</div>';
+  document.getElementById('list_mesas').innerHTML=D.tables.map(t=>`<div class="item">Mesa ${t.table_number}</div>`).join('')||'<div class="muted">Nenhuma</div>';
+  const sel=document.getElementById('prod_cat');
+  sel.innerHTML='<option value="">Sem categoria</option>'+D.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+}
+async function createCategory(){
+  const n=document.getElementById('cat_name').value.trim();if(!n)return;
+  const {data}=await supabase.rpc('dono_criar_categoria',{p_store_id:store.id,p_nome:n});
+  document.getElementById('cat_res').innerHTML=data?.ok?'<div class="msg ok">Criada!</div>':`<div class="msg err">${data?.error}</div>`;
+  document.getElementById('cat_name').value='';await loadData();
+}
+async function createProduct(){
+  const n=document.getElementById('prod_name').value.trim();
+  const c=document.getElementById('prod_cat').value||null;
+  const p=Number(document.getElementById('prod_price').value||0);
+  const d=document.getElementById('prod_desc').value.trim();
+  const {data}=await supabase.rpc('dono_criar_produto',{p_store_id:store.id,p_categoria:c,p_nome:n,p_preco:p,p_desc:d});
+  document.getElementById('prod_res').innerHTML=data?.ok?'<div class="msg ok">Criado!</div>':`<div class="msg err">${data?.error}</div>`;
+  document.getElementById('prod_name').value='';document.getElementById('prod_price').value='';document.getElementById('prod_desc').value='';
+  await loadData();
+}
+async function createTable(){
+  const n=document.getElementById('mesa_num').value.trim();if(!n)return;
+  const {data}=await supabase.rpc('dono_criar_mesa',{p_store_id:store.id,p_numero:n});
+  document.getElementById('mesa_res').innerHTML=data?.ok?'<div class="msg ok">Criada!</div>':`<div class="msg err">${data?.error}</div>`;
+  document.getElementById('mesa_num').value='';await loadData();
+}
+
+/* ---------- PEDIDOS ---------- */
+function renderOrderSelects(){
+  document.getElementById('ord_cli').innerHTML='<option value="">Sem cliente</option>'+D.customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('ord_mesa').innerHTML='<option value="">Mesa</option>'+D.tables.map(t=>`<option value="${t.id}">${t.table_number}</option>`).join('');
+  document.getElementById('item_ord').innerHTML=D.orders.filter(o=>['new','preparing'].includes(o.status)).map(o=>`<option value="${o.id}">#${o.order_number}</option>`).join('')||'<option value="">Sem pedidos abertos</option>';
+  document.getElementById('item_prod').innerHTML=D.products.map(p=>`<option value="${p.id}">${p.name} — ${money(p.price)}</option>`).join('');
+}
+function toggleMesa(){document.getElementById('ord_mesa').classList.toggle('hidden',document.getElementById('ord_tipo').value!=='table');}
+
+async function createCustomer(){
+  const n=document.getElementById('cli_nome').value.trim();if(!n)return;
+  const {data}=await supabase.rpc('staff_criar_cliente',{p_store_id:store.id,p_codigo:staffCode,p_nome:n,p_telefone:document.getElementById('cli_fone').value.trim(),p_endereco:document.getElementById('cli_end').value.trim(),p_notes:document.getElementById('cli_obs').value.trim()});
+  document.getElementById('cli_res').innerHTML=data?.ok?'<div class="msg ok">Cliente salvo!</div>':`<div class="msg err">${data?.error}</div>`;
+  ['cli_nome','cli_fone','cli_end','cli_obs'].forEach(i=>document.getElementById(i).value='');
+  await loadData();
+}
+async function createOrder(){
+  const tipo=document.getElementById('ord_tipo').value;
+  const mesa=tipo==='table'?document.getElementById('ord_mesa').value:null;
+  const cli=document.getElementById('ord_cli').value||null;
+  const {data}=await supabase.rpc('staff_criar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_customer_id:cli,p_table_id:mesa,p_order_type:tipo,p_order_source:'counter',p_notes:document.getElementById('ord_obs').value.trim()||null,p_items:[]});
+  document.getElementById('ord_res').innerHTML=data?.ok?`<div class="msg ok">Pedido #${data.order_number} criado!</div>`:`<div class="msg err">${data?.error}</div>`;
+  document.getElementById('ord_obs').value='';await loadData();
+}
+async function addItem(){
+  const ord=document.getElementById('item_ord').value;
+  const prod=D.products.find(p=>p.id===document.getElementById('item_prod').value);
+  const qtd=Number(document.getElementById('item_qtd').value||1);
+  if(!ord||!prod){document.getElementById('item_res').innerHTML='<div class="msg err">Selecione pedido e produto.</div>';return;}
+  // Recria via RPC simples: atualiza pedido adicionando item — aqui usamos staff_criar não serve; usamos atualização direta não disponível.
+  document.getElementById('item_res').innerHTML='<div class="msg ok">Use o Garçom para pedidos com itens.</div>';
+}
+
+function renderOrders(){
+  const box=document.getElementById('list_orders');
+  if(!D.orders.length){box.innerHTML='<div class="muted">Nenhum pedido.</div>';return;}
+  box.innerHTML=D.orders.slice(0,40).map(o=>`
+    <div class="order-card">
+      <div class="order-head"><b>#${o.order_number}</b><span class="badge b-${o.status}">${STATUS[o.status]||o.status}</span></div>
+      <div class="muted">${o.customer_name||'Balcão'}${o.table_number?' • Mesa '+o.table_number:''} • ${o.order_type}</div>
+      <div style="margin:8px 0">${(o.items||[]).map(i=>`${i.qty}x ${i.name}`).join('<br>')||'<span class="muted">Sem itens</span>'}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b>${money(o.total)}</b><span class="badge b-${o.payment_status||'open'}">${o.payment_status||'open'}</span>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn btn-amber" onclick="setStatus('${o.id}','preparing')">Preparar</button>
+        <button class="btn btn-green" onclick="setStatus('${o.id}','ready')">Pronto</button>
+        <button class="btn btn-blue" onclick="setStatus('${o.id}','delivered')">Entregue</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn btn-green" onclick="setPay('${o.id}','paid')">💰 Pago</button>
+        <button class="btn btn-red" onclick="setStatus('${o.id}','cancelled')">Cancelar</button>
+      </div>
+    </div>`).join('');
+}
+async function setStatus(id,status){
+  await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:status,p_payment:null});
+  await loadData();
+}
+async function setPay(id,pay){
+  await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:null,p_payment:pay});
+  await loadData();
+}
+
+/* ---------- COZINHA ---------- */
+function renderKitchen(){
+  const groups={new:[],preparing:[],ready:[]};
+  D.orders.forEach(o=>{if(groups[o.status])groups[o.status].push(o);});
+  const mk=list=>list.length?list.map(o=>`<div class="order-card"><b>#${o.order_number}</b> ${o.table_number?'• Mesa '+o.table_number:''}<br>${(o.items||[]).map(i=>`${i.qty}x ${i.name}${i.notes?' <i>('+i.notes+')</i>':''}`).join('<br>')}</div>`).join(''):'<div class="muted">Vazio</div>';
+  document.getElementById('k_new').innerHTML=mk(groups.new);
+  document.getElementById('k_prep').innerHTML=mk(groups.preparing);
+  document.getElementById('k_ready').innerHTML=mk(groups.ready);
+}
+function startKitchen(){if(kitchenTimer)return;kitchenTimer=setInterval(loadData,5000);}
+function stopKitchen(){if(kitchenTimer){clearInterval(kitchenTimer);kitchenTimer=null;}}
+
+/* ---------- GARÇOM ---------- */
+function renderGarcomSelects(){
+  document.getElementById('g_mesa').innerHTML=D.tables.map(t=>`<option value="${t.id}">Mesa ${t.table_number}</option>`).join('')||'<option value="">Sem mesas</option>';
+  document.getElementById('g_prod').innerHTML=D.products.map(p=>`<option value="${p.id}">${p.name} — ${money(p.price)}</option>`).join('');
+}
+async function garcomOrder(){
+  const mesa=document.getElementById('g_mesa').value;
+  const prod=document.getElementById('g_prod').value;
+  const qtd=Number(document.getElementById('g_qtd').value||1);
+  const obs=document.getElementById('g_obs').value.trim()||null;
+  const box=document.getElementById('g_res');
+  if(!mesa||!prod){box.innerHTML='<div class="msg err">Escolha mesa e produto.</div>';return;}
+  const {data}=await supabase.rpc('staff_criar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_customer_id:null,p_table_id:mesa,p_order_type:'table',p_order_source:'waiter',p_notes:null,p_items:[{product_id:prod,quantity:qtd,notes:obs}]});
+  box.innerHTML=data?.ok?`<div class="msg ok">Pedido #${data.order_number} enviado! 🔥</div>`:`<div class="msg err">${data?.error}</div>`;
+  document.getElementById('g_qtd').value='1';document.getElementById('g_obs').value='';
+  await loadData();
+}
+
+/* ---------- CAIXA (dono) ---------- */
+async function caixa(acao){
+  const valor=Number(document.getElementById('cx_valor').value||0);
+  const {data}=await supabase.rpc('dono_caixa',{p_store_id:store.id,p_acao:acao,p_valor:valor});
+  const box=document.getElementById('cx_res');
+  if(!data||!data.ok){box.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;}
+  else if(acao==='fechar'){box.innerHTML=`<div class="msg ok">Caixa fechado! Vendas: ${money(data.sales_total)}</div>`;}
+  else{box.innerHTML=`<div class="msg ok">Caixa aberto!</div>`;}
+  document.getElementById('cx_valor').value='';loadCaixa();
+}
+async function loadCaixa(){
+  const {data}=await supabase.rpc('dono_caixa',{p_store_id:store.id,p_acao:'info',p_valor:0});
+  const box=document.getElementById('cx_info');
+  if(!data||!data.ok){box.innerHTML='<div class="muted">Erro.</div>';return;}
+  box.innerHTML=data.open?`<div class="item"><b>Caixa aberto</b><br>Abertura: ${money(data.opening_amount)}<br>Em: ${new Date(data.opened_at).toLocaleString('pt-BR')}</div>`:'<div class="item">Nenhum caixa aberto.</div>';
+}
+
+/* ---------- EQUIPE (dono) ---------- */
+async function regenCode(){
+  const {data}=await supabase.rpc('dono_regenerar_codigo',{p_store_id:store.id});
+  if(data&&data.ok){staffCode=data.staff_code;document.getElementById('team_code').textContent=staffCode;document.getElementById('team_res').innerHTML='<div class="msg ok">Novo código gerado!</div>';}
+}
+
+/* ---------- BOOT ---------- */
+async function boot(){
+  try{await waitForSupabase();}catch(e){return;}
+  const {data}=await supabase.auth.getSession();
+  if(data.session){await enterAsOwner();return;}
+  showScreen('login');
+}
+boot();
+
+window.switchLogin=switchLogin;window.toggleSignup=toggleSignup;window.ownerSignup=ownerSignup;window.ownerLogin=ownerLogin;
+window.staffLogin=staffLogin;window.logout=logout;window.createStore=createStore;window.openTab=openTab;
+window.loadData=loadData;window.createCategory=createCategory;window.createProduct=createProduct;window.createTable=createTable;
+window.createCustomer=createCustomer;window.createOrder=createOrder;window.addItem=addItem;window.toggleMesa=toggleMesa;
+window.setStatus=setStatus;window.setPay=setPay;window.garcomOrder=garcomOrder;window.caixa=caixa;window.regenCode=regenCode;
+</script>
+</body>
+</html>
