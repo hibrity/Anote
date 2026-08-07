@@ -1,1109 +1,562 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anote</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Cardápio</title>
 
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-    window.supabase = createClient(
-      "https://zbxrpprwjrholrycwsqa.supabase.co",
-      "sb_publishable_c4O2UN_u487qWsu4TNwG0Q_OGj3aHNM"
-    );
-    window.dispatchEvent(new Event("supabase-ready"));
-  </script>
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  window.supabase = createClient(
+    "https://zbxrpprwjrholrycwsqa.supabase.co",
+    "sb_publishable_c4O2UN_u487qWsu4TNwG0Q_OGj3aHNM"
+  );
+  window.dispatchEvent(new Event("supabase-ready"));
+</script>
 
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, sans-serif; background: #111827; color: white; }
-    .wrap { max-width: 1320px; margin: 0 auto; padding: 18px; }
-    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
-    .title { font-size: 28px; font-weight: bold; }
-    .subtitle { color: #cbd5e1; font-size: 14px; margin-top: 4px; }
-    .card { background: #1f2937; border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
-    .grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
-    .stats { display: grid; gap: 12px; grid-template-columns: repeat(6, 1fr); }
-    .stat { background: #0f172a; border-radius: 12px; padding: 14px; border: 1px solid rgba(255,255,255,.06); }
-    .stat strong { display: block; margin-top: 6px; font-size: 24px; }
-    .item { background: #0f172a; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.06); margin-top: 10px; }
-    .row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .row > * { flex: 1; min-width: 140px; }
-    input, select, textarea { width: 100%; padding: 11px 12px; border: none; border-radius: 8px; margin-top: 8px; margin-bottom: 10px; background: white; color: black; font-size: 15px; }
-    textarea { min-height: 90px; resize: vertical; }
-    button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 15px; }
-    .primary { background: #22c55e; color: black; }
-    .ghost { background: #334155; color: white; }
-    .danger { background: #ef4444; color: white; }
-    .warning { background: #f59e0b; color: black; }
-    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-    .tab-btn.active { background: #22c55e; color: black; }
-    .hidden { display: none; }
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: bold; margin-top: 6px; background: #22c55e; color: black; }
-    .badge.new { background: #60a5fa; color: black; }
-    .badge.preparing { background: #f59e0b; color: black; }
-    .badge.ready { background: #22c55e; color: black; }
-    .badge.delivered { background: #a78bfa; color: white; }
-    .badge.cancelled { background: #ef4444; color: white; }
-    .badge.open { background: #f59e0b; color: black; }
-    .badge.paid { background: #22c55e; color: black; }
-    .muted { color: #cbd5e1; font-size: 14px; }
-    .menu-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); }
-    .product-card { background: #0f172a; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.06); }
-    .kitchen-board { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
-    .kitchen-col { background: #0f172a; border-radius: 12px; padding: 12px; min-height: 200px; }
-    .center { text-align: center; }
-    .auth-shell { max-width: 420px; margin: 80px auto 0; }
-    .auth-title { text-align: center; margin-bottom: 20px; }
-    #loading_screen { text-align: center; padding: 60px 20px; }
-    .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(255,255,255,.2); border-top-color: #22c55e; border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @media (max-width: 1100px) {
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .grid, .menu-grid, .kitchen-board { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 640px) {
-      .stats { grid-template-columns: 1fr; }
-      .title { font-size: 24px; }
-      .auth-shell { max-width: 100%; margin-top: 40px; }
-    }
-    @media print {
-      body { background: white; color: black; }
-      .no-print { display: none !important; }
-      .card, .item, .product-card, .kitchen-col { box-shadow: none; border: 1px solid #ddd; background: white; color: black; }
-    }
-  </style>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --primary: #ea580c; --primary-dark: #c2410c; --primary-light: #fff7ed;
+    --bg: #f5f5f4; --card: #ffffff; --text: #1c1917; --muted: #78716c;
+    --green: #16a34a; --red: #dc2626; --amber: #d97706; --border: #e7e5e4;
+    --radius: 16px;
+  }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+  .app { max-width: 520px; margin: 0 auto; min-height: 100vh; background: var(--bg); padding-bottom: 90px; position: relative; }
+  .hidden { display: none !important; }
+
+  /* HEADER */
+  .header { background: var(--primary); color: #fff; padding: 20px 18px 24px; border-radius: 0 0 24px 24px; position: sticky; top: 0; z-index: 50; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header .sub { font-size: 13px; opacity: .9; margin-top: 4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .header .user-chip { background: rgba(255,255,255,.2); padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight:600; }
+
+  /* BUSCA / CATEGORIAS */
+  .cats { display: flex; gap: 8px; overflow-x: auto; padding: 14px 16px 4px; scrollbar-width: none; }
+  .cats::-webkit-scrollbar { display: none; }
+  .cat-chip { flex-shrink: 0; padding: 8px 16px; border-radius: 999px; background: var(--card); border: 1px solid var(--border); font-size: 14px; font-weight:600; color: var(--muted); cursor: pointer; transition: .2s; }
+  .cat-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  /* PRODUTOS */
+  .section-title { padding: 16px 18px 8px; font-size: 15px; font-weight:700; color: var(--muted); text-transform: uppercase; letter-spacing:.5px; }
+  .products { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+  .prod-card { background: var(--card); border-radius: var(--radius); padding: 14px; display: flex; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .prod-thumb { width: 64px; height: 64px; border-radius: 12px; background: var(--primary-light); display:flex; align-items:center; justify-content:center; font-size: 28px; flex-shrink: 0; }
+  .prod-info { flex: 1; min-width: 0; }
+  .prod-name { font-size: 15px; font-weight: 700; }
+  .prod-desc { font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .prod-bottom { display:flex; align-items:center; justify-content:space-between; margin-top: 8px; }
+  .prod-price { font-size: 16px; font-weight: 800; color: var(--primary); }
+  .add-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--primary); color:#fff; border:none; font-size: 20px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.15s; }
+  .add-btn:active { transform: scale(.9); }
+
+  /* BOTÃO CARRINHO FLUTUANTE */
+  .cart-float { position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%); background: var(--primary); color:#fff; border:none; border-radius: 999px; padding: 14px 28px; font-size: 15px; font-weight:700; cursor:pointer; box-shadow: 0 8px 20px rgba(234,88,12,.35); display:flex; align-items:center; gap:10px; z-index: 40; }
+  .cart-count { background:#fff; color:var(--primary); border-radius:999px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; }
+
+  /* BOTTOM NAV */
+  .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width:100%; max-width:520px; background:#fff; border-top:1px solid var(--border); display:flex; z-index: 45; padding-bottom: env(safe-area-inset-bottom); }
+  .nav-item { flex:1; text-align:center; padding: 10px 0 12px; font-size: 11px; color: var(--muted); cursor:pointer; font-weight:600; }
+  .nav-item .ico { font-size: 22px; display:block; margin-bottom:2px; }
+  .nav-item.active { color: var(--primary); }
+  .nav-item .dot { position:relative; }
+  .nav-badge { position:absolute; top:-4px; right:-10px; background:var(--red); color:#fff; font-size:10px; border-radius:999px; min-width:16px; height:16px; display:flex; align-items:center; justify-content:center; padding:0 4px; }
+
+  /* MODAL */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; display:flex; align-items:flex-end; justify-content:center; }
+  .sheet { background:#fff; width:100%; max-width:520px; border-radius: 24px 24px 0 0; padding: 20px; max-height: 85vh; overflow-y:auto; animation: up .25s ease; }
+  @keyframes up { from { transform: translateY(60px); opacity:0;} to { transform: translateY(0); opacity:1;} }
+  .sheet h2 { font-size: 18px; margin-bottom: 16px; }
+  .cart-item { display:flex; align-items:center; justify-content:space-between; padding: 10px 0; border-bottom:1px solid var(--border); }
+  .cart-item .n { font-size:14px; font-weight:600; }
+  .cart-item .p { font-size:13px; color:var(--muted); }
+  .qty-ctrl { display:flex; align-items:center; gap:10px; }
+  .qty-btn { width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:#fff; font-size:16px; cursor:pointer; font-weight:700; }
+  .total-row { display:flex; justify-content:space-between; font-size:17px; font-weight:800; padding: 16px 0 8px; }
+  .btn { width:100%; padding: 15px; border:none; border-radius: 14px; font-size:16px; font-weight:700; cursor:pointer; margin-top: 10px; }
+  .btn-primary { background: var(--primary); color:#fff; }
+  .btn-primary:disabled { background:#d6d3d1; cursor:not-allowed; }
+  .btn-ghost { background: var(--primary-light); color: var(--primary); }
+  .field { margin-bottom: 14px; }
+  .field label { font-size:13px; font-weight:600; color:var(--muted); display:block; margin-bottom:6px; }
+  .field input, .field textarea { width:100%; padding: 13px 14px; border:1.5px solid var(--border); border-radius:12px; font-size:15px; outline:none; }
+  .field input:focus { border-color: var(--primary); }
+  .msg { padding: 12px; border-radius: 12px; font-size:14px; margin-top: 10px; }
+  .msg.err { background:#fef2f2; color:var(--red); }
+  .msg.ok { background:#f0fdf4; color:var(--green); }
+
+  /* ACOMPANHAMENTO */
+  .track-card { background:var(--card); margin:16px; border-radius:var(--radius); padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .track-num { font-size:14px; color:var(--muted); }
+  .track-num b { font-size:22px; color:var(--text); }
+  .steps { margin-top: 20px; display:flex; flex-direction:column; gap:0; }
+  .step { display:flex; gap:14px; position:relative; padding-bottom: 24px; }
+  .step:last-child { padding-bottom:0; }
+  .step .line { position:absolute; left:15px; top:32px; bottom:0; width:2px; background:var(--border); }
+  .step.done .line { background: var(--green); }
+  .step .circle { width:32px; height:32px; border-radius:50%; background:var(--border); color:#fff; display:flex; align-items:center; justify-content:center; font-size:15px; z-index:1; flex-shrink:0; }
+  .step.done .circle { background: var(--green); }
+  .step.now .circle { background: var(--amber); animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{ box-shadow:0 0 0 0 rgba(217,119,6,.4);} 50%{ box-shadow:0 0 0 8px rgba(217,119,6,0);} }
+  .step .lbl { font-size:14px; font-weight:600; padding-top:5px; }
+  .step .lbl small { display:block; color:var(--muted); font-weight:400; font-size:12px; }
+
+  /* HISTÓRICO */
+  .hist-card { background:var(--card); margin: 0 16px 12px; border-radius: var(--radius); padding: 14px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .hist-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .badge { padding: 4px 10px; border-radius:999px; font-size:11px; font-weight:700; }
+  .badge.new { background:#dbeafe; color:#1d4ed8; }
+  .badge.preparing { background:#fef3c7; color:#b45309; }
+  .badge.ready { background:#dcfce7; color:#15803d; }
+  .badge.delivered { background:#ede9fe; color:#6d28d9; }
+  .badge.cancelled { background:#fee2e2; color:#b91c1c; }
+  .hist-items { font-size:13px; color:var(--muted); line-height:1.5; }
+  .empty { text-align:center; padding: 60px 20px; color:var(--muted); }
+  .empty .big { font-size:48px; margin-bottom:12px; }
+
+  .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation: spin .8s linear infinite; margin: 40px auto; }
+  @keyframes spin { to { transform: rotate(360deg);} }
+  .center-load { padding: 60px 0; }
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- TELA DE LOADING (enquanto carrega os dados após o login) -->
-    <div id="loading_screen" class="hidden">
-      <div class="spinner"></div>
-      <p class="muted" style="margin-top:20px;">Carregando sistema...</p>
-    </div>
+<div class="app">
 
-    <!-- TELA DE ACESSO POR CHAVE -->
-    <div id="auth_screen">
-      <div class="auth-shell">
-        <div class="topbar auth-title" style="justify-content:center;">
-          <div>
-            <div class="title">Anote</div>
-            <div class="subtitle">Gestão inteligente de pedidos</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3 style="text-align:center; margin-top:0;">Acesso Restrito</h3>
-          <p class="muted center" style="margin-bottom:18px;">Digite a chave de acesso do sistema</p>
-
-          <input id="access_key" type="password" placeholder="Chave de Acesso" />
-          <button class="primary" style="width:100%;" onclick="login()">Acessar Sistema</button>
-          <div id="login_result"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TELA DE CONFIGURAÇÃO DA LOJA -->
-    <div id="store_setup_screen" class="hidden">
-      <div class="topbar">
-        <div>
-          <div class="title">Anote</div>
-          <div class="subtitle">Crie sua loja para começar</div>
-        </div>
-        <button class="danger" onclick="logout()">Sair</button>
-      </div>
-
-      <div class="card">
-        <h3>Nova loja</h3>
-        <input id="store_name" placeholder="Nome da loja" />
-        <input id="store_phone" placeholder="Telefone" />
-        <input id="store_address" placeholder="Endereço" />
-        <button class="primary" onclick="createStore()">Criar loja</button>
-        <div id="store_result"></div>
-      </div>
-    </div>
-
-    <!-- TELA PRINCIPAL DO APP -->
-    <div id="app_screen" class="hidden">
-      <div class="topbar">
-        <div>
-          <div class="title">Anote</div>
-          <div class="subtitle" id="store_label">Carregando loja...</div>
-        </div>
-        <div class="row no-print" style="max-width:460px;width:100%;">
-          <button class="ghost" onclick="loadAll()">Atualizar</button>
-          <button class="ghost" onclick="printKitchen()">Imprimir cozinha</button>
-          <button class="ghost" onclick="enterWaiterMode()">Modo garçom</button>
-          <button class="danger" onclick="logout()">Sair</button>
-        </div>
-      </div>
-
-      <div class="tabs no-print">
-        <button class="tab-btn ghost active" onclick="openTab('dashboard', this)">Painel</button>
-        <button class="tab-btn ghost" onclick="openTab('catalog', this)">Catálogo</button>
-        <button class="tab-btn ghost" onclick="openTab('orders', this)">Pedidos</button>
-        <button class="tab-btn ghost" onclick="openTab('kitchen', this)">Cozinha</button>
-        <button class="tab-btn ghost" onclick="openTab('cashier', this)">Caixa</button>
-        <button class="tab-btn ghost" onclick="openTab('menu', this)">Cardápio / QR</button>
-      </div>
-
-      <div id="tab_dashboard">
-        <div class="card"><h3>Resumo geral</h3><div class="stats" id="stats"></div></div>
-        <div class="grid">
-          <div class="card"><h3>Pedidos recentes</h3><div id="recent_orders"></div></div>
-          <div class="card"><h3>Resumo do dia</h3><div id="daily_summary"></div></div>
-        </div>
-      </div>
-
-      <div id="tab_catalog" class="hidden">
-        <div class="grid">
-          <div>
-            <div class="card">
-              <h3>Nova categoria</h3>
-              <input id="category_name" placeholder="Nome da categoria" />
-              <button class="primary" onclick="createCategory()">Salvar categoria</button>
-              <div id="category_result"></div>
-            </div>
-            <div class="card">
-              <h3>Novo produto</h3>
-              <input id="product_name" placeholder="Nome do produto" />
-              <select id="product_category"></select>
-              <input id="product_price" type="number" step="0.01" placeholder="Preço" />
-              <textarea id="product_description" placeholder="Descrição"></textarea>
-              <button class="primary" onclick="createProduct()">Salvar produto</button>
-              <div id="product_result"></div>
-            </div>
-            <div class="card">
-              <h3>Nova mesa</h3>
-              <input id="table_number" placeholder="Número / nome da mesa" />
-              <button class="ghost" onclick="createTable()">Salvar mesa</button>
-              <div id="table_result"></div>
-            </div>
-          </div>
-          <div>
-            <div class="card"><h3>Categorias</h3><div id="categories_list"></div></div>
-            <div class="card"><h3>Produtos</h3><div id="products_list"></div></div>
-            <div class="card"><h3>Mesas</h3><div id="tables_list"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab_orders" class="hidden">
-        <div class="grid">
-          <div>
-            <div class="card">
-              <h3>Novo cliente</h3>
-              <input id="customer_name" placeholder="Nome do cliente" />
-              <input id="customer_phone" placeholder="Telefone" />
-              <input id="customer_address" placeholder="Endereço" />
-              <textarea id="customer_notes" placeholder="Observações"></textarea>
-              <button class="ghost" onclick="createCustomer()">Salvar cliente</button>
-              <div id="customer_result"></div>
-            </div>
-            <div class="card">
-              <h3>Novo pedido</h3>
-              <select id="order_customer"></select>
-              <select id="order_type" onchange="toggleTableField()">
-                <option value="counter">Balcão</option>
-                <option value="delivery">Delivery</option>
-                <option value="pickup">Retirada</option>
-                <option value="table">Mesa</option>
-              </select>
-              <select id="order_table" class="hidden"></select>
-              <textarea id="order_notes" placeholder="Observações do pedido"></textarea>
-              <button class="primary" onclick="createOrder()">Criar pedido</button>
-              <div id="order_result"></div>
-            </div>
-            <div class="card">
-              <h3>Adicionar item ao pedido</h3>
-              <select id="item_order"></select>
-              <select id="item_product"></select>
-              <input id="item_quantity" type="number" min="1" value="1" />
-              <textarea id="item_notes" placeholder="Observações do item"></textarea>
-              <button class="primary" onclick="addItemToOrder()">Adicionar item</button>
-              <div id="item_result"></div>
-            </div>
-          </div>
-          <div>
-            <div class="card">
-              <h3>Filtros de pedidos</h3>
-              <div class="row">
-                <select id="filter_status" onchange="loadOrders()">
-                  <option value="">Todos os status</option>
-                  <option value="new">Novo</option>
-                  <option value="preparing">Preparando</option>
-                  <option value="ready">Pronto</option>
-                  <option value="delivered">Entregue</option>
-                  <option value="cancelled">Cancelado</option>
-                </select>
-                <select id="filter_type" onchange="loadOrders()">
-                  <option value="">Todos os tipos</option>
-                  <option value="counter">Balcão</option>
-                  <option value="delivery">Delivery</option>
-                  <option value="pickup">Retirada</option>
-                  <option value="table">Mesa</option>
-                </select>
-              </div>
-            </div>
-            <div class="card"><h3>Pedidos</h3><div id="orders_list"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab_kitchen" class="hidden">
-        <div class="card">
-          <h3>Tela da cozinha automática</h3>
-          <div class="kitchen-board">
-            <div class="kitchen-col"><div class="section-title">Novos</div><div id="kitchen_new"></div></div>
-            <div class="kitchen-col"><div class="section-title">Preparando</div><div id="kitchen_preparing"></div></div>
-            <div class="kitchen-col"><div class="section-title">Prontos</div><div id="kitchen_ready"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab_cashier" class="hidden">
-        <div class="grid">
-          <div>
-            <div class="card">
-              <h3>Controle de caixa</h3>
-              <input id="opening_amount" type="number" step="0.01" placeholder="Valor de abertura" />
-              <div class="row">
-                <button class="primary" onclick="openCashSession()">Abrir caixa</button>
-                <button class="danger" onclick="closeCashSession()">Fechar caixa</button>
-              </div>
-              <div id="cash_result"></div>
-            </div>
-          </div>
-          <div>
-            <div class="card"><h3>Sessão atual</h3><div id="cash_session_info"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab_menu" class="hidden">
-        <div class="grid">
-          <div>
-            <div class="card">
-              <h3>QR Code das mesas</h3>
-              <p class="muted">Copie os links abaixo e transforme em QR Code externo ou interno.</p>
-              <div id="table_qr_list"></div>
-            </div>
-            <div class="card">
-              <h3>Link do cardápio online</h3>
-              <div id="menu_public_link" class="item">Carregando...</div>
-            </div>
-          </div>
-          <div>
-            <div class="card">
-              <h3>Cardápio online / mesa</h3>
-              <div class="row">
-                <select id="public_table_select" onchange="loadPublicMenu()"></select>
-                <input id="public_customer_name" placeholder="Nome do cliente (opcional)" />
-              </div>
-              <div id="public_menu"></div>
-              <div class="card" style="margin-top:12px;background:#0f172a;">
-                <h3>Carrinho</h3>
-                <div id="public_cart"></div>
-                <button class="primary" onclick="submitPublicOrder()">Enviar pedido</button>
-                <div id="public_order_result"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="waiter_mode" class="hidden">
-        <div class="card">
-          <div class="topbar">
-            <div>
-              <div class="title">Modo Garçom</div>
-              <div class="subtitle">Uso rápido no celular</div>
-            </div>
-            <button class="danger" onclick="exitWaiterMode()">Fechar</button>
-          </div>
-          <div class="card" style="background:#0f172a;">
-            <h3>Novo pedido rápido</h3>
-            <select id="waiter_table"></select>
-            <select id="waiter_product"></select>
-            <input id="waiter_quantity" type="number" min="1" value="1" />
-            <textarea id="waiter_notes" placeholder="Observações"></textarea>
-            <button class="primary" onclick="createQuickWaiterOrder()">Enviar para cozinha</button>
-            <div id="waiter_result"></div>
-          </div>
-        </div>
-      </div>
+  <!-- HEADER -->
+  <div class="header">
+    <h1 id="store_name">Carregando...</h1>
+    <div class="sub">
+      <span id="store_address"></span>
+      <span id="table_chip" class="user-chip hidden"></span>
+      <span id="user_chip" class="user-chip hidden"></span>
     </div>
   </div>
 
-  <script>
-    let currentStore = null;
-    let currentCashSession = null;
-    let publicCart = [];
-    let kitchenAutoTimer = null;
-
-    // ============================================================
-    // CHAVE DE ACESSO OFUSCADA (não aparece em texto puro no código)
-    // A chave real é reconstruída apenas em memória na validação.
-    // ============================================================
-    function getAccessKey() {
-      const d = [124, 1, 68, 114, 24, 112, 35, 118, 123, 11, 70, 6, 25, 120, 72, 113];
-      const k = "K9pD";
-      let s = "";
-      for (let i = 0; i < d.length; i++) {
-        s += String.fromCharCode(d[i] ^ k.charCodeAt(i % k.length));
-      }
-      return s;
-    }
-
-    function money(v) {
-      return Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    }
-
-    function badgeClass(status) {
-      return status || "";
-    }
-
-    // Aguarda o Supabase carregar (necessário apenas para os dados, não para o login)
-    function waitForSupabase() {
-      return new Promise((resolve, reject) => {
-        if (window.supabase) { resolve(window.supabase); return; }
-        const timeout = setTimeout(() => reject(new Error("Supabase não carregou em 10 segundos")), 10000);
-        window.addEventListener("supabase-ready", () => {
-          clearTimeout(timeout);
-          resolve(window.supabase);
-        }, { once: true });
-      });
-    }
-
-    function openTab(name, btn) {
-      ["dashboard", "catalog", "orders", "kitchen", "cashier", "menu"].forEach(id => {
-        document.getElementById(`tab_${id}`).classList.add("hidden");
-      });
-      document.getElementById(`tab_${name}`).classList.remove("hidden");
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      if (name === "kitchen") startKitchenAutoRefresh();
-      else stopKitchenAutoRefresh();
-    }
-
-    function enterWaiterMode() {
-      document.getElementById("waiter_mode").classList.remove("hidden");
-      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-    }
-
-    function exitWaiterMode() {
-      document.getElementById("waiter_mode").classList.add("hidden");
-    }
-
-    function toggleTableField() {
-      const type = document.getElementById("order_type").value;
-      const tableField = document.getElementById("order_table");
-      if (type === "table") tableField.classList.remove("hidden");
-      else tableField.classList.add("hidden");
-    }
-
-    // --- LOGIN INSTANTÂNEO (valida contra a chave ofuscada) ---
-    function login() {
-      const key = document.getElementById("access_key").value.trim();
-      const box = document.getElementById("login_result");
-      box.innerHTML = "";
-
-      if (key === getAccessKey()) {
-        sessionStorage.setItem("app_access_key", key);
-        enterApp();
-      } else {
-        box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">Chave de acesso inválida.</div>`;
-      }
-    }
-
-    function logout() {
-      sessionStorage.removeItem("app_access_key");
-      location.reload();
-    }
-
-    // --- ENTRA NO APP E CARREGA OS DADOS ---
-    async function enterApp() {
-      document.getElementById("auth_screen").classList.add("hidden");
-      document.getElementById("store_setup_screen").classList.add("hidden");
-      document.getElementById("app_screen").classList.add("hidden");
-      document.getElementById("loading_screen").classList.remove("hidden");
-
-      try {
-        await waitForSupabase();
-        currentStore = await getCurrentStore();
-
-        document.getElementById("loading_screen").classList.add("hidden");
-
-        if (!currentStore) {
-          document.getElementById("store_setup_screen").classList.remove("hidden");
-          return;
-        }
-
-        document.getElementById("app_screen").classList.remove("hidden");
-        document.getElementById("store_label").textContent =
-          currentStore.name +
-          (currentStore.phone ? " • " + currentStore.phone : "") +
-          (currentStore.address ? " • " + currentStore.address : "");
-
-        await loadAll();
-      } catch (e) {
-        console.error("Erro ao entrar no app:", e);
-        document.getElementById("loading_screen").innerHTML = `
-          <div class="item" style="color:#ef4444; border-color:#ef4444; max-width:500px; margin:40px auto;">
-            <b>Falha ao conectar com o servidor</b><br>
-            ${e.message}<br><br>
-            <button class="ghost" onclick="location.reload()">Tentar novamente</button>
-          </div>
-        `;
-      }
-    }
-
-    async function getCurrentStore() {
-      const { data, error } = await supabase
-        .from("stores")
-        .select("*")
-        .limit(1)
-        .maybeSingle();
-      if (error || !data) return null;
-      return data;
-    }
-
-    async function createStore() {
-      const name = document.getElementById("store_name").value.trim();
-      const phone = document.getElementById("store_phone").value.trim();
-      const address = document.getElementById("store_address").value.trim();
-      const box = document.getElementById("store_result");
-
-      const { error } = await supabase.from("stores").insert({
-        name, phone: phone || null, address: address || null, created_by: "admin"
-      });
-
-      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
-      enterApp();
-    }
-
-    async function createCategory() {
-      const name = document.getElementById("category_name").value.trim();
-      const box = document.getElementById("category_result");
-      const { error } = await supabase.from("categories").insert({
-        store_id: currentStore.id, name, created_by: "admin"
-      });
-      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
-      document.getElementById("category_name").value = "";
-      box.innerHTML = `<div class="item">Categoria criada.</div>`;
-      await loadCategories();
-      await loadPublicMenu();
-    }
-
-    async function createProduct() {
-      const name = document.getElementById("product_name").value.trim();
-      const categoryId = document.getElementById("product_category").value || null;
-      const price = Number(document.getElementById("product_price").value || 0);
-      const description = document.getElementById("product_description").value.trim();
-      const box = document.getElementById("product_result");
-
-      const { error } = await supabase.from("products").insert({
-        store_id: currentStore.id, category_id: categoryId, name, price,
-        description: description || null, created_by: "admin"
-      });
-      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
-
-      document.getElementById("product_name").value = "";
-      document.getElementById("product_price").value = "";
-      document.getElementById("product_description").value = "";
-      box.innerHTML = `<div class="item">Produto criado.</div>`;
-      await loadProducts();
-      await loadPublicMenu();
-    }
-
-    async function createTable() {
-      const tableNumber = document.getElementById("table_number").value.trim();
-      const box = document.getElementById("table_result");
-      const { error } = await supabase.from("tables").insert({
-        store_id: currentStore.id, table_number: tableNumber,
-        qr_code: `mesa-${tableNumber}`, created_by: "admin"
-      });
-      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
-      document.getElementById("table_number").value = "";
-      box.innerHTML = `<div class="item">Mesa criada.</div>`;
-      await loadTables();
-    }
-
-    async function createCustomer() {
-      const fullName = document.getElementById("customer_name").value.trim();
-      const phone = document.getElementById("customer_phone").value.trim();
-      const address = document.getElementById("customer_address").value.trim();
-      const notes = document.getElementById("customer_notes").value.trim();
-      const box = document.getElementById("customer_result");
-
-      const { error } = await supabase.from("customers").insert({
-        store_id: currentStore.id, full_name: fullName, phone: phone || null,
-        address: address || null, notes: notes || null, created_by: "admin"
-      });
-      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
-
-      document.getElementById("customer_name").value = "";
-      document.getElementById("customer_phone").value = "";
-      document.getElementById("customer_address").value = "";
-      document.getElementById("customer_notes").value = "";
-      box.innerHTML = `<div class="item">Cliente criado.</div>`;
-      await loadCustomers();
-    }
-
-    async function createOrder() {
-      const customerId = document.getElementById("order_customer").value || null;
-      const orderType = document.getElementById("order_type").value;
-      const tableId = orderType === "table" ? (document.getElementById("order_table").value || null) : null;
-      const notes = document.getElementById("order_notes").value.trim();
-      const box = document.getElementById("order_result");
-
-      const { data, error } = await supabase
-        .from("orders")
-        .insert({
-          store_id: currentStore.id, customer_id: customerId, table_id: tableId,
-          order_type: orderType, order_source: "counter", notes: notes || null, created_by: "admin"
-        })
-        .select("*").single();
-
-      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
-
-      document.getElementById("order_notes").value = "";
-      box.innerHTML = `<div class="item">Pedido criado.</div>`;
-      await loadOrders();
-      await loadStats();
-      await loadDailySummary();
-    }
-
-    async function addItemToOrder() {
-      const orderId = document.getElementById("item_order").value;
-      const productId = document.getElementById("item_product").value;
-      const quantity = Number(document.getElementById("item_quantity").value || 1);
-      const notes = document.getElementById("item_notes").value.trim();
-      const box = document.getElementById("item_result");
-
-      const { data: product } = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
-      if (!product) { box.innerHTML = `<div class="item">Produto inválido.</div>`; return; }
-
-      const { error } = await supabase.from("order_items").insert({
-        order_id: orderId, product_id: product.id, product_name: product.name,
-        unit_price: product.price, quantity, notes: notes || null
-      });
-      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
-
-      document.getElementById("item_quantity").value = "1";
-      document.getElementById("item_notes").value = "";
-      box.innerHTML = `<div class="item">Item adicionado.</div>`;
-      await loadOrders();
-      await loadStats();
-      await loadDailySummary();
-    }
-
-    async function updateOrderStatus(id, status) {
-      const { error } = await supabase.from("orders").update({ status }).eq("id", id);
-      if (error) { alert(error.message); return; }
-      await loadOrders();
-      await loadStats();
-      await loadDailySummary();
-    }
-
-    async function updatePaymentStatus(id, status) {
-      const { error } = await supabase.from("orders").update({ payment_status: status }).eq("id", id);
-      if (error) { alert(error.message); return; }
-      await loadOrders();
-      await loadStats();
-      await loadDailySummary();
-    }
-
-    async function openCashSession() {
-      const openingAmount = Number(document.getElementById("opening_amount").value || 0);
-      const box = document.getElementById("cash_result");
-
-      const { data: existing } = await supabase.from("cash_sessions").select("*")
-        .eq("store_id", currentStore.id).eq("status", "open").maybeSingle();
-
-      if (existing) {
-        box.innerHTML = `<div class="item">Já existe um caixa aberto.</div>`;
-        await loadCashSession();
-        return;
-      }
-
-      const { error } = await supabase.from("cash_sessions").insert({
-        store_id: currentStore.id, opened_by: "admin", opening_amount: openingAmount, status: "open"
-      });
-      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
-
-      box.innerHTML = `<div class="item">Caixa aberto com sucesso.</div>`;
-      document.getElementById("opening_amount").value = "";
-      await loadCashSession();
-    }
-
-    async function closeCashSession() {
-      const box = document.getElementById("cash_result");
-      if (!currentCashSession) { box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`; return; }
-
-      const { data: deliveredOrders } = await supabase.from("orders").select("total")
-        .eq("store_id", currentStore.id).eq("status", "delivered").eq("payment_status", "paid");
-
-      const salesTotal = (deliveredOrders || []).reduce((acc, o) => acc + Number(o.total || 0), 0);
-      const closingAmount = Number(currentCashSession.opening_amount || 0) + salesTotal;
-
-      const { error } = await supabase.from("cash_sessions").update({
-        closed_by: "admin", closing_amount: closingAmount, sales_total: salesTotal,
-        status: "closed", closed_at: new Date().toISOString()
-      }).eq("id", currentCashSession.id);
-
-      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
-
-      box.innerHTML = `<div class="item">Caixa fechado com sucesso.</div>`;
-      await loadCashSession();
-    }
-
-    async function loadCashSession() {
-      const box = document.getElementById("cash_session_info");
-      const { data } = await supabase.from("cash_sessions").select("*")
-        .eq("store_id", currentStore.id).eq("status", "open").maybeSingle();
-
-      currentCashSession = data || null;
-      if (!data) { box.innerHTML = `<div class="item">Nenhum caixa aberto.</div>`; return; }
-
-      box.innerHTML = `
-        <div class="item">
-          <b>Caixa aberto</b><br>
-          Abertura: ${money(data.opening_amount)}<br>
-          Aberto em: ${new Date(data.opened_at).toLocaleString("pt-BR")}<br>
-          <span class="badge open">aberto</span>
-        </div>`;
-    }
-
-    async function loadCategories() {
-      const { data } = await supabase.from("categories").select("*").order("name", { ascending: true });
-      const list = document.getElementById("categories_list");
-      const select = document.getElementById("product_category");
-      list.innerHTML = "";
-      select.innerHTML = `<option value="">Sem categoria</option>`;
-      if (!data || !data.length) { list.innerHTML = `<div class="item">Nenhuma categoria.</div>`; return; }
-      data.forEach(c => {
-        list.innerHTML += `<div class="item"><b>${c.name}</b><br><span class="badge">${c.active ? "ativa" : "inativa"}</span></div>`;
-        select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-      });
-    }
-
-    async function loadProducts() {
-      const { data } = await supabase.from("products").select("*, categories(name)").order("name", { ascending: true });
-      const list = document.getElementById("products_list");
-      const select = document.getElementById("item_product");
-      const waiterSelect = document.getElementById("waiter_product");
-      list.innerHTML = ""; select.innerHTML = ""; waiterSelect.innerHTML = "";
-      if (!data || !data.length) { list.innerHTML = `<div class="item">Nenhum produto.</div>`; return; }
-      data.forEach(p => {
-        list.innerHTML += `<div class="item"><b>${p.name}</b><br>Categoria: ${p.categories?.name || "-"}<br>Preço: ${money(p.price)}<br>${p.description || ""}</div>`;
-        select.innerHTML += `<option value="${p.id}">${p.name} — ${money(p.price)}</option>`;
-        waiterSelect.innerHTML += `<option value="${p.id}">${p.name} — ${money(p.price)}</option>`;
-      });
-    }
-
-    async function loadCustomers() {
-      const { data } = await supabase.from("customers").select("*").order("full_name", { ascending: true });
-      const select = document.getElementById("order_customer");
-      select.innerHTML = `<option value="">Sem cliente</option>`;
-      (data || []).forEach(c => {
-        select.innerHTML += `<option value="${c.id}">${c.full_name}${c.phone ? " — " + c.phone : ""}</option>`;
-      });
-    }
-
-    async function loadTables() {
-      const { data } = await supabase.from("tables").select("*").order("table_number", { ascending: true });
-      const list = document.getElementById("tables_list");
-      const orderSelect = document.getElementById("order_table");
-      const publicSelect = document.getElementById("public_table_select");
-      const waiterSelect = document.getElementById("waiter_table");
-      const qrList = document.getElementById("table_qr_list");
-
-      list.innerHTML = ""; qrList.innerHTML = "";
-      orderSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
-      publicSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
-      waiterSelect.innerHTML = `<option value="">Selecione a mesa</option>`;
-
-      if (!data || !data.length) {
-        list.innerHTML = `<div class="item">Nenhuma mesa.</div>`;
-        qrList.innerHTML = `<div class="item">Nenhuma mesa cadastrada.</div>`;
-        return;
-      }
-
-      const baseUrl = location.origin + location.pathname;
-      data.forEach(t => {
-        list.innerHTML += `<div class="item"><b>Mesa ${t.table_number}</b><br><span class="badge">${t.active ? "ativa" : "inativa"}</span></div>`;
-        orderSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
-        publicSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
-        waiterSelect.innerHTML += `<option value="${t.id}">${t.table_number}</option>`;
-        const link = `${baseUrl}?menu=1&table=${encodeURIComponent(t.id)}`;
-        qrList.innerHTML += `<div class="item"><b>Mesa ${t.table_number}</b><br>QR/link: <br><span class="muted">${link}</span></div>`;
-      });
-      document.getElementById("menu_public_link").innerHTML = `${baseUrl}?menu=1`;
-    }
-
-    async function loadOrders() {
-      const filterStatus = document.getElementById("filter_status").value;
-      const filterType = document.getElementById("filter_type").value;
-      let query = supabase.from("orders").select("*, customers(full_name), tables(table_number)").order("created_at", { ascending: false });
-      if (filterStatus) query = query.eq("status", filterStatus);
-      if (filterType) query = query.eq("order_type", filterType);
-
-      const { data: orders } = await query;
-      const list = document.getElementById("orders_list");
-      const recent = document.getElementById("recent_orders");
-      const itemOrder = document.getElementById("item_order");
-      list.innerHTML = ""; recent.innerHTML = ""; itemOrder.innerHTML = "";
-
-      if (!orders || !orders.length) {
-        list.innerHTML = `<div class="item">Nenhum pedido.</div>`;
-        recent.innerHTML = `<div class="item">Nenhum pedido recente.</div>`;
-        renderKitchenBoard([]);
-        return;
-      }
-
-      for (const o of orders) {
-        const { data: items } = await supabase.from("order_items").select("*").eq("order_id", o.id).order("created_at", { ascending: true });
-        const itemsHtml = (items || []).map(i => {
-          const lineTotal = (Number(i.unit_price) || 0) * (Number(i.quantity) || 0);
-          return `<div style="margin-top:6px;">${i.quantity}x ${i.product_name} — ${money(lineTotal)}${i.notes ? `<br><span class="muted">${i.notes}</span>` : ""}</div>`;
-        }).join("");
-
-        const orderHeader = `
-          <b>Pedido #${o.order_number || o.id.slice(0,4)}</b><br>
-          Cliente: ${o.customers?.full_name || "Balcão"}<br>
-          Tipo: ${o.order_type}${o.tables?.table_number ? ` • Mesa ${o.tables.table_number}` : ""}<br>
-          Origem: ${o.order_source}<br>
-          Total: ${money(o.total)}<br>
-          Pagamento: <span class="badge ${o.payment_status || 'open'}">${o.payment_status || 'aberto'}</span><br>
-          <span class="badge ${badgeClass(o.status)}">${o.status}</span>`;
-
-        const actionsHtml = `
-          <div class="row no-print" style="margin-top:10px;">
-            <button class="ghost" onclick="updateOrderStatus('${o.id}','new')">Novo</button>
-            <button class="warning" onclick="updateOrderStatus('${o.id}','preparing')">Preparando</button>
-            <button class="primary" onclick="updateOrderStatus('${o.id}','ready')">Pronto</button>
-            <button class="ghost" onclick="updateOrderStatus('${o.id}','delivered')">Entregue</button>
-            <button class="danger" onclick="updateOrderStatus('${o.id}','cancelled')">Cancelar</button>
-          </div>
-          <div class="row no-print" style="margin-top:10px;">
-            <button class="ghost" onclick="updatePaymentStatus('${o.id}','open')">Pagamento aberto</button>
-            <button class="primary" onclick="updatePaymentStatus('${o.id}','paid')">Marcar pago</button>
-            <button class="ghost" onclick="printOrder('${o.id}')">Imprimir</button>
-          </div>`;
-
-        const html = `<div class="item" id="order-card-${o.id}">${orderHeader}<div style="margin-top:10px;">${itemsHtml || "<span class='muted'>Sem itens</span>"}</div>${o.notes ? `<div class="muted" style="margin-top:8px;">Obs: ${o.notes}</div>` : ""}${actionsHtml}</div>`;
-        list.innerHTML += html;
-        itemOrder.innerHTML += `<option value="${o.id}">#${o.order_number || o.id.slice(0,4)} — ${o.customers?.full_name || "Balcão"}</option>`;
-      }
-
-      recent.innerHTML = orders.slice(0, 5).map(o => `
-        <div class="item">
-          <b>Pedido #${o.order_number || o.id.slice(0,4)}</b><br>
-          Cliente: ${o.customers?.full_name || "Balcão"}<br>
-          Total: ${money(o.total)}<br>
-          <span class="badge ${o.status}">${o.status}</span>
-        </div>`).join("");
-
-      renderKitchenBoard(orders);
-    }
-
-    function renderKitchenBoard(orders) {
-      const newBox = document.getElementById("kitchen_new");
-      const preparingBox = document.getElementById("kitchen_preparing");
-      const readyBox = document.getElementById("kitchen_ready");
-      newBox.innerHTML = ""; preparingBox.innerHTML = ""; readyBox.innerHTML = "";
-      if (!orders || !orders.length) {
-        newBox.innerHTML = `<div class="item">Sem pedidos.</div>`;
-        preparingBox.innerHTML = `<div class="item">Sem pedidos.</div>`;
-        readyBox.innerHTML = `<div class="item">Sem pedidos.</div>`;
-        return;
-      }
-      orders.forEach(o => {
-        const html = `<div class="item"><b>#${o.order_number || o.id.slice(0,4)}</b><br>${o.customers?.full_name || "Balcão"}<br>${o.tables?.table_number ? `Mesa ${o.tables.table_number}<br>` : ""}<span class="badge ${o.status}">${o.status}</span></div>`;
-        if (o.status === "new") newBox.innerHTML += html;
-        if (o.status === "preparing") preparingBox.innerHTML += html;
-        if (o.status === "ready") readyBox.innerHTML += html;
-      });
-      if (!newBox.innerHTML) newBox.innerHTML = `<div class="item">Sem pedidos novos.</div>`;
-      if (!preparingBox.innerHTML) preparingBox.innerHTML = `<div class="item">Sem pedidos preparando.</div>`;
-      if (!readyBox.innerHTML) readyBox.innerHTML = `<div class="item">Sem pedidos prontos.</div>`;
-    }
-
-    function startKitchenAutoRefresh() {
-      if (kitchenAutoTimer) return;
-      kitchenAutoTimer = setInterval(async () => { await loadOrders(); }, 5000);
-    }
-    function stopKitchenAutoRefresh() {
-      if (!kitchenAutoTimer) return;
-      clearInterval(kitchenAutoTimer);
-      kitchenAutoTimer = null;
-    }
-
-    async function loadStats() {
-      const productsRes = await supabase.from("products").select("*", { count: "exact", head: true });
-      const customersRes = await supabase.from("customers").select("*", { count: "exact", head: true });
-      const ordersRes = await supabase.from("orders").select("*", { count: "exact", head: true });
-      const openRes = await supabase.from("orders").select("*", { count: "exact", head: true }).in("status", ["new", "preparing", "ready"]);
-      const tablesRes = await supabase.from("tables").select("*", { count: "exact", head: true });
-      const deliveredRes = await supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "delivered");
-
-      document.getElementById("stats").innerHTML = `
-        <div class="stat">Produtos<strong>${productsRes.count || 0}</strong></div>
-        <div class="stat">Clientes<strong>${customersRes.count || 0}</strong></div>
-        <div class="stat">Pedidos<strong>${ordersRes.count || 0}</strong></div>
-        <div class="stat">Abertos<strong>${openRes.count || 0}</strong></div>
-        <div class="stat">Mesas<strong>${tablesRes.count || 0}</strong></div>
-        <div class="stat">Entregues<strong>${deliveredRes.count || 0}</strong></div>`;
-    }
-
-    async function loadDailySummary() {
-      const today = new Date();
-      const start = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
-      const end = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
-      const { data: orders } = await supabase.from("orders").select("*").gte("created_at", start).lt("created_at", end);
-      const totalOrders = (orders || []).length;
-      const totalRevenue = (orders || []).filter(o => o.status === "delivered").reduce((acc, o) => acc + Number(o.total || 0), 0);
-      const delivered = (orders || []).filter(o => o.status === "delivered").length;
-      const cancelled = (orders || []).filter(o => o.status === "cancelled").length;
-      const open = (orders || []).filter(o => ["new", "preparing", "ready"].includes(o.status)).length;
-
-      document.getElementById("daily_summary").innerHTML = `
-        <div class="item">
-          <b>Pedidos hoje:</b> ${totalOrders}<br>
-          <b>Faturamento:</b> ${money(totalRevenue)}<br>
-          <b>Entregues:</b> ${delivered}<br>
-          <b>Em aberto:</b> ${open}<br>
-          <b>Cancelados:</b> ${cancelled}
-        </div>`;
-    }
-
-    async function loadPublicMenu() {
-      const menu = document.getElementById("public_menu");
-      const { data: categories } = await supabase.from("categories").select("*").eq("store_id", currentStore.id).eq("active", true).order("name", { ascending: true });
-      const { data: products } = await supabase.from("products").select("*").eq("store_id", currentStore.id).eq("active", true).order("name", { ascending: true });
-
-      if (!products || !products.length) { menu.innerHTML = `<div class="item">Nenhum produto disponível.</div>`; return; }
-
-      menu.innerHTML = "";
-      (categories || []).forEach(c => {
-        const items = products.filter(p => p.category_id === c.id);
-        if (!items.length) return;
-        menu.innerHTML += `<div class="card" style="background:#0f172a;"><h3>${c.name}</h3><div class="menu-grid">`;
-        items.forEach(p => {
-          menu.innerHTML += `
-            <div class="product-card">
-              <b>${p.name}</b><br>
-              <span class="muted">${p.description || ""}</span><br>
-              <span class="badge">${money(p.price)}</span>
-              <div class="row" style="margin-top:10px;">
-                <input id="qty_${p.id}" type="number" min="1" value="1" style="width:70px;" />
-                <button class="primary" onclick="addToPublicCart('${p.id}','${escapeHtml(p.name)}',${Number(p.price || 0)},document.getElementById('qty_${p.id}').value)">Adicionar</button>
-              </div>
-            </div>`;
-        });
-        menu.innerHTML += `</div></div>`;
-      });
-
-      const uncategorized = products.filter(p => !p.category_id);
-      if (uncategorized.length) {
-        menu.innerHTML += `<div class="card" style="background:#0f172a;"><h3>Outros</h3><div class="menu-grid">`;
-        uncategorized.forEach(p => {
-          menu.innerHTML += `
-            <div class="product-card">
-              <b>${p.name}</b><br>
-              <span class="muted">${p.description || ""}</span><br>
-              <span class="badge">${money(p.price)}</span>
-              <div class="row" style="margin-top:10px;">
-                <input id="qty_${p.id}" type="number" min="1" value="1" style="width:70px;" />
-                <button class="primary" onclick="addToPublicCart('${p.id}','${escapeHtml(p.name)}',${Number(p.price || 0)},document.getElementById('qty_${p.id}').value)">Adicionar</button>
-              </div>
-            </div>`;
-        });
-        menu.innerHTML += `</div></div>`;
-      }
-      renderPublicCart();
-    }
-
-    function escapeHtml(str) {
-      return String(str || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    }
-
-    function addToPublicCart(id, name, price, qty) {
-      const quantity = Number(qty || 1);
-      const existing = publicCart.find(i => i.id === id);
-      if (existing) existing.quantity += quantity;
-      else publicCart.push({ id, name, price: Number(price || 0), quantity });
-      renderPublicCart();
-    }
-
-    function removeFromPublicCart(id) {
-      publicCart = publicCart.filter(i => i.id !== id);
-      renderPublicCart();
-    }
-
-    function renderPublicCart() {
-      const box = document.getElementById("public_cart");
-      if (!publicCart.length) { box.innerHTML = `<div class="item">Carrinho vazio.</div>`; return; }
-      box.innerHTML = publicCart.map(i => `
-        <div class="item">
-          <b>${i.name}</b><br>
-          ${i.quantity}x ${money(i.price)} = ${money(i.quantity * i.price)}
-          <div class="row" style="margin-top:10px;">
-            <button class="danger" onclick="removeFromPublicCart('${i.id}')">Remover</button>
-          </div>
-        </div>`).join("");
-      const total = publicCart.reduce((acc, i) => acc + (i.quantity * i.price), 0);
-      box.innerHTML += `<div class="item"><b>Total:</b> ${money(total)}</div>`;
-    }
-
-    async function submitPublicOrder() {
-      const box = document.getElementById("public_order_result");
-      const tableId = document.getElementById("public_table_select").value || null;
-      const customerName = document.getElementById("public_customer_name").value.trim();
-
-      if (!publicCart.length) { box.innerHTML = `<div class="item">Adicione itens ao carrinho.</div>`; return; }
-
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          store_id: currentStore.id, table_id: tableId,
-          order_type: tableId ? "table" : "pickup", order_source: "table_qr",
-          notes: customerName ? `Cliente: ${customerName}` : null, created_by: "cliente_mesa"
-        })
-        .select("*").single();
-
-      if (orderError) { box.innerHTML = `<div class="item">${orderError.message}</div>`; return; }
-
-      for (const item of publicCart) {
-        await supabase.from("order_items").insert({
-          order_id: order.id, product_id: item.id, product_name: item.name,
-          unit_price: item.price, quantity: item.quantity
-        });
-      }
-
-      publicCart = [];
-      document.getElementById("public_customer_name").value = "";
-      renderPublicCart();
-      box.innerHTML = `<div class="item" style="color:#22c55e;">Pedido enviado com sucesso para a cozinha!</div>`;
-      await loadOrders();
-      await loadStats();
-      await loadDailySummary();
-    }
-
-    async function createQuickWaiterOrder() {
-      const tableId = document.getElementById("waiter_table").value || null;
-      const productId = document.getElementById("waiter_product").value;
-      const quantity = Number(document.getElementById("waiter_quantity").value || 1);
-      const notes = document.getElementById("waiter_notes").value.trim();
-      const box = document.getElementById("waiter_result");
-
-      if (!tableId || !productId) { box.innerHTML = `<div class="item">Selecione mesa e produto.</div>`; return; }
-
-      const { data: product } = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
-      const { data: order, error } = await supabase
-        .from("orders")
-        .insert({
-          store_id: currentStore.id, table_id: tableId,
-          order_type: "table", order_source: "waiter", created_by: "admin"
-        })
-        .select("*").single();
-
-      if (error) { box.innerHTML = `<div class="item">${error.message}</div>`; return; }
-
-      await supabase.from("order_items").insert({
-        order_id: order.id, product_id: product.id, product_name: product.name,
-        unit_price: product.price, quantity, notes: notes || null
-      });
-
-      document.getElementById("waiter_quantity").value = "1";
-      document.getElementById("waiter_notes").value = "";
-      box.innerHTML = `<div class="item">Pedido enviado para a cozinha.</div>`;
-      await loadOrders();
-      await loadStats();
-      await loadDailySummary();
-    }
-
-    function printOrder(orderId) {
-      const card = document.getElementById(`order-card-${orderId}`);
-      if (!card) return;
-      const html = `<html><head><title>Pedido</title><style>body { font-family: Arial, sans-serif; padding: 20px; } .box { border: 1px solid #ddd; padding: 14px; border-radius: 8px; }</style></head><body><div class="box">${card.innerHTML.replace(/class="row no-print"[\s\S]*?<\/div>/g, "")}</div></body></html>`;
-      const win = window.open("", "_blank");
-      win.document.write(html);
-      win.document.close();
-      win.focus();
-      win.print();
-    }
-
-    function printKitchen() {
-      const content = document.getElementById("tab_kitchen").innerHTML;
-      const html = `<html><head><title>Cozinha</title><style>body { font-family: Arial, sans-serif; padding: 20px; } .item { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 10px; } .kitchen-board { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; } .kitchen-col { border:1px solid #ddd; border-radius:8px; padding:12px; }</style></head><body>${content}</body></html>`;
-      const win = window.open("", "_blank");
-      win.document.write(html);
-      win.document.close();
-      win.focus();
-      win.print();
-    }
-
-    async function loadAll() {
-      await loadCategories();
-      await loadProducts();
-      await loadCustomers();
-      await loadTables();
-      await loadOrders();
-      await loadStats();
-      await loadDailySummary();
-      await loadCashSession();
-      await loadPublicMenu();
-      toggleTableField();
-    }
-
-    // ============================================================
-    // INICIALIZAÇÃO
-    // Login é instantâneo (não depende do Supabase).
-    // Se já houver sessão válida, entra direto no app.
-    // ============================================================
-    document.addEventListener("DOMContentLoaded", () => {
-      const saved = sessionStorage.getItem("app_access_key");
-      if (saved && saved === getAccessKey()) {
-        enterApp();
-      }
-      // Caso contrário, a tela de acesso já está visível por padrão.
+  <!-- TELA: CARDÁPIO -->
+  <div id="view_menu">
+    <div class="cats" id="cats"></div>
+    <div id="menu_container"><div class="spinner center-load"></div></div>
+  </div>
+
+  <!-- TELA: ACOMPANHAMENTO -->
+  <div id="view_tracking" class="hidden">
+    <div id="track_container"></div>
+  </div>
+
+  <!-- TELA: HISTÓRICO -->
+  <div id="view_history" class="hidden">
+    <div style="padding-top:16px;" id="history_container"></div>
+  </div>
+
+  <!-- BOTÃO CARRINHO -->
+  <button class="cart-float hidden" id="cart_float" onclick="openCart()">
+    🛒 Ver carrinho <span class="cart-count" id="cart_count">0</span>
+  </button>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav_menu" onclick="showView('menu')"><span class="ico">🍽️</span>Cardápio</div>
+    <div class="nav-item" id="nav_track" onclick="showView('tracking')"><span class="ico dot">📦<span class="nav-badge hidden" id="nav_track_badge">•</span></span>Meu Pedido</div>
+    <div class="nav-item" id="nav_hist" onclick="showView('history')"><span class="ico">📜</span>Histórico</div>
+  </div>
+</div>
+
+<!-- MODAL: CARRINHO -->
+<div class="overlay hidden" id="modal_cart" onclick="if(event.target===this)closeCart()">
+  <div class="sheet">
+    <h2>Seu carrinho</h2>
+    <div id="cart_items"></div>
+    <div class="total-row"><span>Total</span><span id="cart_total">R$ 0,00</span></div>
+    <div class="field"><textarea id="cart_notes" rows="2" placeholder="Alguma observação? (ex: sem cebola)"></textarea></div>
+    <button class="btn btn-primary" onclick="checkout()">Finalizar pedido</button>
+    <button class="btn btn-ghost" onclick="closeCart()">Continuar comprando</button>
+  </div>
+</div>
+
+<!-- MODAL: IDENTIFICAÇÃO -->
+<div class="overlay hidden" id="modal_identify" onclick="if(event.target===this)closeIdentify()">
+  <div class="sheet">
+    <h2>Identifique-se para pedir</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">É rapidinho: só pra loja saber quem é você. 😊</p>
+    <div class="field"><label>Telefone (com DDD)</label><input id="id_phone" type="tel" placeholder="(11) 91234-5678" oninput="maskPhone(this)"></div>
+    <div class="field"><label>CPF</label><input id="id_cpf" type="tel" placeholder="000.000.000-00" oninput="maskCPF(this)"></div>
+    <div class="field hidden" id="field_name"><label>Seu nome</label><input id="id_name" placeholder="Como podemos te chamar?"></div>
+    <div id="identify_msg"></div>
+    <button class="btn btn-primary" id="btn_identify" onclick="handleIdentify()">Continuar</button>
+    <button class="btn btn-ghost" onclick="closeIdentify()">Voltar</button>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRMAÇÃO -->
+<div class="overlay hidden" id="modal_confirm">
+  <div class="sheet" style="text-align:center;">
+    <div style="font-size:56px;">✅</div>
+    <h2 style="margin-top:8px;">Pedido enviado!</h2>
+    <p style="color:var(--muted);font-size:14px;margin-top:6px;">Seu pedido <b id="confirm_num"></b> já está com a loja.</p>
+    <button class="btn btn-primary" onclick="goToTracking()">Acompanhar pedido</button>
+    <button class="btn btn-ghost" onclick="closeConfirm()">Voltar ao cardápio</button>
+  </div>
+</div>
+
+<script>
+let storeId = null, tableId = null;
+let storeInfo = null, categories = [], products = [];
+let cart = [];
+let currentCustomer = null;
+let activeOrderId = null;
+let trackTimer = null;
+let identifyMode = 'login'; // 'login' ou 'signup'
+
+const STATUS_LABEL = {
+  new: { txt: 'Pedido recebido', desc: 'A loja já vai confirmar', ico: '📥' },
+  preparing: { txt: 'Em preparação', desc: 'Seu pedido está sendo feito', ico: '👨‍🍳' },
+  ready: { txt: 'Pronto', desc: 'Pode retirar / a caminho', ico: '🔔' },
+  delivered: { txt: 'Entregue', desc: 'Bom apetite!', ico: '✅' },
+  cancelled: { txt: 'Cancelado', desc: 'Fale com a loja', ico: '❌' }
+};
+
+function money(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+function waitForSupabase(){
+  return new Promise((res,rej)=>{
+    if(window.supabase) return res(window.supabase);
+    const t=setTimeout(()=>rej(new Error('Supabase não carregou')),10000);
+    window.addEventListener('supabase-ready',()=>{clearTimeout(t);res(window.supabase);},{once:true});
+  });
+}
+
+/* ---------- MÁSCARAS E VALIDAÇÃO ---------- */
+function maskPhone(el){ let v=el.value.replace(/\D/g,'').slice(0,11); if(v.length>6) v=`(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`; else if(v.length>2) v=`(${v.slice(0,2)}) ${v.slice(2)}`; el.value=v; }
+function maskCPF(el){ let v=el.value.replace(/\D/g,'').slice(0,11); v=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d{1,2})$/,'.$1-$2'); el.value=v; }
+function validarCPF(cpf){
+  cpf=cpf.replace(/\D/g,'');
+  if(cpf.length!==11 || /^(\d)\1{10}$/.test(cpf)) return false;
+  let s=0,r;
+  for(let i=1;i<=9;i++) s+=parseInt(cpf[i-1])*(11-i);
+  r=(s*10)%11; if(r===10||r===11) r=0;
+  if(r!==parseInt(cpf[9])) return false;
+  s=0;
+  for(let i=1;i<=10;i++) s+=parseInt(cpf[i-1])*(12-i);
+  r=(s*10)%11; if(r===10||r===11) r=0;
+  return r===parseInt(cpf[10]);
+}
+
+/* ---------- INICIALIZAÇÃO ---------- */
+async function init(){
+  const params = new URLSearchParams(location.search);
+  storeId = params.get('loja');
+  tableId = params.get('mesa') || null;
+
+  if(!storeId){
+    document.getElementById('menu_container').innerHTML = '<div class="empty"><div class="big">🏪</div>Loja não informada.<br>Use o QR Code da mesa ou o link da loja.</div>';
+    return;
+  }
+
+  try { await waitForSupabase(); } catch(e){
+    document.getElementById('menu_container').innerHTML = '<div class="empty"><div class="big">📡</div>Sem conexão com o servidor.</div>';
+    return;
+  }
+
+  loadSavedCustomer();
+  loadActiveOrder();
+  await loadMenu();
+  if(activeOrderId) startTracking();
+}
+
+function loadSavedCustomer(){
+  try {
+    const raw = localStorage.getItem('anote_cliente_'+storeId);
+    if(raw){ currentCustomer = JSON.parse(raw); renderUserChip(); }
+  } catch(e){}
+}
+function loadActiveOrder(){
+  try {
+    const id = localStorage.getItem('anote_pedido_ativo_'+storeId);
+    if(id){ activeOrderId = id; document.getElementById('nav_track_badge').classList.remove('hidden'); }
+  } catch(e){}
+}
+function renderUserChip(){
+  const chip = document.getElementById('user_chip');
+  if(currentCustomer){ chip.textContent = '👤 '+currentCustomer.name.split(' ')[0]; chip.classList.remove('hidden'); }
+}
+
+/* ---------- CARDÁPIO ---------- */
+async function loadMenu(){
+  const { data, error } = await supabase.rpc('cliente_cardapio', { p_store_id: storeId });
+  if(error || !data || !data.ok){
+    document.getElementById('menu_container').innerHTML = '<div class="empty"><div class="big">😕</div>'+(data?.error||error?.message||'Erro ao carregar cardápio')+'</div>';
+    return;
+  }
+  storeInfo = data.store; categories = data.categories; products = data.products;
+
+  document.getElementById('store_name').textContent = storeInfo.name;
+  document.getElementById('store_address').textContent = storeInfo.address || '';
+  document.title = storeInfo.name;
+
+  if(tableId){
+    const chip = document.getElementById('table_chip');
+    chip.textContent = '🪑 Mesa (pedindo aqui)'; chip.classList.remove('hidden');
+  }
+
+  renderCats();
+  renderMenu('all');
+}
+
+function renderCats(){
+  const c = document.getElementById('cats');
+  let html = '<div class="cat-chip active" onclick="filterCat(this,\'all\')">Tudo</div>';
+  categories.forEach(cat=>{ html += `<div class="cat-chip" onclick="filterCat(this,'${cat.id}')">${cat.name}</div>`; });
+  c.innerHTML = html;
+}
+function filterCat(el, id){
+  document.querySelectorAll('.cat-chip').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  renderMenu(id);
+}
+function renderMenu(catFilter){
+  const container = document.getElementById('menu_container');
+  if(!products.length){ container.innerHTML = '<div class="empty"><div class="big">🍽️</div>Cardápio vazio no momento.</div>'; return; }
+
+  const list = catFilter==='all' ? products : products.filter(p=>p.category_id===catFilter);
+  let html = '';
+
+  if(catFilter==='all'){
+    categories.forEach(cat=>{
+      const items = products.filter(p=>p.category_id===cat.id);
+      if(items.length) html += renderGroup(cat.name, items);
     });
+    const others = products.filter(p=>!p.category_id);
+    if(others.length) html += renderGroup('Outros', others);
+  } else {
+    html += renderGroup('', list);
+  }
 
-    // Permite entrar pressionando Enter no campo da chave
-    document.addEventListener("keypress", (e) => {
-      if (e.key === "Enter" && document.activeElement && document.activeElement.id === "access_key") {
-        login();
-      }
-    });
+  container.innerHTML = html || '<div class="empty">Nada por aqui.</div>';
+}
+function renderGroup(title, items){
+  let html = title ? `<div class="section-title">${title}</div>` : '';
+  html += '<div class="products">';
+  items.forEach(p=>{
+    html += `
+      <div class="prod-card">
+        <div class="prod-thumb">🍽️</div>
+        <div class="prod-info">
+          <div class="prod-name">${p.name}</div>
+          <div class="prod-desc">${p.description||''}</div>
+          <div class="prod-bottom">
+            <span class="prod-price">${money(p.price)}</span>
+            <button class="add-btn" onclick="addToCart('${p.id}')">+</button>
+          </div>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  return html;
+}
 
-    // Expor funções globalmente
-    window.login = login;
-    window.logout = logout;
-    window.createStore = createStore;
-    window.createCategory = createCategory;
-    window.createProduct = createProduct;
-    window.createTable = createTable;
-    window.createCustomer = createCustomer;
-    window.createOrder = createOrder;
-    window.addItemToOrder = addItemToOrder;
-    window.updateOrderStatus = updateOrderStatus;
-    window.updatePaymentStatus = updatePaymentStatus;
-    window.openCashSession = openCashSession;
-    window.closeCashSession = closeCashSession;
-    window.openTab = openTab;
-    window.toggleTableField = toggleTableField;
-    window.enterWaiterMode = enterWaiterMode;
-    window.exitWaiterMode = exitWaiterMode;
-    window.createQuickWaiterOrder = createQuickWaiterOrder;
-    window.printOrder = printOrder;
-    window.printKitchen = printKitchen;
-    window.loadPublicMenu = loadPublicMenu;
-    window.addToPublicCart = addToPublicCart;
-    window.removeFromPublicCart = removeFromPublicCart;
-    window.submitPublicOrder = submitPublicOrder;
-    window.loadAll = loadAll;
-  </script>
+/* ---------- CARRINHO ---------- */
+function addToCart(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  const ex = cart.find(x=>x.id===id);
+  if(ex) ex.qty++; else cart.push({id:p.id, name:p.name, price:Number(p.price), qty:1});
+  updateCartUI();
+}
+function changeQty(id, delta){
+  const item = cart.find(x=>x.id===id);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty<=0) cart = cart.filter(x=>x.id!==id);
+  updateCartUI(); renderCartItems();
+}
+function updateCartUI(){
+  const count = cart.reduce((a,i)=>a+i.qty,0);
+  const btn = document.getElementById('cart_float');
+  document.getElementById('cart_count').textContent = count;
+  if(count>0) btn.classList.remove('hidden'); else btn.classList.add('hidden');
+}
+function openCart(){ renderCartItems(); document.getElementById('modal_cart').classList.remove('hidden'); }
+function closeCart(){ document.getElementById('modal_cart').classList.add('hidden'); }
+function renderCartItems(){
+  const box = document.getElementById('cart_items');
+  if(!cart.length){ box.innerHTML = '<div class="empty">Carrinho vazio</div>'; document.getElementById('cart_total').textContent=money(0); return; }
+  let total = 0;
+  box.innerHTML = cart.map(i=>{
+    total += i.price*i.qty;
+    return `<div class="cart-item">
+      <div><div class="n">${i.qty}x ${i.name}</div><div class="p">${money(i.price*i.qty)}</div></div>
+      <div class="qty-ctrl"><button class="qty-btn" onclick="changeQty('${i.id}',-1)">−</button><span>${i.qty}</span><button class="qty-btn" onclick="changeQty('${i.id}',1)">+</button></div>
+    </div>`;
+  }).join('');
+  document.getElementById('cart_total').textContent = money(total);
+}
+
+/* ---------- CHECKOUT / IDENTIFICAÇÃO ---------- */
+function checkout(){
+  if(!cart.length) return;
+  closeCart();
+  if(currentCustomer){ openConfirmStep(); return; }
+  openIdentify();
+}
+function openIdentify(){
+  identifyMode='login';
+  document.getElementById('field_name').classList.add('hidden');
+  document.getElementById('btn_identify').textContent='Continuar';
+  document.getElementById('identify_msg').innerHTML='';
+  document.getElementById('modal_identify').classList.remove('hidden');
+}
+function closeIdentify(){ document.getElementById('modal_identify').classList.add('hidden'); }
+
+async function handleIdentify(){
+  const phone = document.getElementById('id_phone').value.replace(/\D/g,'');
+  const cpf = document.getElementById('id_cpf').value;
+  const msg = document.getElementById('identify_msg');
+  msg.innerHTML='';
+
+  if(phone.length<10){ msg.innerHTML='<div class="msg err">Digite um telefone válido com DDD.</div>'; return; }
+  if(!validarCPF(cpf)){ msg.innerHTML='<div class="msg err">CPF inválido. Confira os números.</div>'; return; }
+
+  const btn = document.getElementById('btn_identify');
+  btn.disabled=true; btn.textContent='Aguarde...';
+
+  if(identifyMode==='login'){
+    const { data } = await supabase.rpc('cliente_entrar', { p_store_id: storeId, p_phone: phone, p_cpf: cpf });
+    btn.disabled=false; btn.textContent='Continuar';
+    if(data && data.ok){ setCustomer(data.customer); closeIdentify(); openConfirmStep(); return; }
+    // não encontrado → modo cadastro
+    identifyMode='signup';
+    document.getElementById('field_name').classList.remove('hidden');
+    btn.textContent='Criar conta e continuar';
+    msg.innerHTML='<div class="msg ok">Primeira vez por aqui! Informe seu nome pra gente criar sua conta. 🎉</div>';
+    return;
+  }
+
+  // signup
+  const name = document.getElementById('id_name').value.trim();
+  if(!name){ msg.innerHTML='<div class="msg err">Digite seu nome.</div>'; btn.disabled=false; btn.textContent='Criar conta e continuar'; return; }
+  const { data } = await supabase.rpc('cliente_cadastrar', { p_store_id: storeId, p_name: name, p_phone: phone, p_cpf: cpf });
+  btn.disabled=false; btn.textContent='Criar conta e continuar';
+  if(data && data.ok){ setCustomer(data.customer); closeIdentify(); openConfirmStep(); }
+  else msg.innerHTML='<div class="msg err">'+(data?.error||'Erro ao cadastrar')+'</div>';
+}
+function setCustomer(c){
+  currentCustomer = c;
+  localStorage.setItem('anote_cliente_'+storeId, JSON.stringify(c));
+  renderUserChip();
+}
+function openConfirmStep(){ document.getElementById('modal_cart').classList.add('hidden'); submitOrder(); }
+
+/* ---------- ENVIAR PEDIDO ---------- */
+async function submitOrder(){
+  const notes = document.getElementById('cart_notes').value.trim()||null;
+  const items = cart.map(i=>({product_id:i.id, quantity:i.qty}));
+
+  const { data, error } = await supabase.rpc('cliente_criar_pedido', {
+    p_store_id: storeId, p_customer_id: currentCustomer.id,
+    p_table_id: tableId, p_items: items, p_notes: notes
+  });
+
+  if(error || !data || !data.ok){ alert('Erro ao enviar pedido: '+(data?.error||error?.message)); return; }
+
+  activeOrderId = data.order_id;
+  localStorage.setItem('anote_pedido_ativo_'+storeId, data.order_id);
+  document.getElementById('nav_track_badge').classList.remove('hidden');
+
+  cart = []; document.getElementById('cart_notes').value=''; updateCartUI();
+  document.getElementById('confirm_num').textContent = '#'+data.order_number;
+  document.getElementById('modal_confirm').classList.remove('hidden');
+  startTracking();
+}
+function goToTracking(){ document.getElementById('modal_confirm').classList.add('hidden'); showView('tracking'); }
+function closeConfirm(){ document.getElementById('modal_confirm').classList.add('hidden'); }
+
+/* ---------- ACOMPANHAMENTO ---------- */
+function startTracking(){
+  if(trackTimer) clearInterval(trackTimer);
+  pollStatus();
+  trackTimer = setInterval(pollStatus, 4000);
+}
+async function pollStatus(){
+  if(!activeOrderId || !currentCustomer) return renderTrackingEmpty();
+  const { data } = await supabase.rpc('cliente_pedido_status', { p_order_id: activeOrderId, p_customer_id: currentCustomer.id });
+  if(!data || !data.ok){ renderTrackingEmpty(); return; }
+  renderTracking(data);
+  if(data.status==='delivered' || data.status==='cancelled'){
+    clearInterval(trackTimer); trackTimer=null;
+    setTimeout(()=>{ localStorage.removeItem('anote_pedido_ativo_'+storeId); activeOrderId=null; document.getElementById('nav_track_badge').classList.add('hidden'); }, 8000);
+  }
+}
+function renderTrackingEmpty(){
+  document.getElementById('track_container').innerHTML = '<div class="empty"><div class="big">📦</div>Você ainda não tem pedido em andamento.<br>Que tal ver o cardápio? 😋</div>';
+}
+function renderTracking(d){
+  const order = ['new','preparing','ready','delivered'];
+  const idx = order.indexOf(d.status);
+  const cancelled = d.status==='cancelled';
+  let stepsHtml = order.map((s,i)=>{
+    const info = STATUS_LABEL[s];
+    let cls = i<idx ? 'done' : (i===idx ? 'now' : '');
+    if(cancelled) cls = '';
+    return `<div class="step ${cls}">
+      ${i<order.length-1 ? '<div class="line"></div>':''}
+      <div class="circle">${i<idx?'✓':info.ico}</div>
+      <div class="lbl">${info.txt}<small>${info.desc}</small></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('track_container').innerHTML = `
+    <div class="track-card">
+      <div class="track-num">Pedido <b>#${d.order_number}</b> • ${money(d.total)}</div>
+      ${cancelled ? '<div class="msg err" style="margin-top:12px;">❌ Este pedido foi cancelado. Fale com a loja.</div>' : ''}
+      <div class="steps">${stepsHtml}</div>
+      <div style="margin-top:18px;font-size:13px;color:var(--muted);">
+        ${d.items.map(i=>`${i.qty}x ${i.name}`).join(' • ')}
+      </div>
+    </div>`;
+}
+
+/* ---------- HISTÓRICO ---------- */
+async function loadHistory(){
+  const box = document.getElementById('history_container');
+  if(!currentCustomer){ box.innerHTML = '<div class="empty"><div class="big">📜</div>Entre com seu telefone e CPF<br>para ver seu histórico.</div>'; return; }
+  box.innerHTML = '<div class="spinner"></div>';
+  const { data } = await supabase.rpc('cliente_historico', { p_customer_id: currentCustomer.id, p_store_id: storeId });
+  if(!data || !data.ok){ box.innerHTML='<div class="empty">Erro ao carregar histórico.</div>'; return; }
+  if(!data.orders.length){ box.innerHTML='<div class="empty"><div class="big">🛍️</div>Você ainda não fez pedidos aqui.</div>'; return; }
+  box.innerHTML = data.orders.map(o=>`
+    <div class="hist-card">
+      <div class="hist-top">
+        <b>#${o.order_number}</b>
+        <span class="badge ${o.status}">${STATUS_LABEL[o.status]?.txt||o.status}</span>
+      </div>
+      <div class="hist-items">${o.items.map(i=>`${i.qty}x ${i.name}`).join('<br>')}</div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:13px;">
+        <span style="color:var(--muted);">${new Date(o.created_at).toLocaleDateString('pt-BR')} ${new Date(o.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</span>
+        <b>${money(o.total)}</b>
+      </div>
+    </div>`).join('');
+}
+
+/* ---------- NAVEGAÇÃO ---------- */
+function showView(view){
+  document.getElementById('view_menu').classList.add('hidden');
+  document.getElementById('view_tracking').classList.add('hidden');
+  document.getElementById('view_history').classList.add('hidden');
+  document.getElementById('nav_menu').classList.remove('active');
+  document.getElementById('nav_track').classList.remove('active');
+  document.getElementById('nav_hist').classList.remove('active');
+
+  if(view==='menu'){ document.getElementById('view_menu').classList.remove('hidden'); document.getElementById('nav_menu').classList.add('active'); }
+  if(view==='tracking'){ document.getElementById('view_tracking').classList.remove('hidden'); document.getElementById('nav_track').classList.add('active'); if(activeOrderId) pollStatus(); else renderTrackingEmpty(); }
+  if(view==='history'){ document.getElementById('view_history').classList.remove('hidden'); document.getElementById('nav_hist').classList.add('active'); loadHistory(); }
+}
+
+init();
+
+window.openCart=openCart; window.closeCart=closeCart; window.addToCart=addToCart;
+window.changeQty=changeQty; window.checkout=checkout; window.handleIdentify=handleIdentify;
+window.closeIdentify=closeIdentify; window.goToTracking=goToTracking; window.closeConfirm=closeConfirm;
+window.showView=showView; window.filterCat=filterCat; window.maskPhone=maskPhone; window.maskCPF=maskCPF;
+</script>
 </body>
 </html>
