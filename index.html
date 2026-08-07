@@ -11,6 +11,8 @@
       "https://zbxrpprwjrholrycwsqa.supabase.co",
       "sb_publishable_c4O2UN_u487qWsu4TNwG0Q_OGj3aHNM"
     );
+    // Dispara evento quando o Supabase estiver pronto
+    window.dispatchEvent(new Event("supabase-ready"));
   </script>
 
   <style>
@@ -183,6 +185,23 @@
       margin-bottom: 20px;
     }
 
+    #loading_screen {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255,255,255,.2);
+      border-top-color: #22c55e;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     @media (max-width: 1100px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
       .grid, .menu-grid, .kitchen-board { grid-template-columns: 1fr; }
@@ -209,7 +228,14 @@
 </head>
 <body>
   <div class="wrap">
-    <div id="auth_screen">
+    <!-- TELA DE LOADING (enquanto o Supabase carrega) -->
+    <div id="loading_screen">
+      <div class="spinner"></div>
+      <p class="muted" style="margin-top:20px;">Carregando sistema...</p>
+    </div>
+
+    <!-- TELA DE ACESSO POR CHAVE -->
+    <div id="auth_screen" class="hidden">
       <div class="auth-shell">
         <div class="topbar auth-title" style="justify-content:center;">
           <div>
@@ -229,6 +255,7 @@
       </div>
     </div>
 
+    <!-- TELA DE CONFIGURAÇÃO DA LOJA (Primeiro acesso) -->
     <div id="store_setup_screen" class="hidden">
       <div class="topbar">
         <div>
@@ -248,6 +275,7 @@
       </div>
     </div>
 
+    <!-- TELA PRINCIPAL DO APP -->
     <div id="app_screen" class="hidden">
       <div class="topbar">
         <div>
@@ -469,7 +497,7 @@
   </div>
 
   <script>
-    // CHAVE CARREGADA DO SUPABASE (não está mais fixa no código)
+    // Variáveis globais
     let ACCESS_KEY = null;
     let currentStore = null;
     let currentCashSession = null;
@@ -484,22 +512,49 @@
       return status || "";
     }
 
+    // --- AGUARDA O SUPABASE CARREGAR COMPLETAMENTE ---
+    function waitForSupabase() {
+      return new Promise((resolve, reject) => {
+        if (window.supabase) {
+          resolve(window.supabase);
+          return;
+        }
+
+        const timeout = setTimeout(() => {
+          reject(new Error("Supabase não carregou em 10 segundos"));
+        }, 10000);
+
+        window.addEventListener("supabase-ready", () => {
+          clearTimeout(timeout);
+          resolve(window.supabase);
+        }, { once: true });
+      });
+    }
+
     // --- BUSCA A CHAVE DE ACESSO DO SUPABASE ---
     async function loadAccessKey() {
       try {
-        const { data, error } = await supabase
+        const sb = await waitForSupabase();
+        
+        const { data, error } = await sb
           .from("system_config")
           .select("config_value")
           .eq("config_key", "access_key")
           .maybeSingle();
 
-        if (error || !data) {
-          console.error("Erro ao carregar chave:", error);
+        if (error) {
+          console.error("Erro Supabase:", error);
           return null;
         }
+        
+        if (!data) {
+          console.warn("Chave não encontrada no banco");
+          return null;
+        }
+        
         return data.config_value;
       } catch (e) {
-        console.error("Falha na conexão com Supabase:", e);
+        console.error("Falha ao carregar chave:", e);
         return null;
       }
     }
@@ -539,23 +594,29 @@
       const box = document.getElementById("login_result");
       box.innerHTML = `<div class="item">Verificando...</div>`;
 
-      // Busca a chave atualizada do banco a cada tentativa
-      const storedKey = await loadAccessKey();
+      try {
+        const storedKey = await loadAccessKey();
 
-      if (!storedKey) {
-        box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
-          Erro ao conectar com o servidor. Verifique sua conexão.
-        </div>`;
-        return;
-      }
+        if (!storedKey) {
+          box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
+            Erro ao conectar com o servidor. Verifique o console (F12) para detalhes.
+          </div>`;
+          return;
+        }
 
-      if (key === storedKey) {
-        sessionStorage.setItem("app_access_key", key);
-        sessionStorage.setItem("app_access_granted_at", Date.now().toString());
-        bootstrap();
-      } else {
+        if (key === storedKey) {
+          sessionStorage.setItem("app_access_key", key);
+          sessionStorage.setItem("app_access_granted_at", Date.now().toString());
+          bootstrap();
+        } else {
+          box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
+            Chave de acesso inválida.
+          </div>`;
+        }
+      } catch (e) {
+        console.error("Erro no login:", e);
         box.innerHTML = `<div class="item" style="color:#ef4444; border-color:#ef4444;">
-          Chave de acesso inválida.
+          Erro inesperado: ${e.message}
         </div>`;
       }
     }
@@ -1336,42 +1397,69 @@
 
     // --- BOOTSTRAP VALIDA CONTRA A CHAVE DO BANCO ---
     async function bootstrap() {
-      // Busca a chave do banco se ainda não estiver em memória
-      if (!ACCESS_KEY) {
-        ACCESS_KEY = await loadAccessKey();
+      try {
+        // Busca a chave do banco se ainda não estiver em memória
+        if (!ACCESS_KEY) {
+          ACCESS_KEY = await loadAccessKey();
+        }
+
+        const savedKey = sessionStorage.getItem("app_access_key");
+
+        document.getElementById("loading_screen").classList.add("hidden");
+        document.getElementById("auth_screen").classList.add("hidden");
+        document.getElementById("store_setup_screen").classList.add("hidden");
+        document.getElementById("app_screen").classList.add("hidden");
+
+        // Verifica se a sessão salva corresponde à chave atual do banco
+        if (!savedKey || savedKey !== ACCESS_KEY) {
+          document.getElementById("auth_screen").classList.remove("hidden");
+          return;
+        }
+
+        currentStore = await getCurrentStore();
+
+        if (!currentStore) {
+          document.getElementById("store_setup_screen").classList.remove("hidden");
+          return;
+        }
+
+        document.getElementById("app_screen").classList.remove("hidden");
+        document.getElementById("store_label").textContent =
+          currentStore.name +
+          (currentStore.phone ? " • " + currentStore.phone : "") +
+          (currentStore.address ? " • " + currentStore.address : "");
+
+        await loadAll();
+      } catch (e) {
+        console.error("Erro no bootstrap:", e);
+        document.getElementById("loading_screen").innerHTML = `
+          <div class="item" style="color:#ef4444; border-color:#ef4444; max-width:500px; margin:40px auto;">
+            <b>Erro ao inicializar o sistema</b><br>
+            ${e.message}<br><br>
+            <button class="ghost" onclick="location.reload()">Tentar novamente</button>
+          </div>
+        `;
       }
-
-      const savedKey = sessionStorage.getItem("app_access_key");
-
-      document.getElementById("auth_screen").classList.add("hidden");
-      document.getElementById("store_setup_screen").classList.add("hidden");
-      document.getElementById("app_screen").classList.add("hidden");
-
-      // Verifica se a sessão salva corresponde à chave atual do banco
-      if (!savedKey || savedKey !== ACCESS_KEY) {
-        document.getElementById("auth_screen").classList.remove("hidden");
-        return;
-      }
-
-      currentStore = await getCurrentStore();
-
-      if (!currentStore) {
-        document.getElementById("store_setup_screen").classList.remove("hidden");
-        return;
-      }
-
-      document.getElementById("app_screen").classList.remove("hidden");
-      document.getElementById("store_label").textContent =
-        currentStore.name +
-        (currentStore.phone ? " • " + currentStore.phone : "") +
-        (currentStore.address ? " • " + currentStore.address : "");
-
-      await loadAll();
     }
 
-    // Inicialização
-    bootstrap();
+    // Inicialização - aguarda o Supabase carregar antes de iniciar
+    waitForSupabase()
+      .then(() => {
+        console.log("✅ Supabase carregado com sucesso");
+        bootstrap();
+      })
+      .catch((err) => {
+        console.error("❌ Falha ao carregar Supabase:", err);
+        document.getElementById("loading_screen").innerHTML = `
+          <div class="item" style="color:#ef4444; border-color:#ef4444; max-width:500px; margin:40px auto;">
+            <b>Falha ao conectar com o servidor</b><br>
+            ${err.message}<br><br>
+            <button class="ghost" onclick="location.reload()">Tentar novamente</button>
+          </div>
+        `;
+      });
 
+    // Expor funções globalmente
     window.login = login;
     window.logout = logout;
     window.createStore = createStore;
