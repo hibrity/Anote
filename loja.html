@@ -14,7 +14,7 @@
 </script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  :root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a78bfa;--radius:14px}
+  :root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--radius:14px}
   body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
   .wrap{max-width:1280px;margin:0 auto;padding:18px}
   .hidden{display:none!important}
@@ -52,12 +52,10 @@
   .msg{padding:11px;border-radius:10px;font-size:14px;margin-top:10px}
   .msg.err{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d}
   .msg.ok{background:#14351f;color:#86efac;border:1px solid #166534}
-  /* LOGIN */
-  .login-shell{max-width:420px;margin:60px auto 0}
+  .login-shell{max-width:440px;margin:50px auto 0}
   .login-tabs{display:flex;gap:8px;margin-bottom:16px}
-  .login-tab{flex:1;padding:12px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--border);cursor:pointer;font-weight:700;color:var(--mut)}
+  .login-tab{flex:1;padding:12px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--border);cursor:pointer;font-weight:700;color:var(--mut);font-size:13px}
   .login-tab.active{background:var(--green);color:#052e16;border-color:var(--green)}
-  /* KANBAN COZINHA */
   .kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
   .kcol{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px;min-height:200px}
   .kcol h3{text-align:center;margin-bottom:10px}
@@ -71,38 +69,44 @@
 <body>
 <div class="wrap">
 
-  <!-- ============ TELA DE LOGIN ============ -->
+  <!-- ============ ENTRADA DO LOJISTA ============ -->
   <div id="screen_login">
     <div class="login-shell">
       <div style="text-align:center;margin-bottom:24px">
         <div class="title">Anote</div>
-        <div class="muted">Gestão de pedidos para sua loja</div>
+        <div class="muted">Crie sua loja ou entre</div>
       </div>
       <div class="card">
         <div class="login-tabs">
-          <div class="login-tab active" id="lt_owner" onclick="switchLogin('owner')">👑 Sou Dono</div>
-          <div class="login-tab" id="lt_staff" onclick="switchLogin('staff')">👷 Sou Funcionário</div>
+          <div class="login-tab active" id="lt_new" onclick="switchEntry('new')">🏪 Criar loja</div>
+          <div class="login-tab" id="lt_login" onclick="switchEntry('login')">🔑 Já tenho conta</div>
+          <div class="login-tab" id="lt_staff" onclick="switchEntry('staff')">👷 Funcionário</div>
         </div>
 
-        <!-- Login dono -->
-        <div id="login_owner">
-          <div id="owner_mode_login">
-            <label>Email</label><input id="o_email" type="email" placeholder="seu@email.com"/>
-            <label>Senha</label><input id="o_pass" type="password" placeholder="••••••••"/>
-            <button class="btn btn-green btn-block" onclick="ownerLogin()">Entrar</button>
-            <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="toggleSignup()">Não tem conta? Criar conta</button>
-            <div id="owner_signup" class="hidden" style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
-              <h3>Criar conta de dono</h3>
-              <label>Email</label><input id="s_email" type="email"/>
-              <label>Senha</label><input id="s_pass" type="password"/>
-              <button class="btn btn-blue btn-block" onclick="ownerSignup()">Criar conta</button>
-            </div>
-          </div>
-          <div id="owner_result"></div>
+        <!-- CRIAR LOJA (formulário único) -->
+        <div id="entry_new">
+          <h3>Dados do responsável</h3>
+          <label>Seu nome</label><input id="new_owner_name" placeholder="Nome completo"/>
+          <label>Email</label><input id="new_email" type="email" placeholder="seu@email.com"/>
+          <label>Senha</label><input id="new_pass" type="password" placeholder="Crie uma senha"/>
+          <h3 style="margin-top:16px">Dados da loja</h3>
+          <label>Nome da loja</label><input id="new_store_name" placeholder="Ex: Loja Brix"/>
+          <label>Telefone da loja</label><input id="new_store_phone" placeholder="(11) 99999-9999"/>
+          <label>Endereço</label><input id="new_store_address" placeholder="Rua, número, bairro"/>
+          <button class="btn btn-green btn-block" onclick="createStoreSingle()">Criar minha loja</button>
+          <div id="new_result"></div>
         </div>
 
-        <!-- Login funcionário -->
-        <div id="login_staff" class="hidden">
+        <!-- LOGIN DONO -->
+        <div id="entry_login" class="hidden">
+          <label>Email</label><input id="log_email" type="email" placeholder="seu@email.com"/>
+          <label>Senha</label><input id="log_pass" type="password" placeholder="••••••••"/>
+          <button class="btn btn-green btn-block" onclick="ownerLogin()">Entrar</button>
+          <div id="login_result"></div>
+        </div>
+
+        <!-- FUNCIONÁRIO -->
+        <div id="entry_staff" class="hidden">
           <label>Código da loja</label>
           <input id="st_code" placeholder="ANOTE-00000" style="text-transform:uppercase"/>
           <button class="btn btn-green btn-block" onclick="staffLogin()">Entrar</button>
@@ -110,18 +114,6 @@
           <div id="staff_result"></div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- ============ CRIAR LOJA (dono sem loja) ============ -->
-  <div id="screen_setup" class="hidden">
-    <div class="topbar"><div class="title">Crie sua loja</div><button class="btn btn-red" onclick="logout()">Sair</button></div>
-    <div class="card" style="max-width:520px">
-      <label>Nome da loja</label><input id="setup_name"/>
-      <label>Telefone</label><input id="setup_phone"/>
-      <label>Endereço</label><input id="setup_address"/>
-      <button class="btn btn-green btn-block" onclick="createStore()">Criar loja</button>
-      <div id="setup_result"></div>
     </div>
   </div>
 
@@ -136,12 +128,10 @@
     </div>
     <div class="tabs" id="tabs"></div>
 
-    <!-- Painel (dono) -->
     <div id="tab_painel" class="hidden">
       <div class="card"><h2>Resumo</h2><div class="grid3" id="stats"></div></div>
     </div>
 
-    <!-- Catálogo (dono) -->
     <div id="tab_catalogo" class="hidden">
       <div class="grid2">
         <div>
@@ -163,7 +153,6 @@
       </div>
     </div>
 
-    <!-- Pedidos -->
     <div id="tab_pedidos" class="hidden">
       <div class="grid2">
         <div>
@@ -182,12 +171,6 @@
             <label>Observações</label><textarea id="ord_obs"></textarea>
             <button class="btn btn-green btn-block" onclick="createOrder()">Criar pedido</button><div id="ord_res"></div>
           </div>
-          <div class="card"><h3>Adicionar item</h3>
-            <label>Pedido</label><select id="item_ord"></select>
-            <label>Produto</label><select id="item_prod"></select>
-            <label>Qtd</label><input id="item_qtd" type="number" min="1" value="1"/>
-            <button class="btn btn-green btn-block" onclick="addItem()">Adicionar</button><div id="item_res"></div>
-          </div>
         </div>
         <div>
           <div class="card"><h3>Pedidos</h3><div id="list_orders"></div></div>
@@ -195,7 +178,6 @@
       </div>
     </div>
 
-    <!-- Cozinha -->
     <div id="tab_cozinha" class="hidden">
       <div class="card">
         <h2>Cozinha</h2>
@@ -207,7 +189,6 @@
       </div>
     </div>
 
-    <!-- Garçom (staff) -->
     <div id="tab_garcom" class="hidden">
       <div class="card" style="max-width:520px">
         <h2>🤵 Pedido rápido</h2>
@@ -220,7 +201,6 @@
       </div>
     </div>
 
-    <!-- Caixa (dono) -->
     <div id="tab_caixa" class="hidden">
       <div class="grid2">
         <div class="card"><h3>Controle de caixa</h3>
@@ -232,11 +212,10 @@
       </div>
     </div>
 
-    <!-- Equipe (dono) -->
     <div id="tab_equipe" class="hidden">
       <div class="card" style="max-width:520px">
         <h2>🔑 Código da equipe</h2>
-        <p class="muted">Compartilhe este código com seus funcionários. Eles entram na aba “Sou Funcionário”.</p>
+        <p class="muted">Compartilhe este código com seus funcionários. Eles entram na aba “Funcionário”.</p>
         <div class="item" style="text-align:center;font-size:26px;font-weight:800;letter-spacing:2px" id="team_code">—</div>
         <button class="btn btn-amber btn-block" onclick="regenCode()">🔄 Gerar novo código</button>
         <div class="muted" style="margin-top:8px">Ao gerar um novo código, o antigo deixa de funcionar.</div>
@@ -250,73 +229,87 @@
 <script>
 let role=null, store=null, staffCode=null;
 let D={categories:[],products:[],tables:[],customers:[],orders:[]};
-let cartItems=[]; let kitchenTimer=null;
+let kitchenTimer=null;
 const STATUS={new:'Novo',preparing:'Preparando',ready:'Pronto',delivered:'Entregue',cancelled:'Cancelado'};
+const PAY_LABEL={pix:'💠 Pix',credit:'💳 Crédito',debit:'💳 Débito',cash:'💵 Dinheiro'};
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
 function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res();},{once:true});});}
 
-/* ---------- LOGIN ---------- */
-function switchLogin(mode){
-  document.getElementById('lt_owner').classList.toggle('active',mode==='owner');
-  document.getElementById('lt_staff').classList.toggle('active',mode==='staff');
-  document.getElementById('login_owner').classList.toggle('hidden',mode!=='owner');
-  document.getElementById('login_staff').classList.toggle('hidden',mode!=='staff');
+/* ---------- ENTRADA ---------- */
+function switchEntry(mode){
+  ['new','login','staff'].forEach(m=>{
+    document.getElementById('lt_'+m).classList.toggle('active',m===mode);
+    document.getElementById('entry_'+m).classList.toggle('hidden',m!==mode);
+  });
 }
-function toggleSignup(){document.getElementById('owner_signup').classList.toggle('hidden');}
 
-async function ownerSignup(){
-  const e=document.getElementById('s_email').value.trim(),p=document.getElementById('s_pass').value;
-  const box=document.getElementById('owner_result');box.innerHTML='';
-  const {error}=await supabase.auth.signUp({email:e,password:p});
-  if(error){box.innerHTML=`<div class="msg err">${error.message}</div>`;return;}
-  box.innerHTML=`<div class="msg ok">Conta criada! Agora faça login.</div>`;
-  document.getElementById('owner_signup').classList.add('hidden');
+async function createStoreSingle(){
+  const ownerName=document.getElementById('new_owner_name').value.trim();
+  const email=document.getElementById('new_email').value.trim();
+  const pass=document.getElementById('new_pass').value;
+  const storeName=document.getElementById('new_store_name').value.trim();
+  const storePhone=document.getElementById('new_store_phone').value.trim();
+  const storeAddress=document.getElementById('new_store_address').value.trim();
+  const box=document.getElementById('new_result');
+
+  if(!ownerName||!email||!pass||!storeName){
+    box.innerHTML='<div class="msg err">Preencha ao menos nome, email, senha e nome da loja.</div>';return;
+  }
+
+  box.innerHTML='<div class="msg ok">Criando sua conta...</div>';
+  const {error:signErr}=await supabase.auth.signUp({email,password:pass,options:{data:{name:ownerName}}});
+  if(signErr){box.innerHTML=`<div class="msg err">${signErr.message}</div>`;return;}
+
+  let tries=0;
+  while(tries<10){
+    const {data}=await supabase.auth.getSession();
+    if(data.session)break;
+    await new Promise(r=>setTimeout(r,400));tries++;
+  }
+
+  box.innerHTML='<div class="msg ok">Criando sua loja...</div>';
+  const {data:loja}=await supabase.rpc('dono_criar_loja',{p_nome:storeName,p_telefone:storePhone,p_endereco:storeAddress});
+  if(!loja||!loja.ok){box.innerHTML=`<div class="msg err">${loja?.error||'Erro ao criar loja'}</div>`;return;}
+  await enterAsOwner();
 }
+
 async function ownerLogin(){
-  const e=document.getElementById('o_email').value.trim(),p=document.getElementById('o_pass').value;
-  const box=document.getElementById('owner_result');box.innerHTML='<div class="msg ok">Entrando...</div>';
+  const e=document.getElementById('log_email').value.trim();
+  const p=document.getElementById('log_pass').value;
+  const box=document.getElementById('login_result');
+  box.innerHTML='<div class="msg ok">Entrando...</div>';
   const {error}=await supabase.auth.signInWithPassword({email:e,password:p});
   if(error){box.innerHTML=`<div class="msg err">${error.message}</div>`;return;}
   await enterAsOwner();
 }
+
 async function enterAsOwner(){
   const {data}=await supabase.rpc('dono_entrar');
-  if(!data||!data.ok){
-    if(data&&data.error==='no_store'){showScreen('setup');return;}
-    showScreen('login');return;
-  }
+  if(!data||!data.ok){showScreen('login');return;}
   role='owner';store=data.store;staffCode=data.store.staff_code;
   enterApp();
 }
+
 async function staffLogin(){
   const code=document.getElementById('st_code').value.trim().toUpperCase();
-  const box=document.getElementById('staff_result');box.innerHTML='<div class="msg ok">Verificando...</div>';
+  const box=document.getElementById('staff_result');
+  box.innerHTML='<div class="msg ok">Verificando...</div>';
   const {data}=await supabase.rpc('staff_entrar',{p_codigo:code});
   if(!data||!data.ok){box.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;return;}
   role='staff';store=data.store;staffCode=data.store.staff_code;
   enterApp();
 }
+
 function logout(){
   supabase.auth.signOut();
-  sessionStorage.clear();role=null;store=null;staffCode=null;
+  role=null;store=null;staffCode=null;
   showScreen('login');
-}
-
-/* ---------- SETUP LOJA ---------- */
-async function createStore(){
-  const n=document.getElementById('setup_name').value.trim();
-  const f=document.getElementById('setup_phone').value.trim();
-  const e=document.getElementById('setup_address').value.trim();
-  const box=document.getElementById('setup_result');
-  const {data}=await supabase.rpc('dono_criar_loja',{p_nome:n,p_telefone:f,p_endereco:e});
-  if(!data||!data.ok){box.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;return;}
-  await enterAsOwner();
 }
 
 /* ---------- APP ---------- */
 function showScreen(s){
-  ['login','setup','app'].forEach(x=>document.getElementById('screen_'+x).classList.add('hidden'));
+  ['login','app'].forEach(x=>document.getElementById('screen_'+x).classList.add('hidden'));
   document.getElementById('screen_'+s).classList.remove('hidden');
 }
 async function enterApp(){
@@ -346,7 +339,7 @@ function openTab(id,el){
   if(id==='equipe')document.getElementById('team_code').textContent=staffCode;
 }
 
-/* ---------- CARREGAR DADOS ---------- */
+/* ---------- DADOS ---------- */
 async function loadData(){
   const {data}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:staffCode});
   if(!data||!data.ok){alert(data?.error||'Erro ao carregar');return;}
@@ -358,7 +351,7 @@ function renderAll(){
   renderCatalog();renderOrderSelects();renderOrders();renderKitchen();renderGarcomSelects();
 }
 
-/* ---------- PAINEL (dono) ---------- */
+/* ---------- PAINEL ---------- */
 async function loadDashboard(){
   const {data}=await supabase.rpc('dono_dashboard',{p_store_id:store.id});
   if(!data||!data.ok)return;
@@ -372,13 +365,12 @@ async function loadDashboard(){
     <div class="stat">Faturamento hoje<b>${money(s.today_revenue)}</b></div>`;
 }
 
-/* ---------- CATÁLOGO (dono) ---------- */
+/* ---------- CATÁLOGO ---------- */
 function renderCatalog(){
   document.getElementById('list_cats').innerHTML=D.categories.map(c=>`<div class="item">${c.name}</div>`).join('')||'<div class="muted">Nenhuma</div>';
   document.getElementById('list_prods').innerHTML=D.products.map(p=>`<div class="item"><b>${p.name}</b><br><span class="muted">${money(p.price)}</span></div>`).join('')||'<div class="muted">Nenhum</div>';
   document.getElementById('list_mesas').innerHTML=D.tables.map(t=>`<div class="item">Mesa ${t.table_number}</div>`).join('')||'<div class="muted">Nenhuma</div>';
-  const sel=document.getElementById('prod_cat');
-  sel.innerHTML='<option value="">Sem categoria</option>'+D.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('prod_cat').innerHTML='<option value="">Sem categoria</option>'+D.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
 }
 async function createCategory(){
   const n=document.getElementById('cat_name').value.trim();if(!n)return;
@@ -407,8 +399,6 @@ async function createTable(){
 function renderOrderSelects(){
   document.getElementById('ord_cli').innerHTML='<option value="">Sem cliente</option>'+D.customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   document.getElementById('ord_mesa').innerHTML='<option value="">Mesa</option>'+D.tables.map(t=>`<option value="${t.id}">${t.table_number}</option>`).join('');
-  document.getElementById('item_ord').innerHTML=D.orders.filter(o=>['new','preparing'].includes(o.status)).map(o=>`<option value="${o.id}">#${o.order_number}</option>`).join('')||'<option value="">Sem pedidos abertos</option>';
-  document.getElementById('item_prod').innerHTML=D.products.map(p=>`<option value="${p.id}">${p.name} — ${money(p.price)}</option>`).join('');
 }
 function toggleMesa(){document.getElementById('ord_mesa').classList.toggle('hidden',document.getElementById('ord_tipo').value!=='table');}
 
@@ -427,14 +417,6 @@ async function createOrder(){
   document.getElementById('ord_res').innerHTML=data?.ok?`<div class="msg ok">Pedido #${data.order_number} criado!</div>`:`<div class="msg err">${data?.error}</div>`;
   document.getElementById('ord_obs').value='';await loadData();
 }
-async function addItem(){
-  const ord=document.getElementById('item_ord').value;
-  const prod=D.products.find(p=>p.id===document.getElementById('item_prod').value);
-  const qtd=Number(document.getElementById('item_qtd').value||1);
-  if(!ord||!prod){document.getElementById('item_res').innerHTML='<div class="msg err">Selecione pedido e produto.</div>';return;}
-  // Recria via RPC simples: atualiza pedido adicionando item — aqui usamos staff_criar não serve; usamos atualização direta não disponível.
-  document.getElementById('item_res').innerHTML='<div class="msg ok">Use o Garçom para pedidos com itens.</div>';
-}
 
 function renderOrders(){
   const box=document.getElementById('list_orders');
@@ -445,7 +427,8 @@ function renderOrders(){
       <div class="muted">${o.customer_name||'Balcão'}${o.table_number?' • Mesa '+o.table_number:''} • ${o.order_type}</div>
       <div style="margin:8px 0">${(o.items||[]).map(i=>`${i.qty}x ${i.name}`).join('<br>')||'<span class="muted">Sem itens</span>'}</div>
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <b>${money(o.total)}</b><span class="badge b-${o.payment_status||'open'}">${o.payment_status||'open'}</span>
+        <b>${money(o.total)}</b>
+        <span class="muted">${o.payment_method?PAY_LABEL[o.payment_method]||o.payment_method:''}</span>
       </div>
       <div class="row" style="margin-top:8px">
         <button class="btn btn-amber" onclick="setStatus('${o.id}','preparing')">Preparar</button>
@@ -497,7 +480,7 @@ async function garcomOrder(){
   await loadData();
 }
 
-/* ---------- CAIXA (dono) ---------- */
+/* ---------- CAIXA ---------- */
 async function caixa(acao){
   const valor=Number(document.getElementById('cx_valor').value||0);
   const {data}=await supabase.rpc('dono_caixa',{p_store_id:store.id,p_acao:acao,p_valor:valor});
@@ -514,7 +497,7 @@ async function loadCaixa(){
   box.innerHTML=data.open?`<div class="item"><b>Caixa aberto</b><br>Abertura: ${money(data.opening_amount)}<br>Em: ${new Date(data.opened_at).toLocaleString('pt-BR')}</div>`:'<div class="item">Nenhum caixa aberto.</div>';
 }
 
-/* ---------- EQUIPE (dono) ---------- */
+/* ---------- EQUIPE ---------- */
 async function regenCode(){
   const {data}=await supabase.rpc('dono_regenerar_codigo',{p_store_id:store.id});
   if(data&&data.ok){staffCode=data.staff_code;document.getElementById('team_code').textContent=staffCode;document.getElementById('team_res').innerHTML='<div class="msg ok">Novo código gerado!</div>';}
@@ -529,10 +512,10 @@ async function boot(){
 }
 boot();
 
-window.switchLogin=switchLogin;window.toggleSignup=toggleSignup;window.ownerSignup=ownerSignup;window.ownerLogin=ownerLogin;
-window.staffLogin=staffLogin;window.logout=logout;window.createStore=createStore;window.openTab=openTab;
-window.loadData=loadData;window.createCategory=createCategory;window.createProduct=createProduct;window.createTable=createTable;
-window.createCustomer=createCustomer;window.createOrder=createOrder;window.addItem=addItem;window.toggleMesa=toggleMesa;
+window.switchEntry=switchEntry;window.createStoreSingle=createStoreSingle;window.ownerLogin=ownerLogin;
+window.staffLogin=staffLogin;window.logout=logout;window.openTab=openTab;window.loadData=loadData;
+window.createCategory=createCategory;window.createProduct=createProduct;window.createTable=createTable;
+window.createCustomer=createCustomer;window.createOrder=createOrder;window.toggleMesa=toggleMesa;
 window.setStatus=setStatus;window.setPay=setPay;window.garcomOrder=garcomOrder;window.caixa=caixa;window.regenCode=regenCode;
 </script>
 </body>
