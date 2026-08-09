@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Anote — Loja</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script type="module">
   import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
   window.supabase = createClient(
@@ -61,9 +62,17 @@
   .kcol h3{text-align:center;margin-bottom:10px}
   .order-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
   .order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .qr-item{display:inline-block;text-align:center;margin:12px;padding:16px;background:#fff;border-radius:12px;border:1px solid var(--border)}
+  .qr-label{margin-top:8px;font-weight:700;color:#1c1917}
   .spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:sp .8s linear infinite;margin:40px auto}
   @keyframes sp{to{transform:rotate(360deg)}}
   @media(max-width:900px){.grid2,.grid3,.kanban{grid-template-columns:1fr}}
+  @media print{
+    body *{visibility:hidden}
+    #qr_container,#qr_container *{visibility:visible}
+    #qr_container{position:absolute;left:0;top:0;width:100%}
+    .btn{display:none}
+  }
 </style>
 </head>
 <body>
@@ -223,6 +232,29 @@
       </div>
     </div>
 
+    <div id="tab_qrcodes" class="hidden">
+      <!-- IDENTIDADE DA LOJA -->
+      <div class="card">
+        <h2>🪪 Identidade da loja</h2>
+        <p class="muted">Este é o QR Code único da sua loja. Compartilhe nas redes sociais, imprima na porta ou em panfletos. Quem escanear abre seu cardápio.</p>
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <div class="qr-item"><div id="qr_store"></div><div class="qr-label" id="qr_store_label">Minha Loja</div></div>
+          <div style="flex:1;min-width:220px">
+            <div class="item" id="store_link" style="word-break:break-all;font-size:12px"></div>
+            <button class="btn btn-blue" onclick="copyStoreLink()">📋 Copiar link</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR DAS MESAS -->
+      <div class="card">
+        <h2>🔳 QR Codes das mesas</h2>
+        <p class="muted">Imprima e cole cada QR Code na mesa correspondente. O cliente escaneia e já cai na mesa certa.</p>
+        <button class="btn btn-blue" onclick="window.print()">🖨️ Imprimir tudo</button>
+        <div id="qr_container" style="margin-top:16px"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -322,7 +354,7 @@ async function enterApp(){
 function buildTabs(){
   const t=document.getElementById('tabs');t.innerHTML='';
   let tabs;
-  if(role==='owner') tabs=[['painel','📊 Painel'],['catalogo','🍔 Catálogo'],['pedidos','🧾 Pedidos'],['cozinha','👨‍🍳 Cozinha'],['caixa','💰 Caixa'],['equipe','🔑 Equipe']];
+  if(role==='owner') tabs=[['painel','📊 Painel'],['catalogo','🍔 Catálogo'],['pedidos','🧾 Pedidos'],['cozinha','👨‍🍳 Cozinha'],['caixa','💰 Caixa'],['equipe','🔑 Equipe'],['qrcodes','🔳 QR Codes']];
   else tabs=[['pedidos','🧾 Pedidos'],['cozinha','👨‍🍳 Cozinha'],['garcom','🤵 Garçom']];
   tabs.forEach(([id,lbl],i)=>{
     const b=document.createElement('div');b.className='tab'+(i===0?' active':'');b.textContent=lbl;b.onclick=()=>openTab(id,b);t.appendChild(b);
@@ -332,11 +364,12 @@ function buildTabs(){
 function openTab(id,el){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   if(el)el.classList.add('active');
-  ['painel','catalogo','pedidos','cozinha','garcom','caixa','equipe'].forEach(x=>document.getElementById('tab_'+x).classList.add('hidden'));
+  ['painel','catalogo','pedidos','cozinha','garcom','caixa','equipe','qrcodes'].forEach(x=>document.getElementById('tab_'+x).classList.add('hidden'));
   document.getElementById('tab_'+id).classList.remove('hidden');
   if(id==='cozinha')startKitchen();else stopKitchen();
   if(id==='caixa')loadCaixa();
   if(id==='equipe')document.getElementById('team_code').textContent=staffCode;
+  if(id==='qrcodes')renderQRCodes();
 }
 
 /* ---------- DADOS ---------- */
@@ -503,6 +536,45 @@ async function regenCode(){
   if(data&&data.ok){staffCode=data.staff_code;document.getElementById('team_code').textContent=staffCode;document.getElementById('team_res').innerHTML='<div class="msg ok">Novo código gerado!</div>';}
 }
 
+/* ---------- QR CODES ---------- */
+function renderQRCodes(){
+  if(typeof QRCode==='undefined'){
+    document.getElementById('qr_container').innerHTML='<div class="msg err">Biblioteca de QR Code não carregou. Verifique sua conexão.</div>';
+    return;
+  }
+  const baseDir=location.href.substring(0,location.href.lastIndexOf('/')+1);
+  const clienteUrl=baseDir+'cliente.html';
+  const storeUrl=`${clienteUrl}?loja=${store.id}`;
+
+  // 🪪 Identidade da loja
+  const storeQrEl=document.getElementById('qr_store');
+  storeQrEl.innerHTML='';
+  new QRCode(storeQrEl,{text:storeUrl,width:180,height:180});
+  document.getElementById('qr_store_label').textContent=store.name;
+  document.getElementById('store_link').textContent=storeUrl;
+
+  // 🔳 QR das mesas
+  const container=document.getElementById('qr_container');
+  container.innerHTML='';
+  if(!D.tables.length){
+    container.innerHTML='<div class="muted">Nenhuma mesa cadastrada. Crie mesas na aba <b>Catálogo</b> primeiro.</div>';
+    return;
+  }
+  D.tables.forEach(t=>{
+    const url=`${clienteUrl}?loja=${store.id}&mesa=${t.id}`;
+    const div=document.createElement('div');
+    div.className='qr-item';
+    div.innerHTML=`<div id="qr_${t.id}"></div><div class="qr-label">Mesa ${t.table_number}</div>`;
+    container.appendChild(div);
+    new QRCode(document.getElementById('qr_'+t.id),{text:url,width:150,height:150});
+  });
+}
+function copyStoreLink(){
+  const baseDir=location.href.substring(0,location.href.lastIndexOf('/')+1);
+  const storeUrl=`${baseDir}cliente.html?loja=${store.id}`;
+  navigator.clipboard.writeText(storeUrl).then(()=>alert('Link da loja copiado! 📋'));
+}
+
 /* ---------- BOOT ---------- */
 async function boot(){
   try{await waitForSupabase();}catch(e){return;}
@@ -516,7 +588,8 @@ window.switchEntry=switchEntry;window.createStoreSingle=createStoreSingle;window
 window.staffLogin=staffLogin;window.logout=logout;window.openTab=openTab;window.loadData=loadData;
 window.createCategory=createCategory;window.createProduct=createProduct;window.createTable=createTable;
 window.createCustomer=createCustomer;window.createOrder=createOrder;window.toggleMesa=toggleMesa;
-window.setStatus=setStatus;window.setPay=setPay;window.garcomOrder=garcomOrder;window.caixa=caixa;window.regenCode=regenCode;
+window.setStatus=setStatus;window.setPay=setPay;window.garcomOrder=garcomOrder;window.caixa=caixa;
+window.regenCode=regenCode;window.renderQRCodes=renderQRCodes;window.copyStoreLink=copyStoreLink;
 </script>
 </body>
 </html>
