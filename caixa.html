@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Anote — Caixa</title>
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  window.supabase = createClient(
+    "https://mrchckrrkkvkmhpgellp.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk"
+  );
+  window.dispatchEvent(new Event("supabase-ready"));
+</script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--radius:14px}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+  .wrap{max-width:760px;margin:0 auto;padding:18px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+  h2{font-size:18px;margin-bottom:14px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
+  .btn-green{background:var(--green);color:#052e16}.btn-red{background:var(--red);color:#fff}
+  .btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
+  .btn-block{width:100%}
+  input{width:100%;padding:12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:15px;margin-bottom:10px;outline:none}
+  label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weight:600}
+  .row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
+  .muted{color:var(--mut);font-size:13px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+  .title{font-size:24px;font-weight:800}
+  .item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+  .msg{padding:11px;border-radius:10px;font-size:14px;margin-top:10px}
+  .msg.err{background:#451a1a;color:#fca5a5}.msg.ok{background:#14351f;color:#86efac}
+  .big{font-size:26px;font-weight:800}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div><div class="title">💰 Caixa</div><div class="muted" id="store_name">...</div></div>
+    <button class="btn btn-ghost" onclick="location.href='index.html'">← Voltar</button>
+  </div>
+
+  <div class="card">
+    <h2>Controle de caixa</h2>
+    <label>Valor de abertura</label>
+    <input id="cx_valor" type="number" step="0.01" placeholder="Ex: 100.00"/>
+    <div class="row">
+      <button class="btn btn-green" onclick="caixa('abrir')">🔓 Abrir caixa</button>
+      <button class="btn btn-red" onclick="caixa('fechar')">🔒 Fechar caixa</button>
+    </div>
+    <div id="cx_res"></div>
+  </div>
+
+  <div class="card">
+    <h2>Caixa atual</h2>
+    <div id="cx_info"></div>
+  </div>
+
+  <div class="card">
+    <h2>Resumo de hoje</h2>
+    <div id="cx_resumo"></div>
+  </div>
+</div>
+
+<script>
+let store=null;
+const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res();},{once:true});});}
+
+async function boot(){
+  try{await waitForSupabase();}catch(e){location.href='index.html';return;}
+  const {data:s}=await supabase.auth.getSession();
+  if(!s.session){location.href='index.html';return;}
+  const {data}=await supabase.rpc('dono_entrar');
+  if(!data||!data.ok){location.href='index.html';return;}
+  store=data.store;
+  document.getElementById('store_name').textContent=store.name;
+  loadCaixa();loadResumo();
+}
+
+async function caixa(acao){
+  const valor=Number(document.getElementById('cx_valor').value||0);
+  const {data}=await supabase.rpc('dono_caixa',{p_store_id:store.id,p_acao:acao,p_valor:valor});
+  const box=document.getElementById('cx_res');
+  if(!data||!data.ok){box.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;}
+  else if(acao==='fechar'){box.innerHTML=`<div class="msg ok">Caixa fechado! Vendas do período: ${money(data.sales_total)}</div>`;}
+  else{box.innerHTML=`<div class="msg ok">Caixa aberto!</div>`;}
+  document.getElementById('cx_valor').value='';
+  loadCaixa();loadResumo();
+}
+
+async function loadCaixa(){
+  const {data}=await supabase.rpc('dono_caixa',{p_store_id:store.id,p_acao:'info',p_valor:0});
+  const box=document.getElementById('cx_info');
+  if(!data||!data.ok){box.innerHTML='<div class="muted">Erro.</div>';return;}
+  box.innerHTML=data.open
+    ?`<div class="item"><b style="color:var(--green)">🟢 Caixa ABERTO</b><br>Abertura: ${money(data.opening_amount)}<br>Em: ${new Date(data.opened_at).toLocaleString('pt-BR')}</div>`
+    :`<div class="item"><b style="color:var(--red)">🔴 Caixa FECHADO</b><br>Abra o caixa para começar a operar.</div>`;
+}
+
+async function loadResumo(){
+  const {data}=await supabase.rpc('dono_dashboard',{p_store_id:store.id});
+  if(!data||!data.ok)return;
+  const s=data.stats;
+  document.getElementById('cx_resumo').innerHTML=`
+    <div class="item">Pedidos hoje: <span class="big">${s.today_orders}</span></div>
+    <div class="item">Faturamento hoje: <span class="big" style="color:var(--green)">${money(s.today_revenue)}</span></div>`;
+}
+
+boot();
+window.caixa=caixa;
+</script>
+</body>
+</html>
