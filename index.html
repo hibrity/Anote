@@ -177,7 +177,7 @@
           </div>
         </div>
         <div>
-          <div class="card"><h3>Pedidos</h3><div id="list_orders"></div></div>
+          <div class="card"><h3>Pedidos em andamento</h3><div id="list_orders"></div></div>
         </div>
       </div>
     </div>
@@ -203,16 +203,9 @@
         <button class="btn btn-green btn-block" onclick="garcomOrder()">Enviar pra cozinha</button>
         <div id="g_res"></div>
       </div>
-    </div>
-
-    <div id="tab_caixa" class="hidden">
-      <div class="grid2">
-        <div class="card"><h3>Controle de caixa</h3>
-          <label>Valor de abertura</label><input id="cx_valor" type="number" step="0.01"/>
-          <div class="row"><button class="btn btn-green" onclick="caixa('abrir')">Abrir caixa</button><button class="btn btn-red" onclick="caixa('fechar')">Fechar caixa</button></div>
-          <div id="cx_res"></div>
-        </div>
-        <div class="card"><h3>Caixa atual</h3><div id="cx_info"></div></div>
+      <div class="card" style="max-width:520px">
+        <h2>📦 Pedidos pra entregar</h2>
+        <div id="g_list"></div>
       </div>
     </div>
 
@@ -241,7 +234,11 @@
       </div>
       <div class="card">
         <h2>🔳 QR Codes das mesas</h2>
-        <p class="muted">Imprima e cole cada QR Code na mesa correspondente.</p>
+        <p class="muted">Digite o número da mesa e gere o QR Code na hora.</p>
+        <div class="row" style="margin-bottom:10px">
+          <input id="qr_mesa_num" placeholder="Número da mesa (ex: 5)" style="margin-bottom:0"/>
+          <button class="btn btn-green" onclick="createMesaAndQR()">➕ Gerar QR da mesa</button>
+        </div>
         <button class="btn btn-blue" onclick="window.print()">🖨️ Imprimir tudo</button>
         <div id="qr_container" style="margin-top:16px"></div>
       </div>
@@ -253,7 +250,7 @@
 <script>
 let role=null, store=null, staffCode=null;
 let D={categories:[],products:[],tables:[],customers:[],orders:[]};
-let kitchenTimer=null;
+let liveTimer=null;
 const STATUS={new:'Novo',preparing:'Preparando',ready:'Pronto',delivered:'Entregue',cancelled:'Cancelado'};
 const PAY_LABEL={pix:'💠 Pix',credit:'💳 Crédito',debit:'💳 Débito',cash:'💵 Dinheiro'};
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -275,22 +272,12 @@ async function createStoreSingle(){
   const storePhone=document.getElementById('new_store_phone').value.trim();
   const storeAddress=document.getElementById('new_store_address').value.trim();
   const box=document.getElementById('new_result');
-
-  if(!ownerName||!email||!pass||!storeName){
-    box.innerHTML='<div class="msg err">Preencha ao menos nome, email, senha e nome da loja.</div>';return;
-  }
-
+  if(!ownerName||!email||!pass||!storeName){box.innerHTML='<div class="msg err">Preencha ao menos nome, email, senha e nome da loja.</div>';return;}
   box.innerHTML='<div class="msg ok">Criando sua conta...</div>';
   const {error:signErr}=await supabase.auth.signUp({email,password:pass,options:{data:{name:ownerName}}});
   if(signErr){box.innerHTML=`<div class="msg err">${signErr.message}</div>`;return;}
-
   let tries=0;
-  while(tries<10){
-    const {data}=await supabase.auth.getSession();
-    if(data.session)break;
-    await new Promise(r=>setTimeout(r,400));tries++;
-  }
-
+  while(tries<10){const {data}=await supabase.auth.getSession();if(data.session)break;await new Promise(r=>setTimeout(r,400));tries++;}
   box.innerHTML='<div class="msg ok">Criando sua loja...</div>';
   const {data:loja}=await supabase.rpc('dono_criar_loja',{p_nome:storeName,p_telefone:storePhone,p_endereco:storeAddress});
   if(!loja||!loja.ok){box.innerHTML=`<div class="msg err">${loja?.error||'Erro ao criar loja'}</div>`;return;}
@@ -324,54 +311,60 @@ async function staffLogin(){
   enterApp();
 }
 
-function logout(){
-  supabase.auth.signOut();
-  role=null;store=null;staffCode=null;
-  showScreen('login');
-}
+function logout(){supabase.auth.signOut();stopLive();role=null;store=null;staffCode=null;showScreen('login');}
 
-function showScreen(s){
-  ['login','app'].forEach(x=>document.getElementById('screen_'+x).classList.add('hidden'));
-  document.getElementById('screen_'+s).classList.remove('hidden');
-}
+function showScreen(s){['login','app'].forEach(x=>document.getElementById('screen_'+x).classList.add('hidden'));document.getElementById('screen_'+s).classList.remove('hidden');}
+
 async function enterApp(){
   showScreen('app');
   document.getElementById('app_store_name').textContent=store.name;
   document.getElementById('app_role_label').textContent= role==='owner' ? '👑 Dono' : '👷 Funcionário';
   buildTabs();
   await loadData();
+  startLive();
 }
+
 function buildTabs(){
   const t=document.getElementById('tabs');t.innerHTML='';
   let tabs;
-  if(role==='owner') tabs=[['painel','📊 Painel'],['catalogo','🍔 Catálogo'],['pedidos','🧾 Pedidos'],['cozinha','👨‍🍳 Cozinha'],['caixa','💰 Caixa'],['equipe','🔑 Equipe'],['qrcodes','🔳 QR Codes']];
-  else tabs=[['pedidos','🧾 Pedidos'],['cozinha','👨‍🍳 Cozinha'],['garcom','🤵 Garçom']];
+  if(role==='owner') tabs=[['painel','📊 Painel'],['catalogo','🍔 Catálogo'],['pedidos','🧾 Pedidos'],['cozinha','👨🍳 Cozinha'],['caixa','💰 Caixa'],['equipe','🔑 Equipe'],['qrcodes','🔳 QR Codes']];
+  else tabs=[['pedidos','🧾 Pedidos'],['cozinha','👨‍ Cozinha'],['garcom','🤵 Garçom']];
   tabs.forEach(([id,lbl],i)=>{
-    const b=document.createElement('div');b.className='tab'+(i===0?' active':'');b.textContent=lbl;b.onclick=()=>openTab(id,b);t.appendChild(b);
+    const b=document.createElement('div');b.className='tab'+(i===0?' active':'');b.textContent=lbl;
+    b.onclick=(id==='caixa')?()=>{location.href='caixa.html';}:()=>openTab(id,b);
+    t.appendChild(b);
   });
   openTab(tabs[0][0],t.firstChild);
 }
+
 function openTab(id,el){
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   if(el)el.classList.add('active');
-  ['painel','catalogo','pedidos','cozinha','garcom','caixa','equipe','qrcodes'].forEach(x=>document.getElementById('tab_'+x).classList.add('hidden'));
+  ['painel','catalogo','pedidos','cozinha','garcom','equipe','qrcodes'].forEach(x=>document.getElementById('tab_'+x).classList.add('hidden'));
   document.getElementById('tab_'+id).classList.remove('hidden');
-  if(id==='cozinha')startKitchen();else stopKitchen();
-  if(id==='caixa')loadCaixa();
   if(id==='equipe')document.getElementById('team_code').textContent=staffCode;
   if(id==='qrcodes')renderQRCodes();
+}
+
+/* ---------- TEMPO REAL ---------- */
+function startLive(){if(liveTimer)return;liveTimer=setInterval(liveRefresh,5000);}
+function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null;}}
+async function liveRefresh(){
+  if(!store||!staffCode)return;
+  const {data}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:staffCode});
+  if(!data||!data.ok)return;
+  D=data;
+  renderOrders();renderKitchen();renderGarcomList();
+  if(role==='owner')loadDashboard();
 }
 
 async function loadData(){
   const {data}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:staffCode});
   if(!data||!data.ok){alert(data?.error||'Erro ao carregar');return;}
-  D=data;
-  renderAll();
+  D=data;renderAll();
   if(role==='owner')loadDashboard();
 }
-function renderAll(){
-  renderCatalog();renderOrderSelects();renderOrders();renderKitchen();renderGarcomSelects();
-}
+function renderAll(){renderCatalog();renderOrderSelects();renderOrders();renderKitchen();renderGarcomSelects();renderGarcomList();}
 
 async function loadDashboard(){
   const {data}=await supabase.rpc('dono_dashboard',{p_store_id:store.id});
@@ -439,8 +432,9 @@ async function createOrder(){
 
 function renderOrders(){
   const box=document.getElementById('list_orders');
-  if(!D.orders.length){box.innerHTML='<div class="muted">Nenhum pedido.</div>';return;}
-  box.innerHTML=D.orders.slice(0,40).map(o=>`
+  const ativos=D.orders.filter(o=>['new','preparing','ready'].includes(o.status));
+  if(!ativos.length){box.innerHTML='<div class="muted">Nenhum pedido em andamento. 🎉</div>';return;}
+  box.innerHTML=ativos.slice(0,40).map(o=>`
     <div class="order-card">
       <div class="order-head"><b>#${o.order_number}</b><span class="badge b-${o.status}">${STATUS[o.status]||o.status}</span></div>
       <div class="muted">${o.customer_name||'Balcão'}${o.table_number?' • Mesa '+o.table_number:''} • ${o.order_type}</div>
@@ -450,35 +444,42 @@ function renderOrders(){
         <span class="muted">${o.payment_method?PAY_LABEL[o.payment_method]||o.payment_method:''}</span>
       </div>
       <div class="row" style="margin-top:8px">
-        <button class="btn btn-amber" onclick="setStatus('${o.id}','preparing')">Preparar</button>
-        <button class="btn btn-green" onclick="setStatus('${o.id}','ready')">Pronto</button>
-        <button class="btn btn-blue" onclick="setStatus('${o.id}','delivered')">Entregue</button>
-      </div>
-      <div class="row" style="margin-top:6px">
+        <button class="btn btn-blue" onclick="setStatus('${o.id}','delivered')">✅ Entregue</button>
         <button class="btn btn-green" onclick="setPay('${o.id}','paid')">💰 Pago</button>
         <button class="btn btn-red" onclick="setStatus('${o.id}','cancelled')">Cancelar</button>
       </div>
     </div>`).join('');
 }
-async function setStatus(id,status){
-  await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:status,p_payment:null});
-  await loadData();
-}
-async function setPay(id,pay){
-  await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:null,p_payment:pay});
-  await loadData();
-}
 
 function renderKitchen(){
   const groups={new:[],preparing:[],ready:[]};
   D.orders.forEach(o=>{if(groups[o.status])groups[o.status].push(o);});
-  const mk=list=>list.length?list.map(o=>`<div class="order-card"><b>#${o.order_number}</b> ${o.table_number?'• Mesa '+o.table_number:''}<br>${(o.items||[]).map(i=>`${i.qty}x ${i.name}${i.notes?' <i>('+i.notes+')</i>':''}`).join('<br>')}</div>`).join(''):'<div class="muted">Vazio</div>';
-  document.getElementById('k_new').innerHTML=mk(groups.new);
-  document.getElementById('k_prep').innerHTML=mk(groups.preparing);
-  document.getElementById('k_ready').innerHTML=mk(groups.ready);
+  const card=(o,actions)=>`<div class="order-card"><b>#${o.order_number}</b> ${o.table_number?'• Mesa '+o.table_number:''}<br>${(o.items||[]).map(i=>`${i.qty}x ${i.name}${i.notes?' <i>('+i.notes+')</i>':''}`).join('<br>')||''}<div class="row" style="margin-top:8px">${actions}</div></div>`;
+  document.getElementById('k_new').innerHTML=groups.new.length?groups.new.map(o=>card(o,`<button class="btn btn-amber" onclick="setStatus('${o.id}','preparing')">👨‍ Preparar</button>`)).join(''):'<div class="muted">Vazio</div>';
+  document.getElementById('k_prep').innerHTML=groups.preparing.length?groups.preparing.map(o=>card(o,`<button class="btn btn-green" onclick="setStatus('${o.id}','ready')">🔔 Pronto</button>`)).join(''):'<div class="muted">Vazio</div>';
+  document.getElementById('k_ready').innerHTML=groups.ready.length?groups.ready.map(o=>card(o,`<span class="badge b-ready">Aguardando entrega</span>`)).join(''):'<div class="muted">Vazio</div>';
 }
-function startKitchen(){if(kitchenTimer)return;kitchenTimer=setInterval(loadData,5000);}
-function stopKitchen(){if(kitchenTimer){clearInterval(kitchenTimer);kitchenTimer=null;}}
+
+function renderGarcomList(){
+  const box=document.getElementById('g_list');if(!box)return;
+  const ativos=D.orders.filter(o=>['new','preparing','ready'].includes(o.status));
+  if(!ativos.length){box.innerHTML='<div class="muted">Nenhum pedido ativo.</div>';return;}
+  box.innerHTML=ativos.map(o=>`
+    <div class="order-card">
+      <div class="order-head"><b>#${o.order_number}</b><span class="badge b-${o.status}">${STATUS[o.status]}</span></div>
+      <div class="muted">${o.table_number?'Mesa '+o.table_number:o.order_type} • ${money(o.total)}</div>
+      <button class="btn btn-blue" style="margin-top:8px" onclick="setStatus('${o.id}','delivered')">✅ Entregue</button>
+    </div>`).join('');
+}
+
+async function setStatus(id,status){
+  await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:status,p_payment:null});
+  await liveRefresh();
+}
+async function setPay(id,pay){
+  await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:null,p_payment:pay});
+  await liveRefresh();
+}
 
 function renderGarcomSelects(){
   document.getElementById('g_mesa').innerHTML=D.tables.map(t=>`<option value="${t.id}">Mesa ${t.table_number}</option>`).join('')||'<option value="">Sem mesas</option>';
@@ -497,48 +498,34 @@ async function garcomOrder(){
   await loadData();
 }
 
-async function caixa(acao){
-  const valor=Number(document.getElementById('cx_valor').value||0);
-  const {data}=await supabase.rpc('dono_caixa',{p_store_id:store.id,p_acao:acao,p_valor:valor});
-  const box=document.getElementById('cx_res');
-  if(!data||!data.ok){box.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;}
-  else if(acao==='fechar'){box.innerHTML=`<div class="msg ok">Caixa fechado! Vendas: ${money(data.sales_total)}</div>`;}
-  else{box.innerHTML=`<div class="msg ok">Caixa aberto!</div>`;}
-  document.getElementById('cx_valor').value='';loadCaixa();
-}
-async function loadCaixa(){
-  const {data}=await supabase.rpc('dono_caixa',{p_store_id:store.id,p_acao:'info',p_valor:0});
-  const box=document.getElementById('cx_info');
-  if(!data||!data.ok){box.innerHTML='<div class="muted">Erro.</div>';return;}
-  box.innerHTML=data.open?`<div class="item"><b>Caixa aberto</b><br>Abertura: ${money(data.opening_amount)}<br>Em: ${new Date(data.opened_at).toLocaleString('pt-BR')}</div>`:'<div class="item">Nenhum caixa aberto.</div>';
-}
-
 async function regenCode(){
   const {data}=await supabase.rpc('dono_regenerar_codigo',{p_store_id:store.id});
   if(data&&data.ok){staffCode=data.staff_code;document.getElementById('team_code').textContent=staffCode;document.getElementById('team_res').innerHTML='<div class="msg ok">Novo código gerado!</div>';}
 }
 
+/* ---------- QR CODES ---------- */
+async function createMesaAndQR(){
+  const n=document.getElementById('qr_mesa_num').value.trim();
+  if(!n){alert('Digite o número da mesa.');return;}
+  const {data}=await supabase.rpc('dono_criar_mesa',{p_store_id:store.id,p_numero:n});
+  if(!data||!data.ok){alert(data?.error||'Erro ao criar mesa');return;}
+  document.getElementById('qr_mesa_num').value='';
+  await loadData();
+  renderQRCodes();
+}
 function renderQRCodes(){
-  if(typeof QRCode==='undefined'){
-    document.getElementById('qr_container').innerHTML='<div class="msg err">Biblioteca de QR Code não carregou.</div>';
-    return;
-  }
+  if(typeof QRCode==='undefined'){document.getElementById('qr_container').innerHTML='<div class="msg err">Biblioteca de QR Code não carregou.</div>';return;}
   const baseDir=location.href.substring(0,location.href.lastIndexOf('/')+1);
   const clienteUrl=baseDir+'cliente.html';
   const storeUrl=`${clienteUrl}?loja=${store.id}`;
-
   const storeQrEl=document.getElementById('qr_store');
   storeQrEl.innerHTML='';
   new QRCode(storeQrEl,{text:storeUrl,width:180,height:180});
   document.getElementById('qr_store_label').textContent=store.name;
   document.getElementById('store_link').textContent=storeUrl;
-
   const container=document.getElementById('qr_container');
   container.innerHTML='';
-  if(!D.tables.length){
-    container.innerHTML='<div class="muted">Nenhuma mesa cadastrada. Crie mesas na aba <b>Catálogo</b> primeiro.</div>';
-    return;
-  }
+  if(!D.tables.length){container.innerHTML='<div class="muted">Nenhuma mesa cadastrada. Gere a primeira acima. ⬆️</div>';return;}
   D.tables.forEach(t=>{
     const url=`${clienteUrl}?loja=${store.id}&mesa=${t.id}`;
     const div=document.createElement('div');
@@ -566,8 +553,8 @@ window.switchEntry=switchEntry;window.createStoreSingle=createStoreSingle;window
 window.staffLogin=staffLogin;window.logout=logout;window.openTab=openTab;window.loadData=loadData;
 window.createCategory=createCategory;window.createProduct=createProduct;window.createTable=createTable;
 window.createCustomer=createCustomer;window.createOrder=createOrder;window.toggleMesa=toggleMesa;
-window.setStatus=setStatus;window.setPay=setPay;window.garcomOrder=garcomOrder;window.caixa=caixa;
-window.regenCode=regenCode;window.renderQRCodes=renderQRCodes;window.copyStoreLink=copyStoreLink;
+window.setStatus=setStatus;window.setPay=setPay;window.garcomOrder=garcomOrder;
+window.regenCode=regenCode;window.createMesaAndQR=createMesaAndQR;window.renderQRCodes=renderQRCodes;window.copyStoreLink=copyStoreLink;
 </script>
 </body>
 </html>
