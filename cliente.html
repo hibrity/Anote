@@ -7,8 +7,8 @@
 <script type="module">
   import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
   window.supabase = createClient(
-    "https://zbxrpprwjrholrycwsqa.supabase.co",
-    "sb_publishable_c4O2UN_u487qWsu4TNwG0Q_OGj3aHNM"
+    "https://mrchckrrkkvkmhpgellp.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk"
   );
   window.dispatchEvent(new Event("supabase-ready"));
 </script>
@@ -130,7 +130,6 @@
   </div>
 </div>
 
-<!-- MODAL CARRINHO -->
 <div class="overlay hidden" id="modal_cart" onclick="if(event.target===this)closeCart()">
   <div class="sheet">
     <h2>Seu carrinho</h2>
@@ -142,7 +141,6 @@
   </div>
 </div>
 
-<!-- MODAL IDENTIFICAÇÃO (nome + telefone) -->
 <div class="overlay hidden" id="modal_identify" onclick="if(event.target===this)closeIdentify()">
   <div class="sheet">
     <h2>Identifique-se para pedir</h2>
@@ -155,7 +153,6 @@
   </div>
 </div>
 
-<!-- MODAL PAGAMENTO -->
 <div class="overlay hidden" id="modal_payment" onclick="if(event.target===this)closePayment()">
   <div class="sheet">
     <h2>Como você vai pagar?</h2>
@@ -165,7 +162,6 @@
   </div>
 </div>
 
-<!-- MODAL CONFIRMAÇÃO -->
 <div class="overlay hidden" id="modal_confirm">
   <div class="sheet" style="text-align:center;">
     <div style="font-size:56px;">✅</div>
