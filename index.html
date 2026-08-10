@@ -80,7 +80,11 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 <div id="tab_garcom" class="hidden"><div class="card" style="max-width:520px"><h2>🤵 Pedido rápido</h2><label>Mesa</label><select id="g_mesa"></select><label>Produto</label><select id="g_prod"></select><label>Qtd</label><input id="g_qtd" type="number" min="1" value="1"/><label>Obs</label><textarea id="g_obs"></textarea><button class="btn btn-green btn-block" onclick="garcomOrder()">Enviar pra cozinha</button><div id="g_res"></div></div><div class="card" style="max-width:520px"><h2>📦 Pra entregar</h2><div id="g_list"></div></div></div>
 
 <!-- 🔑 EQUIPE (com QR do Garçom) -->
-<div id="tab_equipe" class="hidden"><div class="card" style="max-width:520px"><h2>🔑 Código da equipe</h2><div class="item" style="text-align:center;font-size:26px;font-weight:800" id="team_code">—</div><button class="btn btn-amber btn-block" onclick="regenCode()">🔄 Gerar novo</button><div id="team_res"></div>
+<div id="tab_equipe" class="hidden"><div class="card" style="max-width:520px">
+<h2>🔑 Código da equipe</h2>
+<div class="item" style="text-align:center;font-size:26px;font-weight:800" id="team_code">—</div>
+<button class="btn btn-amber btn-block" onclick="regenCode()">🔄 Gerar novo</button>
+<div id="team_res"></div>
 <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
 <h3>🤵 QR Code do Garçom</h3>
 <p class="muted">O garçom escaneia e abre a página dele direto (o código já vai preenchido).</p>
@@ -89,13 +93,27 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 </div></div>
 
 <!-- 🔳 QR CODES -->
-<div id="tab_qrcodes" class="hidden"><div class="card"><h2>🔳 QR Codes</h2><p class="muted">Todos os QR Codes da sua loja num só lugar.</p>
-<div style="margin-top:16px;padding:16px;background:var(--card2);border-radius:12px"><h3 style="margin-bottom:12px">🪪 Identidade da loja</h3>
-<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center"><div class="qr-item"><div id="qr_store"></div><div class="qr-label" id="qr_store_label">Minha Loja</div></div>
-<div style="flex:1;min-width:220px"><div style="margin-bottom:6px"><b id="store_display_name">—</b></div><div class="item" id="store_link" style="word-break:break-all;font-size:12px;margin-bottom:8px"></div><button class="btn btn-blue" onclick="copyStoreLink()">📋 Copiar link</button></div></div></div>
-<div style="margin-top:16px;padding:16px;background:var(--card2);border-radius:12px"><h3 style="margin-bottom:12px">🪑 QR Codes das mesas</h3><p class="muted" style="margin-bottom:12px">Digite o número da mesa e gere o QR. Use ✏️ para renomear e 🗑️ para excluir.</p>
-<div class="row" style="margin-bottom:10px"><input id="qr_mesa_num" placeholder="Número da mesa (ex: 5)" style="margin-bottom:0"/><button class="btn btn-green" onclick="createMesaAndQR()">➕ Gerar QR</button></div>
-<button class="btn btn-blue" onclick="window.print()">🖨️ Imprimir tudo</button><div id="qr_container" style="margin-top:16px"></div></div>
+<div id="tab_qrcodes" class="hidden"><div class="card">
+<h2>🔳 QR Codes</h2>
+<p class="muted">Todos os QR Codes da sua loja num só lugar.</p>
+<div style="margin-top:16px;padding:16px;background:var(--card2);border-radius:12px">
+<h3 style="margin-bottom:12px">🪪 Identidade da loja</h3>
+<div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+<div class="qr-item"><div id="qr_store"></div><div class="qr-label" id="qr_store_label">Minha Loja</div></div>
+<div style="flex:1;min-width:220px">
+<div style="margin-bottom:6px"><b id="store_display_name">—</b></div>
+<div class="item" id="store_link" style="word-break:break-all;font-size:12px;margin-bottom:8px"></div>
+<button class="btn btn-blue" onclick="copyStoreLink()">📋 Copiar link</button>
+</div></div></div>
+<div style="margin-top:16px;padding:16px;background:var(--card2);border-radius:12px">
+<h3 style="margin-bottom:12px">🪑 QR Codes das mesas</h3>
+<p class="muted" style="margin-bottom:12px">Digite o número da mesa e gere o QR. Use ✏️ para renomear e 🗑️ para excluir.</p>
+<div class="row" style="margin-bottom:10px">
+<input id="qr_mesa_num" placeholder="Número da mesa (ex: 5)" style="margin-bottom:0"/>
+<button class="btn btn-green" onclick="createMesaAndQR()">➕ Gerar QR</button></div>
+<button class="btn btn-blue" onclick="window.print()">🖨️ Imprimir tudo</button>
+<div id="qr_container" style="margin-top:16px"></div>
+</div>
 </div></div>
 </div>
 </div>
