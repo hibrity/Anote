@@ -4,7 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Anote — Painel</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script type="module">
 import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
 window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
@@ -16,10 +15,18 @@ window.dispatchEvent(new Event("supabase-ready"));
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
 .wrap{max-width:1100px;margin:0 auto;padding:16px}.hidden{display:none!important}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
-h2{font-size:17px;margin-bottom:12px}h3{font-size:14px;margin-bottom:8px;color:var(--mut)}
+h2{font-size:17px;margin-bottom:12px}
+h3{font-size:14px;margin-bottom:8px;color:var(--mut)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
-.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-amber{background:var(--amber);color:#3b2503}.btn-red{background:var(--red);color:#fff}.btn-purple{background:var(--purple);color:#fff}.btn-cyan{background:var(--cyan);color:#083344}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}.btn-block{width:100%}.btn-sm{padding:6px 10px;font-size:12px}
+.btn-green{background:var(--green);color:#052e16}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-amber{background:var(--amber);color:#3b2503}
+.btn-red{background:var(--red);color:#fff}
+.btn-purple{background:var(--purple);color:#fff}
+.btn-cyan{background:var(--cyan);color:#083344}
+.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
+.btn-block{width:100%}
+.btn-sm{padding:6px 10px;font-size:12px}
 input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:14px;margin-bottom:8px;outline:none}
 label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weight:600}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
@@ -27,7 +34,8 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 .muted{color:var(--mut);font-size:13px}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .title{font-size:20px;font-weight:800}
-.stat{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px}.stat b{display:block;font-size:22px;margin-top:4px}
+.stat{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px}
+.stat b{display:block;font-size:22px;margin-top:4px}
 .msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
 .msg.err{background:#451a1a;color:#fca5a5}.msg.ok{background:#14351f;color:#86efac}
 .nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
@@ -38,21 +46,15 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 .login-tabs{display:flex;gap:8px;margin-bottom:16px}
 .login-tab{flex:1;padding:12px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--border);cursor:pointer;font-weight:700;color:var(--mut);font-size:13px}
 .login-tab.active{background:var(--green);color:#052e16}
-.qr-item{display:inline-block;text-align:center;margin:10px;padding:14px;background:#fff;border-radius:12px;vertical-align:top}
-.qr-label{margin-top:8px;font-weight:700;color:#1c1917}
-.qr-link{margin-top:4px;font-size:10px;color:#94a3b8;word-break:break-all;max-width:180px}
-.tabs{display:flex;gap:8px;margin-bottom:14px}
-.tab{padding:10px 16px;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--mut);cursor:pointer;font-weight:700;font-size:14px}
-.tab.active{background:var(--green);color:#052e16}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:.3s;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(4px)}
 @media(max-width:800px){.grid3{grid-template-columns:1fr}}
-@media print{body *{visibility:hidden}.print-area,.print-area *{visibility:visible}.print-area{position:absolute;left:0;top:0;width:100%}.btn{display:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
+<!-- LOGIN -->
 <div id="screen_login"><div class="login-shell">
 <div style="text-align:center;margin-bottom:24px"><div class="title">Anote</div><div class="muted">Crie sua loja ou entre</div></div>
 <div class="card"><div class="login-tabs">
@@ -62,56 +64,55 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 <div id="entry_login" class="hidden"><label>Email</label><input id="log_email" type="email"/><label>Senha</label><input id="log_pass" type="password"/><button class="btn btn-green btn-block" onclick="ownerLogin()">Entrar</button><div id="login_result"></div></div>
 </div></div></div>
 
+<!-- APP -->
 <div id="screen_app" class="hidden">
-<div class="topbar"><div><div class="title" id="app_store_name">Loja</div><div class="muted">👑 Dono</div></div>
-<div class="row" style="max-width:340px"><button class="btn btn-ghost" onclick="refreshAll()">🔄 Atualizar</button><button class="btn btn-red" onclick="logout()">Sair</button></div></div>
+<div class="topbar">
+ <div><div class="title" id="app_store_name">Loja</div><div class="muted">👑 Dono</div></div>
+ <div class="row" style="max-width:340px"><button class="btn btn-ghost" onclick="refreshAll()">🔄 Atualizar</button><button class="btn btn-red" onclick="logout()">Sair</button></div>
+</div>
+
+<!-- ALERTAS -->
 <div id="alerts_wrap"></div>
 
 <!-- GESTÃO -->
 <h3 style="margin-bottom:8px">📋 Gestão</h3>
 <div class="nav">
-<button class="btn btn-blue" onclick="location.href='catalogo.html'">📦 Catálogo</button>
-<button class="btn btn-blue" onclick="location.href='pedidos.html'">🧾 Pedidos</button>
-<button class="btn btn-blue" onclick="location.href='equipe.html'">👥 Equipe</button>
+ <button class="btn btn-blue" onclick="location.href='catalogo.html'">📦 Catálogo</button>
+ <button class="btn btn-blue" onclick="location.href='pedidos.html'">🧾 Pedidos</button>
+ <button class="btn btn-blue" onclick="location.href='equipe.html'">👥 Equipe</button>
+ <button class="btn btn-blue" onclick="location.href='mesas.html'">🔳 Mesas</button>
 </div>
 
-<!-- ✅ NOVOS BOTÕES: ACESSO RÁPIDO P/ GARÇOM, COZINHA E CAIXA -->
-<h3 style="margin-bottom:8px">⚡ Acessos rápidos da equipe</h3>
+<!-- ACESSOS DA EQUIPE -->
+<h3 style="margin-bottom:8px">⚡ Acessos da equipe</h3>
 <div class="nav-staff">
-<button class="btn btn-cyan" onclick="goStaff('garcom.html')">🤵 Garçom</button>
-<button class="btn btn-amber" onclick="goStaff('cozinha.html')">👨‍🍳 Cozinha</button>
-<button class="btn btn-green" onclick="goStaff('caixa.html')">💰 Caixa</button>
+ <button class="btn btn-cyan" onclick="goStaff('garcom.html')">🤵 Garçom</button>
+ <button class="btn btn-amber" onclick="goStaff('cozinha.html')">👨‍🍳 Cozinha</button>
+ <button class="btn btn-green" onclick="goStaff('caixa.html')">💰 Caixa</button>
 </div>
 
-<div class="tabs">
-<div class="tab active" id="tb_painel" onclick="openTab('painel')">📊 Painel</div>
-<div class="tab" id="tb_mesas" onclick="openTab('mesas')">🔳 Mesas</div>
+<!-- SÓ PAINEL (DASHBOARD) -->
+<div class="card"><h2>📊 Resumo</h2><div class="grid3" id="stats"></div></div>
 </div>
-<div id="tab_painel"><div class="card"><h2>📊 Resumo</h2><div class="grid3" id="stats"></div></div></div>
-<div id="tab_mesas" class="hidden"><div class="card print-area"><h2>🔳 QR Codes das mesas</h2>
-<div style="padding:14px;background:var(--card2);border-radius:12px">
-<div class="row" style="margin-bottom:10px">
-<input id="qr_mesa_num" placeholder="Número da mesa (ex: 5)" style="margin-bottom:0"/>
-<button class="btn btn-green" id="btn_create_mesa" onclick="createMesa()">➕ Gerar QR</button>
-</div>
-<div style="display:flex;gap:8px;margin-bottom:10px">
-<button class="btn btn-ghost btn-sm" onclick="forceRenderMesas()">🔄 Atualizar QR codes</button>
-<button class="btn btn-blue btn-sm" onclick="window.print()">🖨️ Imprimir tudo</button>
-</div>
-<div id="qr_container" style="margin-top:14px"></div>
-</div></div></div>
-</div>
+
 </div>
 <div id="toast" class="toast"></div>
 
 <script>
 const $=id=>document.getElementById(id);
-let S={store:null,code:null},D={tables:[]},liveTimer=null,lastAlerts=0;
-function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t==='err'?'#ef4444':'#22c55e';e.style.color=t==='err'?'#fff':'#052e16';e.classList.add('show');clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500)}
-function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
-async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}catch(e){console.warn(n+' exception:',e);return{data:null,error:e}}}
+let S={store:null,code:null},liveTimer=null,lastAlerts=0;
 
-/* ✅ ACESSO RÁPIDO P/ EQUIPE (usa o código da loja atual) */
+function toast(m,t='ok'){
+ const e=$('toast');e.textContent=m;
+ e.style.background=t==='err'?'#ef4444':'#22c55e';
+ e.style.color=t==='err'?'#fff':'#052e16';
+ e.classList.add('show');
+ clearTimeout(e._tm);
+ e._tm=setTimeout(()=>e.classList.remove('show'),2500);
+}
+function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
+async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}catch(e){return{data:null,error:e}}}
+
 function goStaff(page){
  if(!S||!S.code){toast('Código da loja não disponível','err');return}
  const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
@@ -119,6 +120,7 @@ function goStaff(page){
 }
 
 function switchEntry(m){['new','login'].forEach(x=>{$('lt_'+x).classList.toggle('active',x===m);$('entry_'+x).classList.toggle('hidden',x!==m)})}
+
 async function createStore(){
  const on=$('new_owner_name').value.trim(),e=$('new_email').value.trim(),p=$('new_pass').value,sn=$('new_store_name').value.trim(),b=$('new_result');
  if(!on||!e||!p||!sn){b.innerHTML='<div class="msg err">Preencha nome, email, senha e loja.</div>';return}
@@ -130,12 +132,14 @@ async function createStore(){
  if(!data||!data.ok){b.innerHTML='<div class="msg err">'+(data?.error||'Erro ao criar loja')+'</div>';return}
  await enterApp();
 }
+
 async function ownerLogin(){
  const b=$('login_result');b.innerHTML='<div class="msg ok">Entrando...</div>';
  const{error}=await supabase.auth.signInWithPassword({email:$('log_email').value.trim(),password:$('log_pass').value});
  if(error){b.innerHTML='<div class="msg err">'+error.message+'</div>';return}
  await enterApp();
 }
+
 async function enterApp(){
  const{data}=await rpc('dono_entrar');
  if(!data||!data.ok||!data.store){show('login');return}
@@ -145,16 +149,14 @@ async function enterApp(){
  show('app');$('app_store_name').textContent=st.name;
  refreshAll();startLive();
 }
+
 function logout(){supabase.auth.signOut();stopLive();show('login')}
 function show(s){$('screen_login').classList.toggle('hidden',s!=='login');$('screen_app').classList.toggle('hidden',s!=='app')}
-function openTab(t){['painel','mesas'].forEach(x=>{$('tab_'+x).classList.toggle('hidden',x!==t);$('tb_'+x).classList.toggle('active',x===t)});if(t==='mesas')renderMesasQR()}
 function startLive(){if(liveTimer)return;liveTimer=setInterval(refreshAll,5000)}
 function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null}}
 
 async function refreshAll(){
  if(!S.store)return;
- const{data}=await rpc('staff_carregar',{p_store_id:S.store.id,p_codigo:S.code});
- if(data&&data.ok){D=data;if(!$('tab_mesas').classList.contains('hidden'))renderMesasQR()}
  const d=await rpc('dono_dashboard',{p_store_id:S.store.id});
  if(d.data?.ok){const s=d.data.stats;$('stats').innerHTML='<div class="stat">Produtos<b>'+s.total_products+'</b></div><div class="stat">Clientes<b>'+s.total_customers+'</b></div><div class="stat">Pedidos<b>'+s.total_orders+'</b></div><div class="stat">Em aberto<b>'+s.open_orders+'</b></div><div class="stat">Hoje<b>'+s.today_orders+'</b></div><div class="stat">Fat. hoje<b>'+Number(s.today_revenue||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</b></div>'}
  renderAlerts();
@@ -180,105 +182,9 @@ async function ackAlert(id){await rpc('staff_alerta_ack',{p_store_id:S.store.id,
 async function doneAlert(id){await rpc('staff_alerta_done',{p_store_id:S.store.id,p_codigo:S.code,p_alert_id:id});renderAlerts()}
 function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.1;o.start();setTimeout(()=>{o.stop();c.close()},300)}catch(e){}}
 
-async function createMesa(){
- const n=$('qr_mesa_num').value.trim();
- if(!n){toast('Digite o número da mesa','err');return}
- const btn=$('btn_create_mesa');
- btn.disabled=true;btn.textContent='Criando...';
- const{data,error}=await rpc('dono_criar_mesa',{p_store_id:S.store.id,p_numero:n});
- btn.disabled=false;btn.textContent='➕ Gerar QR';
- if(data?.ok){$('qr_mesa_num').value='';toast('Mesa criada! ✅')}
- else{const msg=error?.message||data?.error||'Erro ao criar mesa';toast(msg,'err')}
- await reloadMesas();
-}
-async function reloadMesas(){
- const{data}=await rpc('staff_carregar',{p_store_id:S.store.id,p_codigo:S.code});
- if(data?.ok){D=data;renderMesasQR()}
-}
-function forceRenderMesas(){toast('Atualizando...');reloadMesas()}
-
-/* ✅ QR CODE DEFINITIVO — 3 níveis de fallback */
-function qrImgUrl(link,size){
- // API 1: qrserver (mais confiável)
- return 'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&data='+encodeURIComponent(link);
-}
-function qrImgUrl2(link,size){
- // API 2: Google Charts (backup)
- return 'https://chart.googleapis.com/chart?cht=qr&chs='+size+'x'+size+'&chl='+encodeURIComponent(link);
-}
-function drawQR(el,link,size){
- size=size||150;
- el.innerHTML='';
- // Se a biblioteca local carregou, tenta usar
- if(window.QRCode&&QRCode.toCanvas){
-  const cv=document.createElement('canvas');
-  el.appendChild(cv);
-  try{
-   QRCode.toCanvas(cv,link,{width:size,margin:2,color:{dark:'#000000',light:'#ffffff'}},function(err){
-    if(err){useImgFallback(el,link,size)}
-   });
-  }catch(e){useImgFallback(el,link,size)}
- }else{
-  useImgFallback(el,link,size);
- }
-}
-function useImgFallback(el,link,size){
- // Imagem com 2 APIs de fallback
- const img=document.createElement('img');
- img.width=size;img.height=size;
- img.style.cssText='display:block;margin:0 auto;background:#fff';
- img.alt='QR Code';
- img.onerror=function(){
-  // Se a primeira API falhar, tenta a segunda
-  if(this.src.indexOf('qrserver')!==-1){this.src=qrImgUrl2(link,size)}
-  else{this.style.display='none';const p=document.createElement('div');p.style.cssText='font-size:10px;color:#c00;text-align:center;padding:8px';p.textContent='QR indisponível. Use o link abaixo.';el.appendChild(p)}
- };
- img.src=qrImgUrl(link,size);
- el.innerHTML='';
- el.appendChild(img);
-}
-
-function renderMesasQR(){
- const c=$('qr_container');
- c.innerHTML='';
- if(!D.tables||!D.tables.length){
-  c.innerHTML='<div class="muted" style="text-align:center;padding:30px">Nenhuma mesa cadastrada.<br>Gere a primeira mesa acima! 👆</div>';
-  return;
- }
- const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
- D.tables.forEach((t)=>{
-  const link=base+'cliente.html?loja='+S.store.id+'&mesa='+t.id;
-  const card=document.createElement('div');card.className='qr-item';
-  const qrDiv=document.createElement('div');
-  qrDiv.style.cssText='width:150px;height:150px;margin:0 auto;background:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;';
-  card.appendChild(qrDiv);
-  const label=document.createElement('div');label.className='qr-label';label.textContent='Mesa '+t.table_number;card.appendChild(label);
-  const linkDiv=document.createElement('div');linkDiv.className='qr-link';linkDiv.textContent=link;card.appendChild(linkDiv);
-  const actions=document.createElement('div');actions.style.cssText='margin-top:8px;display:flex;gap:6px;justify-content:center';
-  actions.innerHTML='<button class="btn btn-blue btn-sm" onclick="editMesa(\''+t.id+'\',\''+t.table_number+'\')">✏️</button><button class="btn btn-red btn-sm" onclick="delMesa(\''+t.id+'\')">🗑️</button>';
-  card.appendChild(actions);
-  c.appendChild(card);
-  drawQR(qrDiv,link,150);
- });
-}
-
-async function editMesa(id,atual){
- const novo=prompt('Novo número da mesa:',atual);
- if(!novo||!novo.trim())return;
- const{data,error}=await rpc('dono_atualizar_mesa',{p_store_id:S.store.id,p_table_id:id,p_numero:novo.trim()});
- if(data?.ok){toast('Mesa atualizada! ✅');await reloadMesas()}
- else{const msg=error?.message||data?.error||'Erro';toast(msg,'err')}
-}
-async function delMesa(id){
- if(!confirm('Excluir esta mesa e o QR Code?'))return;
- const{data,error}=await rpc('dono_excluir_mesa',{p_store_id:S.store.id,p_table_id:id});
- if(data?.ok){toast('Mesa excluída! 🗑️');await reloadMesas()}
- else{const msg=error?.message||data?.error||'Erro';toast(msg,'err')}
-}
-
 async function boot(){try{await waitSB()}catch(e){return}const{data}=await supabase.auth.getSession();if(data.session)await enterApp();else show('login')}
 boot();
-window.switchEntry=switchEntry;window.createStore=createStore;window.ownerLogin=ownerLogin;window.logout=logout;window.refreshAll=refreshAll;window.openTab=openTab;window.ackAlert=ackAlert;window.doneAlert=doneAlert;window.createMesa=createMesa;window.forceRenderMesas=forceRenderMesas;window.editMesa=editMesa;window.delMesa=delMesa;window.goStaff=goStaff;
+window.switchEntry=switchEntry;window.createStore=createStore;window.ownerLogin=ownerLogin;window.logout=logout;window.refreshAll=refreshAll;window.ackAlert=ackAlert;window.doneAlert=doneAlert;window.goStaff=goStaff;
 </script>
 </body>
 </html>
