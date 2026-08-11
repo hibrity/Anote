@@ -50,10 +50,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .total-row{display:flex;justify-content:space-between;font-size:17px;font-weight:800;padding:16px 0 8px}
 .btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px}
 .btn-primary{background:var(--primary);color:#fff}.btn-ghost{background:var(--primary-light);color:var(--primary)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-success{background:var(--green);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 .field{margin-bottom:14px}.field label{font-size:13px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px}
 .field input,.field textarea{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;outline:none}
-.msg{padding:12px;border-radius:12px;font-size:14px;margin-top:10px}
-.msg.err{background:#fef2f2;color:var(--red)}.msg.ok{background:#f0fdf4;color:var(--green)}
+.msg{padding:12px;border-radius:12px;font-size:14px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.msg.err{background:#fef2f2;color:var(--red)}.msg.ok{background:#f0fdf4;color:var(--green)}.msg.info{background:#eff6ff;color:#1e40af}
+.msg .msg-btn{padding:6px 14px;border-radius:10px;border:none;font-weight:700;font-size:13px;cursor:pointer;background:#fff;color:var(--text)}
+.msg.err .msg-btn{color:var(--red);border:1px solid var(--red)}
+.msg.ok .msg-btn{color:var(--green);border:1px solid var(--green)}
 .pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
 .pay-opt{border:2px solid var(--border);border-radius:14px;padding:18px 12px;text-align:center;cursor:pointer;font-weight:700;font-size:14px}
 .pay-opt .ico{font-size:26px;display:block;margin-bottom:6px}
@@ -74,6 +80,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .empty{text-align:center;padding:60px 20px;color:var(--muted)}.empty .big{font-size:48px;margin-bottom:12px}
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:40px auto}
 @keyframes spin{to{transform:rotate(360deg)}}
+.edit-bar{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+.edit-bar .btn{margin-top:0;flex:1}
+.alert-wrap{padding:10px 16px 4px;display:flex;flex-direction:column;gap:8px}
+.alert-card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px}
+.alert-card .ico{font-size:28px;flex-shrink:0}
+.alert-card .info{flex:1;font-size:13px;font-weight:600}
+.alert-card .info small{display:block;font-size:11px;font-weight:400;color:var(--muted);margin-top:2px}
+.alert-card .actions{display:flex;gap:6px}
+.alert-card .actions button{padding:8px 12px;border-radius:10px;border:none;font-weight:700;font-size:12px;cursor:pointer}
+.edit-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.edit-item .info{flex:1}
+.edit-item .info .n{font-size:14px;font-weight:600}
+.edit-item .info .p{font-size:12px;color:var(--muted)}
+.edit-item .rm{width:32px;height:32px;border-radius:50%;background:#fee2e2;color:var(--red);border:none;font-size:18px;cursor:pointer;font-weight:700}
 </style>
 </head>
 <body>
@@ -83,7 +103,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div id="table_actions" style="display:none;gap:8px;padding:10px 16px 0">
 <button onclick="chamarGarcom()" style="flex:1;background:var(--primary-light);color:var(--primary);border:2px solid var(--primary);border-radius:12px;padding:10px;font-weight:700;cursor:pointer">🔔 Chamar garçom</button>
 <button onclick="fecharConta()" style="flex:1;background:var(--primary-light);color:var(--primary);border:2px solid var(--primary);border-radius:12px;padding:10px;font-weight:700;cursor:pointer">💳 Fechar conta</button></div>
-<div id="alert_banner" style="padding:0 16px"></div>
+<div id="alert_banner" class="alert-wrap"></div>
 <div id="view_menu"><div class="cats" id="cats"></div><div id="menu_container"><div class="spinner"></div></div></div>
 <div id="view_tracking" class="hidden"><div id="track_container"></div></div>
 <div id="view_history" class="hidden"><div style="padding-top:16px" id="history_container"></div></div>
@@ -97,10 +117,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="overlay hidden" id="modal_identify" onclick="if(event.target===this)closeIdentify()"><div class="sheet"><h2>Identifique-se para pedir</h2><p style="font-size:13px;color:var(--muted);margin-bottom:16px">Só seu nome e telefone. Na próxima vez não precisa preencher de novo. 😊</p><div class="field"><label>Seu nome</label><input id="id_name" placeholder="Como podemos te chamar?"></div><div class="field"><label>Telefone (com DDD)</label><input id="id_phone" type="tel" placeholder="(11) 91234-5678" oninput="maskPhone(this)"></div><div id="identify_msg"></div><button class="btn btn-primary" id="btn_identify" onclick="handleIdentify()">Continuar</button><button class="btn btn-ghost" onclick="closeIdentify()">Voltar</button></div></div>
 <div class="overlay hidden" id="modal_payment" onclick="if(event.target===this)closePayment()"><div class="sheet"><h2>Como você vai pagar?</h2><div class="pay-grid" id="pay_grid"></div><button class="btn btn-primary" id="btn_pay" onclick="confirmPayment()" disabled style="opacity:.5">Confirmar pedido</button><button class="btn btn-ghost" onclick="closePayment()">Voltar</button></div></div>
 <div class="overlay hidden" id="modal_confirm"><div class="sheet" style="text-align:center"><div style="font-size:56px">✅</div><h2 style="margin-top:8px">Pedido enviado!</h2><p style="color:var(--muted);font-size:14px;margin-top:6px">Seu pedido <b id="confirm_num"></b> já está com a loja.</p><button class="btn btn-primary" onclick="goToTracking()">Acompanhar pedido</button><button class="btn btn-ghost" onclick="closeConfirm()">Voltar ao cardápio</button></div></div>
+<div class="overlay hidden" id="modal_edit" onclick="if(event.target===this)closeEdit()"><div class="sheet"><h2>Editar pedido</h2><p style="font-size:13px;color:var(--muted);margin-bottom:14px">Você pode alterar quantidades ou remover itens. Pedidos com status "Preparando" não podem ser editados.</p><div id="edit_items"></div><div class="total-row"><span>Total</span><span id="edit_total">R$ 0,00</span></div><div class="field"><textarea id="edit_notes" rows="2" placeholder="Observações do pedido"></textarea></div><button class="btn btn-primary" id="btn_add_item" onclick="addItemFromMenu()">+ Adicionar novo item do cardápio</button><button class="btn btn-ghost" id="btn_save_edit" onclick="saveEdit()">Salvar alterações</button><button class="btn btn-ghost" onclick="closeEdit()">Cancelar</button></div></div>
+<div class="overlay hidden" id="modal_add_item" onclick="if(event.target===this)closeAddItem()"><div class="sheet"><h2>Adicionar item ao pedido</h2><p style="font-size:13px;color:var(--muted);margin-bottom:14px">Escolha o que mais deseja adicionar:</p><div id="add_items_list" style="max-height:50vh;overflow-y:auto"></div><button class="btn btn-ghost" onclick="closeAddItem()">Voltar</button></div></div>
 <script>
-let storeId=null,tableId=null,storeInfo=null,categories=[],products=[],cart=[],currentCustomer=null,activeOrderId=null,trackTimer=null,selectedPayment=null;
+let storeId=null,tableId=null,storeInfo=null,categories=[],products=[],cart=[],currentCustomer=null,activeOrderId=null,trackTimer=null,selectedPayment=null,editDraft=[],editOriginalNotes='',pollTimer=null;
 const PAYMENTS=[{id:'pix',label:'Pix',ico:'💠'},{id:'credit',label:'Crédito',ico:'💳'},{id:'debit',label:'Débito',ico:'💳'},{id:'cash',label:'Dinheiro',ico:'💵'}];
-const STATUS_LABEL={new:{txt:'Pedido recebido',desc:'A loja já vai confirmar',ico:'📥'},preparing:{txt:'Em preparação',desc:'Seu pedido está sendo feito',ico:'👨‍'},ready:{txt:'Pronto',desc:'Pode retirar / a caminho',ico:'🔔'},delivered:{txt:'Entregue',desc:'Bom apetite!',ico:'✅'},cancelled:{txt:'Cancelado',desc:'Fale com a loja',ico:'❌'}};
+const STATUS_LABEL={new:{txt:'Pedido recebido',desc:'A loja já vai confirmar',ico:'📥'},preparing:{txt:'Em preparação',desc:'Seu pedido está sendo feito',ico:'👨‍🍳'},ready:{txt:'Pronto',desc:'Pode retirar / a caminho',ico:'🔔'},delivered:{txt:'Entregue',desc:'Bom apetite!',ico:'✅'},cancelled:{txt:'Cancelado',desc:'Fale com a loja',ico:'❌'}};
 function money(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 function maskPhone(el){let v=el.value.replace(/\D/g,'').slice(0,11);if(v.length>6)v=`(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;else if(v.length>2)v=`(${v.slice(0,2)}) ${v.slice(2)}`;el.value=v}
@@ -109,7 +131,7 @@ async function init(){
  if(!storeId){document.getElementById('store_name').textContent='Anote';document.getElementById('menu_container').innerHTML='<div class="empty"><div class="big">📲</div><h3>Bem-vindo ao Anote!</h3><p>Escaneie o QR Code da sua mesa.</p></div>';return}
  try{await waitForSupabase()}catch(e){document.getElementById('menu_container').innerHTML='<div class="empty">Sem conexão.</div>';return}
  loadSavedCustomer();loadActiveOrder();await loadMenu();
- if(tableId){document.getElementById('table_actions').style.display='flex';pollAlerts();setInterval(pollAlerts,5000)}
+ if(tableId){document.getElementById('table_actions').style.display='flex';pollAlerts();if(pollTimer)clearInterval(pollTimer);pollTimer=setInterval(pollAlerts,5000)}
  if(activeOrderId)startTracking();
 }
 function loadSavedCustomer(){try{const r=localStorage.getItem('anote_cliente_'+storeId);if(r){currentCustomer=JSON.parse(r);renderUserChip()}}catch(e){}}
@@ -148,16 +170,80 @@ function closeConfirm(){document.getElementById('modal_confirm').classList.add('
 function startTracking(){if(trackTimer)clearInterval(trackTimer);pollStatus();trackTimer=setInterval(pollStatus,4000)}
 async function pollStatus(){if(!activeOrderId||!currentCustomer)return renderTrackingEmpty();const{data}=await supabase.rpc('cliente_pedido_status',{p_order_id:activeOrderId,p_customer_id:currentCustomer.id});if(!data||!data.ok)return renderTrackingEmpty();renderTracking(data);if(data.status==='delivered'||data.status==='cancelled'){clearInterval(trackTimer);trackTimer=null;setTimeout(()=>{localStorage.removeItem('anote_pedido_ativo_'+storeId);activeOrderId=null},8000)}}
 function renderTrackingEmpty(){document.getElementById('track_container').innerHTML='<div class="empty"><div class="big">📦</div>Nenhum pedido em andamento.</div>'}
-function renderTracking(d){const order=['new','preparing','ready','delivered'];const idx=order.indexOf(d.status);let s=order.map((st,i)=>{const inf=STATUS_LABEL[st];let cls=i<idx?'done':(i===idx?'now':'');if(d.status==='cancelled')cls='';return`<div class="step ${cls}">${i<3?'<div class="line"></div>':''}<div class="circle">${i<idx?'✓':inf.ico}</div><div class="lbl">${inf.txt}<small>${inf.desc}</small></div></div>`}).join('');document.getElementById('track_container').innerHTML=`<div class="track-card"><div style="font-size:14px;color:var(--muted)">Pedido <b style="font-size:22px;color:var(--text)">#${d.order_number}</b> • ${money(d.total)}</div>${d.status==='cancelled'?'<div class="msg err">❌ Cancelado.</div>':''}<div class="steps">${s}</div><div style="margin-top:18px;font-size:13px;color:var(--muted)">${d.items.map(i=>`${i.qty}x ${i.name}`).join(' • ')}</div></div>`}
+function renderTracking(d){const order=['new','preparing','ready','delivered'];const idx=order.indexOf(d.status);let s=order.map((st,i)=>{const inf=STATUS_LABEL[st];let cls=i<idx?'done':(i===idx?'now':'');if(d.status==='cancelled')cls='';return`<div class="step ${cls}">${i<3?'<div class="line"></div>':''}<div class="circle">${i<idx?'✓':inf.ico}</div><div class="lbl">${inf.txt}<small>${inf.desc}</small></div></div>`}).join('');const canEdit=d.status==='new';const editBtn=canEdit?`<div class="edit-bar"><button class="btn btn-ghost" onclick="openEdit()">✏️ Editar pedido</button></div>`:`<div style="margin-top:12px;padding:10px;background:var(--primary-light);border-radius:10px;font-size:12px;color:var(--primary);text-align:center"><b>🔒 Pedido em preparo</b> — alterações só são possíveis antes de começar a preparação.</div>`;document.getElementById('track_container').innerHTML=`<div class="track-card"><div style="font-size:14px;color:var(--muted)">Pedido <b style="font-size:22px;color:var(--text)">#${d.order_number}</b> • ${money(d.total)}</div>${d.status==='cancelled'?'<div class="msg err" style="display:block">❌ Cancelado.</div>':''}<div class="steps">${s}</div><div style="margin-top:18px;font-size:13px;color:var(--muted)">${d.items.map(i=>`${i.qty}x ${i.name}`).join(' • ')}</div>${editBtn}</div>`}
+
+// === EDITAR PEDIDO (apenas status 'new') ===
+function openEdit(){if(!activeOrderId)return;(async()=>{const{data}=await supabase.rpc('cliente_pedido_status',{p_order_id:activeOrderId,p_customer_id:currentCustomer.id});if(!data||!data.ok||data.status!=='new'){alert('Este pedido não pode mais ser editado.');return}editDraft=data.items.map(i=>({...i}));editOriginalNotes=data.notes||'';renderEditItems();document.getElementById('edit_notes').value=editOriginalNotes;document.getElementById('modal_edit').classList.remove('hidden')})()}
+function closeEdit(){document.getElementById('modal_edit').classList.add('hidden')}
+function renderEditItems(){const b=document.getElementById('edit_items');if(!editDraft.length){b.innerHTML='<div class="empty" style="padding:20px">Sem itens.</div>';document.getElementById('edit_total').textContent=money(0);return}let t=0;b.innerHTML=editDraft.map(i=>{const prod=products.find(p=>p.id===i.product_id);const price=prod?Number(prod.price):i.price||0;const sub=price*i.quantity;t+=sub;return`<div class="edit-item"><div class="info"><div class="n">${i.quantity}x ${i.name||'Item'}</div><div class="p">${money(price)} • Subtotal: ${money(sub)}</div></div><div class="qty-ctrl"><button class="qty-btn" onclick="editQty('${i.product_id}',-1)">−</button><span>${i.quantity}</span><button class="qty-btn" onclick="editQty('${i.product_id}',1)">+</button></div><button class="rm" onclick="editRemove('${i.product_id}')" title="Remover">✕</button></div>`}).join('');document.getElementById('edit_total').textContent=money(t)}
+function editQty(pid,d){const i=editDraft.find(x=>x.product_id===pid);if(!i)return;i.quantity+=d;if(i.quantity<=0)editDraft=editDraft.filter(x=>x.product_id!==pid);renderEditItems()}
+function editRemove(pid){editDraft=editDraft.filter(x=>x.product_id!==pid);renderEditItems()}
+function addItemFromMenu(){const list=document.getElementById('add_items_list');list.innerHTML=products.map(p=>{const existing=editDraft.find(i=>i.product_id===p.id);const qty=existing?existing.quantity:0;return`<div class="prod-card" style="margin-bottom:8px"><div class="prod-thumb">🍽️</div><div class="prod-info"><div class="prod-name">${p.name}</div><div class="prod-desc">${p.description||''}</div><div class="prod-bottom"><span class="prod-price">${money(p.price)}</span>${qty>0?`<div class="qty-ctrl"><button class="qty-btn" onclick="editAddQty('${p.id}',-1);this.closest('.prod-card').querySelector('.qty-val').textContent=editDraft.find(i=>i.product_id==='${p.id}')?.quantity||0">−</button><span class="qty-val">${qty}</span><button class="qty-btn" onclick="editAddQty('${p.id}',1);this.closest('.prod-card').querySelector('.qty-val').textContent=editDraft.find(i=>i.product_id==='${p.id}')?.quantity||0">+</button></div>`:`<button class="add-btn" onclick="editAddQty('${p.id}',1);this.closest('.prod-card').querySelector('.prod-bottom').innerHTML='<div class=\\'qty-ctrl\\'><button class=\\'qty-btn\\' onclick=\\'editAddQty(&quot;${p.id}&quot;,-1);this.closest(&quot;.prod-card&quot;).querySelector(&quot;.qty-val&quot;).textContent=editDraft.find(i=>i.product_id===&quot;${p.id}&quot;)?.quantity||0\\'>−</button><span class=\\'qty-val\\'>1</span><button class=\\'qty-btn\\' onclick=\\'editAddQty(&quot;${p.id}&quot;,1);this.closest(&quot;.prod-card&quot;).querySelector(&quot;.qty-val&quot;).textContent=editDraft.find(i=>i.product_id===&quot;${p.id}&quot;)?.quantity||0\\'>+</button></div>'">+</button>`}</div></div></div>`}).join('');document.getElementById('modal_add_item').classList.remove('hidden')}
+function editAddQty(pid,d){const prod=products.find(p=>p.id===pid);if(!prod)return;const existing=editDraft.find(i=>i.product_id===pid);if(existing){existing.quantity+=d;if(existing.quantity<=0)editDraft=editDraft.filter(x=>x.product_id!==pid)}else if(d>0){editDraft.push({product_id:pid,name:prod.name,price:Number(prod.price),quantity:1})}renderEditItems()}
+function closeAddItem(){document.getElementById('modal_add_item').classList.add('hidden')}
+async function saveEdit(){if(!editDraft.length){alert('O pedido precisa ter ao menos um item.');return}const btn=document.getElementById('btn_save_edit');btn.disabled=true;btn.textContent='Salvando...';const notes=document.getElementById('edit_notes').value.trim()||null;const items=editDraft.map(i=>({product_id:i.product_id,quantity:i.quantity}));const{data,error}=await supabase.rpc('cliente_atualizar_pedido',{p_order_id:activeOrderId,p_customer_id:currentCustomer.id,p_items:items,p_notes:notes});btn.disabled=false;btn.textContent='Salvar alterações';if(error||!data||!data.ok){alert('Erro ao salvar: '+(data?.error||error?.message));return}closeEdit();closeAddItem();pollStatus()}
+
 async function loadHistory(){const b=document.getElementById('history_container');if(!currentCustomer){b.innerHTML='<div class="empty">Faça seu primeiro pedido.</div>';return}b.innerHTML='<div class="spinner"></div>';const{data}=await supabase.rpc('cliente_historico',{p_customer_id:currentCustomer.id,p_store_id:storeId});if(!data||!data.ok){b.innerHTML='<div class="empty">Erro.</div>';return}if(!data.orders.length){b.innerHTML='<div class="empty">Sem pedidos ainda.</div>';return}b.innerHTML=data.orders.map(o=>`<div class="hist-card"><div class="hist-top"><b>#${o.order_number}</b><span class="badge ${o.status}">${STATUS_LABEL[o.status]?.txt||o.status}</span></div><div style="font-size:13px;color:var(--muted)">${o.items.map(i=>`${i.qty}x ${i.name}`).join('<br>')}</div><div style="display:flex;justify-content:space-between;margin-top:8px"><span style="color:var(--muted)">${new Date(o.created_at).toLocaleDateString('pt-BR')}</span><b>${money(o.total)}</b></div></div>`).join('')}
 function showView(v){['menu','tracking','history'].forEach(x=>document.getElementById('view_'+x).classList.add('hidden'));['nav_menu','nav_track','nav_hist'].forEach(n=>document.getElementById(n).classList.remove('active'));document.getElementById('view_'+v).classList.remove('hidden');document.getElementById('nav_'+(v==='menu'?'menu':v==='tracking'?'track':'hist')).classList.add('active');if(v==='tracking'){activeOrderId?pollStatus():renderTrackingEmpty()}if(v==='history')loadHistory()}
-async function chamarGarcom(){if(!confirm('Chamar o garçom na sua mesa?'))return;const{data}=await supabase.rpc('cliente_chamar',{p_store_id:storeId,p_table_id:tableId,p_type:'waiter'});if(data&&data.ok)pollAlerts()}
-async function fecharConta(){if(!confirm('Pedir o fechamento da conta?'))return;const{data}=await supabase.rpc('cliente_chamar',{p_store_id:storeId,p_table_id:tableId,p_type:'bill'});if(data&&data.ok)pollAlerts()}
-async function confirmarAlerta(id){await supabase.rpc('cliente_fechar_alerta',{p_store_id:storeId,p_alert_id:id});pollAlerts()}
+
+// === CHAMAR GARÇOM ===
+async function chamarGarcom(){
+ if(!confirm('Chamar o garçom na sua mesa?'))return;
+ const{data,error}=await supabase.rpc('cliente_chamar',{p_store_id:storeId,p_table_id:tableId,p_type:'waiter'});
+ if(error||!data||!data.ok){alert('Erro: '+(data?.error||error?.message));return}
+ pollAlerts();
+}
+
+// === FECHAR CONTA ===
+async function fecharConta(){
+ if(!confirm('Pedir o fechamento da conta? O caixa vai confirmar os valores.'))return;
+ const{data,error}=await supabase.rpc('cliente_chamar',{p_store_id:storeId,p_table_id:tableId,p_type:'bill'});
+ if(error||!data||!data.ok){alert('Erro: '+(data?.error||error?.message));return}
+ pollAlerts();
+}
+
+// === MARCAR GARÇOM COMO ATENDIDO (cliente) ===
+async function marcarAtendido(alertId){
+ if(!confirm('Confirmar que o garçom já te atendeu?'))return;
+ const{data,error}=await supabase.rpc('cliente_fechar_alerta',{p_store_id:storeId,p_alert_id:alertId});
+ if(error){alert('Erro: '+error.message);return}
+ pollAlerts();
+}
+
+// === CONFIRMAR CONTA (cliente ciente) ===
+async function confirmarConta(alertId){
+ if(!confirm('Confirma que recebeu o fechamento da conta?'))return;
+ const{data,error}=await supabase.rpc('cliente_fechar_alerta',{p_store_id:storeId,p_alert_id:alertId});
+ if(error){alert('Erro: '+error.message);return}
+ pollAlerts();
+}
+
+// === ALERTAS DA MESA ===
 async function pollAlerts(){if(!tableId)return;const{data}=await supabase.rpc('cliente_meus_alertas',{p_store_id:storeId,p_table_id:tableId});if(!data||!data.ok)return;renderAlertBanner(data.alerts||[])}
-function renderAlertBanner(a){const b=document.getElementById('alert_banner');if(!a.length){b.innerHTML='';return}b.innerHTML=a.map(x=>{if(x.type==='waiter')return x.status==='ack'?`<div class="msg ok">✅ Garçom a caminho!<button class="btn btn-primary" onclick="confirmarAlerta('${x.id}')">Confirmar</button></div>`:`<div class="msg ok">🔔 Garçom chamado! Aguarde...</div>`;return x.status==='ack'?`<div class="msg ok">✅ Conta confirmada! Maquininha a caminho ou vá ao balcão.<button class="btn btn-primary" onclick="confirmarAlerta('${x.id}')">Concluir</button></div>`:`<div class="msg ok">💳 Conta solicitada! Aguardando o caixa...</div>`}).join('')}
+function renderAlertBanner(a){
+ const b=document.getElementById('alert_banner');
+ if(!a.length){b.innerHTML='';return}
+ b.innerHTML=a.map(x=>{
+  if(x.type==='waiter'){
+   if(x.status==='closed')return`<div class="alert-card" style="background:#f0fdf4"><div class="ico">✅</div><div class="info">Atendimento concluído.<small>O garçom marcou como atendido.</small></div></div>`;
+   if(x.status==='ack')return`<div class="alert-card" style="background:#eff6ff"><div class="ico">👨‍🍳</div><div class="info">Garçom a caminho!<small>Já viu o chamado e está indo até sua mesa.</small></div><div class="actions"><button style="background:var(--green);color:#fff" onclick="marcarAtendido('${x.id}')">Marcar como atendido</button></div></div>`;
+   return`<div class="alert-card" style="background:#fef3c7"><div class="ico">🔔</div><div class="info">Chamando garçom...<small>Aguardando resposta.</small></div></div>`;
+  }
+  if(x.type==='bill'){
+   if(x.status==='closed')return`<div class="alert-card" style="background:#f0fdf4"><div class="ico">✅</div><div class="info">Conta encerrada!<small>Obrigado pela preferência.</small></div></div>`;
+   if(x.status==='ack'){
+    const total=x.total?money(x.total):'';
+    const payment=x.payment_method?PAYMENTS.find(p=>p.id===x.payment_method)?.label:'';
+    return`<div class="alert-card" style="background:#dcfce7"><div class="ico">💳</div><div class="info">Conta confirmada pelo caixa!<small>${total?`Total: ${total}`:''}${payment?` • ${payment}`:''}. Aguarde maquininha ou vá ao balcão.</small></div><div class="actions"><button style="background:var(--green);color:#fff" onclick="confirmarConta('${x.id}')">Estou ciente</button></div></div>`;
+   }
+   return`<div class="alert-card" style="background:#fef3c7"><div class="ico">💳</div><div class="info">Fechamento de conta solicitado<small>Aguardando o caixa confirmar.</small></div></div>`;
+  }
+  return'';
+ }).join('');
+}
+
 init();
-window.openCart=openCart;window.closeCart=closeCart;window.addToCart=addToCart;window.changeQty=changeQty;window.checkout=checkout;window.handleIdentify=handleIdentify;window.closeIdentify=closeIdentify;window.selectPayment=selectPayment;window.confirmPayment=confirmPayment;window.closePayment=closePayment;window.goToTracking=goToTracking;window.closeConfirm=closeConfirm;window.showView=showView;window.filterCat=filterCat;window.maskPhone=maskPhone;window.chamarGarcom=chamarGarcom;window.fecharConta=fecharConta;window.confirmarAlerta=confirmarAlerta;
+window.openCart=openCart;window.closeCart=closeCart;window.addToCart=addToCart;window.changeQty=changeQty;window.checkout=checkout;window.handleIdentify=handleIdentify;window.closeIdentify=closeIdentify;window.selectPayment=selectPayment;window.confirmPayment=confirmPayment;window.closePayment=closePayment;window.goToTracking=goToTracking;window.closeConfirm=closeConfirm;window.showView=showView;window.filterCat=filterCat;window.maskPhone=maskPhone;window.chamarGarcom=chamarGarcom;window.fecharConta=fecharConta;window.confirmarAlerta=marcarAtendido;window.marcarAtendido=marcarAtendido;window.confirmarConta=confirmarConta;window.openEdit=openEdit;window.closeEdit=closeEdit;window.editQty=editQty;window.editRemove=editRemove;window.addItemFromMenu=addItemFromMenu;window.editAddQty=editAddQty;window.closeAddItem=closeAddItem;window.saveEdit=saveEdit;
 </script>
 </body>
 </html>
