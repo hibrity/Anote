@@ -260,4 +260,214 @@ function renderAll(){renderCatalog();renderOrderSelects();renderOrders();renderO
 
 async function loadDashboard(){const{data}=await supabase.rpc('dono_dashboard',{p_store_id:store.id});if(!data||!data.ok)return;const s=data.stats;document.getElementById('stats').innerHTML=`<div class="stat">Produtos<b>${s.total_products}</b></div><div class="stat">Clientes<b>${s.total_customers}</b></div><div class="stat">Pedidos<b>${s.total_orders}</b></div><div class="stat">Em aberto<b>${s.open_orders}</b></div><div class="stat">Hoje<b>${s.today_orders}</b></div><div class="stat">Fat. hoje<b>${money(s.today_revenue)}</b></div>`}
 
-function renderCatalog(){document.getElementById('list_cats').innerHTML=D.categories.map(c=>`<div class="item">${c.name}</div>`).join('')||'<div class="muted">Nenhuma</div>';document.getElementById('list_prods').innerHTML=D.products.map(p=>`<div class="item"><b>${p.name}</b><br><span class="muted">${money(p.price)}</span></div>`).join('')||'<div 
+function renderCatalog(){document.getElementById('list_cats').innerHTML=D.categories.map(c=>`<div class="item">${c.name}</div>`).join('')||'<div class="muted">Nenhuma</div>';document.getElementById('list_prods').innerHTML=D.products.map(p=>`<div class="item"><b>${p.name}</b><br><span class="muted">${money(p.price)}</span></div>`).join('')||'<div class="muted">Nenhum</div>';document.getElementById('list_mesas').innerHTML=D.tables.map(t=>`<div class="item">🍽️ Mesa ${t.table_number}</div>`).join('')||'<div class="muted">Nenhuma</div>';document.getElementById('prod_cat').innerHTML='<option value="">Sem categoria</option>'+D.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
+
+async function createCategory(){const n=document.getElementById('cat_name').value.trim();if(!n)return;const{data}=await supabase.rpc('dono_criar_categoria',{p_store_id:store.id,p_nome:n});document.getElementById('cat_res').innerHTML=data?.ok?'<div class="msg ok">Criada!</div>':`<div class="msg err">${data?.error}</div>`;document.getElementById('cat_name').value='';await loadData()}
+
+async function createProduct(){const n=document.getElementById('prod_name').value.trim(),c=document.getElementById('prod_cat').value||null,p=Number(document.getElementById('prod_price').value||0),d=document.getElementById('prod_desc').value.trim();if(!n){document.getElementById('prod_res').innerHTML='<div class="msg err">Digite o nome.</div>';return}const{data}=await supabase.rpc('dono_criar_produto',{p_store_id:store.id,p_categoria:c,p_nome:n,p_preco:p,p_desc:d});document.getElementById('prod_res').innerHTML=data?.ok?'<div class="msg ok">Criado!</div>':`<div class="msg err">${data?.error}</div>`;document.getElementById('prod_name').value='';document.getElementById('prod_price').value='';document.getElementById('prod_desc').value='';await loadData()}
+
+function renderOrderSelects(){document.getElementById('ord_cli').innerHTML='<option value="">Sem cliente</option>'+D.customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');document.getElementById('ord_mesa').innerHTML='<option value="">Mesa</option>'+D.tables.map(t=>`<option value="${t.id}">${t.table_number}</option>`).join('');document.getElementById('ord_prod').innerHTML=D.products.map(p=>`<option value="${p.id}">${p.name} — ${money(p.price)}</option>`).join('')||'<option value="">Sem produtos</option>'}
+
+function toggleMesa(){document.getElementById('ord_mesa').classList.toggle('hidden',document.getElementById('ord_tipo').value!=='table')}
+
+function addOrderItem(){const pid=document.getElementById('ord_prod').value,q=Number(document.getElementById('ord_qtd').value||1);const p=D.products.find(x=>x.id===pid);if(!p){alert('Escolha produto.');return}const e=orderItems.find(i=>i.product_id===pid);if(e)e.quantity+=q;else orderItems.push({product_id:pid,quantity:q});renderOrderItems()}
+
+function rmOrderItem(pid){orderItems=orderItems.filter(i=>i.product_id!==pid);renderOrderItems()}
+
+function renderOrderItems(){const b=document.getElementById('ord_items');if(!orderItems.length){b.innerHTML='<div class="muted">Nenhum item.</div>';return}b.innerHTML=orderItems.map(i=>{const p=D.products.find(x=>x.id===i.product_id);return`<div class="item" style="display:flex;justify-content:space-between;align-items:center">${i.quantity}x ${p?p.name:'?'}<button class="btn btn-red btn-sm" onclick="rmOrderItem('${i.product_id}')">✕</button></div>`}).join('')}
+
+async function createCustomer(){const n=document.getElementById('cli_nome').value.trim();if(!n)return;const{data}=await supabase.rpc('staff_criar_cliente',{p_store_id:store.id,p_codigo:staffCode,p_nome:n,p_telefone:document.getElementById('cli_fone').value.trim(),p_endereco:document.getElementById('cli_end').value.trim(),p_notes:document.getElementById('cli_obs').value.trim()});document.getElementById('cli_res').innerHTML=data?.ok?'<div class="msg ok">Salvo!</div>':`<div class="msg err">${data?.error}</div>`;['cli_nome','cli_fone','cli_end','cli_obs'].forEach(i=>document.getElementById(i).value='');await loadData()}
+
+async function createOrder(){const tipo=document.getElementById('ord_tipo').value,mesa=tipo==='table'?document.getElementById('ord_mesa').value:null,cli=document.getElementById('ord_cli').value||null,pag=document.getElementById('ord_pagamento').value||null;if(!orderItems.length){document.getElementById('ord_res').innerHTML='<div class="msg err">Adicione pelo menos 1 item.</div>';return}const{data}=await supabase.rpc('staff_criar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_customer_id:cli,p_table_id:mesa,p_order_type:tipo,p_order_source:'counter',p_notes:document.getElementById('ord_obs').value.trim()||null,p_items:orderItems,p_payment_method:pag});document.getElementById('ord_res').innerHTML=data?.ok?`<div class="msg ok">Pedido #${data.order_number} criado! Total ${money(data.total)}</div>`:`<div class="msg err">${data?.error}</div>`;orderItems=[];renderOrderItems();await loadData()}
+
+function renderOrders(){const b=document.getElementById('list_orders');const a=D.orders.filter(o=>['new','preparing','ready'].includes(o.status));if(!a.length){b.innerHTML='<div class="muted">Nenhum em andamento. 🎉</div>';return}b.innerHTML=a.slice(0,40).map(o=>`<div class="order-card"><div class="order-head"><b>#${o.order_number}</b><span class="badge b-${o.status}">${STATUS[o.status]}</span></div><div class="muted">${o.customer_name||'Balcão'}${o.table_number?' • Mesa '+o.table_number:''}</div><div style="margin:8px 0">${(o.items||[]).map(i=>`${i.qty}x ${i.name}`).join('<br>')||'Sem itens'}</div><div style="display:flex;justify-content:space-between"><b>${money(o.total)}</b><span class="muted">${o.payment_method?PAY_LABEL[o.payment_method]:''}</span></div><div class="row" style="margin-top:8px"><button class="btn btn-blue btn-sm" onclick="setStatus('${o.id}','delivered')">✅ Entregue</button><button class="btn btn-green btn-sm" onclick="setPay('${o.id}','paid')">💰 Pago</button><button class="btn btn-red btn-sm" onclick="setStatus('${o.id}','cancelled')">✕</button></div></div>`).join('')}
+
+async function setStatus(id,s){await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:s,p_payment:null});await liveRefresh()}
+async function setPay(id,p){await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:null,p_payment:p});await liveRefresh()}
+
+async function regenCode(){if(!confirm('Regenerar o código? Todos os QR Codes antigos pararão de funcionar.'))return;const{data}=await supabase.rpc('dono_regenerar_codigo',{p_store_id:store.id});if(data&&data.ok){staffCode=data.staff_code;document.getElementById('team_code').textContent=staffCode;document.getElementById('team_res').innerHTML='<div class="msg ok">Novo código gerado!</div>';renderLoginQRs()}}
+
+function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.1;o.start();setTimeout(()=>{o.stop();c.close()},300)}catch(e){}}
+
+async function refreshAlerts(){if(!store||!staffCode)return;const{data}=await supabase.rpc('staff_alertas',{p_store_id:store.id,p_codigo:staffCode});if(!data||!data.ok)return;const a=data.alerts||[];if(a.length>lastAlertCount)beep();lastAlertCount=a.length;document.getElementById('staff_alerts').innerHTML=a.map(x=>x.type==='waiter'?`<div class="msg err" style="margin-bottom:8px">🔔 <b>Mesa ${x.table_number}</b> chamando! <button class="btn btn-green btn-sm" onclick="atenderAlerta('${x.id}')">✅ Atender</button></div>`:`<div class="msg err" style="margin-bottom:8px">💳 <b>Mesa ${x.table_number}</b> pediu a conta! <button class="btn btn-blue btn-sm" onclick="atenderAlerta('${x.id}')">✅ Confirmar</button></div>`).join('')}
+
+async function atenderAlerta(id){await supabase.rpc('staff_alerta_ack',{p_store_id:store.id,p_codigo:staffCode,p_alert_id:id});refreshAlerts()}
+
+async function createMesaAndQR(){const n=document.getElementById('qr_mesa_num').value.trim();if(!n){alert('Digite o número.');return}const{data}=await supabase.rpc('dono_criar_mesa',{p_store_id:store.id,p_numero:n});if(!data||!data.ok){alert(data?.error||'Erro');return}document.getElementById('qr_mesa_num').value='';await loadData();renderQRCodes()}
+
+async function editMesa(id,at){const n=prompt('Novo número:',at);if(!n||!n.trim())return;const{data}=await supabase.rpc('dono_atualizar_mesa',{p_store_id:store.id,p_table_id:id,p_numero:n.trim()});if(data&&data.ok){await loadData();renderQRCodes()}else alert(data?.error||'Erro')}
+
+async function delMesa(id){if(!confirm('Excluir esta mesa e o QR?'))return;const{data}=await supabase.rpc('dono_excluir_mesa',{p_store_id:store.id,p_table_id:id});if(data&&data.ok){await loadData();renderQRCodes()}else alert(data?.error||'Erro')}
+
+// ============ QR CODES DE LOGIN POR CARGO ============
+function renderLoginQRs(){
+  if(typeof QRCode==='undefined')return;
+  const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
+  const cargos=['waiter','kitchen','cashier'];
+  cargos.forEach(cargo=>{
+    const el=document.getElementById('qr_'+cargo);
+    const linkEl=document.getElementById('link_'+cargo);
+    if(!el)return;
+    const url=base+CARGO_PAGE[cargo]+'?loja='+encodeURIComponent(staffCode||'');
+    el.innerHTML='';
+    new QRCode(el,{text:url,width:120,height:120});
+    if(linkEl)linkEl.value=url;
+  });
+}
+
+function copyLink(elId){const el=document.getElementById(elId);if(!el)return;el.select();navigator.clipboard.writeText(el.value).then(()=>alert('Link copiado!'))}
+
+// ============ GESTÃO DE FUNCIONÁRIOS ============
+async function loadStaff(){
+  const{data}=await supabase.rpc('dono_listar_staff',{p_store_id:store.id});
+  staffList=data||[];
+  renderStaffList();
+}
+
+function renderStaffList(){
+  const b=document.getElementById('list_staff');
+  if(!staffList.length){
+    b.innerHTML='<div class="muted" style="text-align:center;padding:20px">Nenhum funcionário cadastrado.<br>Crie o primeiro acima! 👆</div>';
+    return;
+  }
+  b.innerHTML=staffList.map(s=>`
+    <div class="staff-card">
+      <div class="staff-info">
+        <b>${s.nome}</b>
+        <span class="badge b-${s.cargo}">${CARGO_LABEL[s.cargo]||s.cargo}</span>
+        ${s.last_login?`<div class="muted" style="font-size:11px;margin-top:4px">Último acesso: ${new Date(s.last_login).toLocaleString('pt-BR')}</div>`:''}
+      </div>
+      <div class="staff-pin">${s.pin}</div>
+      <div class="staff-actions">
+        <button class="btn btn-ghost btn-sm" onclick="copyStaffLink('${s.cargo}')" title="Copiar link de acesso">🔗</button>
+        <button class="btn btn-amber btn-sm" onclick="regenPin('${s.id}')" title="Gerar novo PIN">🔄</button>
+        <button class="btn btn-purple btn-sm" onclick="editPin('${s.id}','${s.pin}')" title="Definir PIN">✏️</button>
+        <button class="btn btn-blue btn-sm" onclick="showFicha('${s.id}')" title="Ver ficha">🎫</button>
+        <button class="btn btn-red btn-sm" onclick="deleteStaff('${s.id}','${s.nome}')" title="Remover">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function createStaff(){
+  const nome=document.getElementById('stf_name').value.trim();
+  const cargo=document.getElementById('stf_cargo').value;
+  const res=document.getElementById('stf_res');
+  if(!nome){res.innerHTML='<div class="msg err">Digite o nome.</div>';return}
+  res.innerHTML='<div class="msg ok">Criando...</div>';
+  const{data}=await supabase.rpc('dono_criar_staff',{p_store_id:store.id,p_nome:nome,p_cargo:cargo});
+  if(data&&data.ok){
+    res.innerHTML=`<div class="msg ok">✅ Criado! PIN: <b style="font-size:18px;letter-spacing:2px">${data.pin}</b></div>`;
+    document.getElementById('stf_name').value='';
+    await loadStaff();
+    // Mostrar ficha automaticamente
+    setTimeout(()=>{
+      const stf=staffList.find(s=>s.id===data.staff_id);
+      if(stf)showFicha(stf.id);
+    },300);
+  }else{
+    res.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;
+  }
+}
+
+async function regenPin(id){
+  if(!confirm('Gerar novo PIN para este funcionário?'))return;
+  const{data}=await supabase.rpc('dono_regenerar_pin',{p_store_id:store.id,p_staff_id:id});
+  if(data&&data.ok){
+    alert('Novo PIN: '+data.pin);
+    await loadStaff();
+  }
+}
+
+async function editPin(id,currentPin){
+  const novo=prompt('Novo PIN (4 números):',currentPin);
+  if(!novo)return;
+  if(!/^\d{4}$/.test(novo)){alert('PIN deve ter exatamente 4 números.');return}
+  const{data}=await supabase.rpc('dono_definir_pin',{p_store_id:store.id,p_staff_id:id,p_pin:novo});
+  if(data&&data.ok){
+    alert('PIN atualizado!');
+    await loadStaff();
+  }else{
+    alert(data?.error||'Erro');
+  }
+}
+
+async function deleteStaff(id,nome){
+  if(!confirm(`Remover ${nome}? O PIN deixará de funcionar.`))return;
+  const{data}=await supabase.rpc('dono_excluir_staff',{p_store_id:store.id,p_staff_id:id});
+  if(data&&data.ok){
+    await loadStaff();
+  }else{
+    alert(data?.error||'Erro');
+  }
+}
+
+function copyStaffLink(cargo){
+  const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
+  const url=base+CARGO_PAGE[cargo]+'?loja='+encodeURIComponent(staffCode||'');
+  navigator.clipboard.writeText(url).then(()=>alert('Link de acesso copiado!'));
+}
+
+// ============ FICHA DO FUNCIONÁRIO ============
+function showFicha(id){
+  const s=staffList.find(x=>x.id===id);
+  if(!s)return;
+  const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
+  const url=base+CARGO_PAGE[s.cargo]+'?loja='+encodeURIComponent(staffCode||'');
+  
+  document.getElementById('ficha_content').innerHTML=`
+    <div style="font-size:14px;color:#666;margin-bottom:8px">🍽️ ${store.name}</div>
+    <div style="font-size:22px;font-weight:800;margin-bottom:4px">${s.nome}</div>
+    <div style="font-size:14px;color:#666;margin-bottom:16px">${CARGO_LABEL[s.cargo]||s.cargo}</div>
+    <div style="background:#f1f5f9;padding:16px;border-radius:12px;margin-bottom:16px">
+      <div style="font-size:12px;color:#666;margin-bottom:6px">PIN DE ACESSO</div>
+      <div style="font-size:36px;font-weight:800;letter-spacing:8px;font-family:monospace">${s.pin}</div>
+    </div>
+    <div id="ficha_qr" style="display:inline-block"></div>
+    <div style="font-size:12px;color:#666;margin-top:12px">
+      1️⃣ Escaneie o QR Code<br>
+      2️⃣ Digite seu PIN<br>
+      3️⃣ Comece a trabalhar! 🚀
+    </div>
+  `;
+  document.getElementById('ficha_card').classList.remove('hidden');
+  
+  // Gerar QR na ficha
+  setTimeout(()=>{
+    const qrEl=document.getElementById('ficha_qr');
+    if(qrEl){qrEl.innerHTML='';new QRCode(qrEl,{text:url,width:140,height:140})}
+  },100);
+  
+  // Scroll até a ficha
+  document.getElementById('ficha_card').scrollIntoView({behavior:'smooth'});
+}
+
+function closeFicha(){
+  document.getElementById('ficha_card').classList.add('hidden');
+}
+
+function printFicha(){
+  const content=document.getElementById('ficha_content').innerHTML;
+  const win=window.open('','_blank');
+  win.document.write(`
+    <html><head><title>Ficha do Funcionário</title>
+    <style>
+      body{font-family:Segoe UI,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#fff}
+      .ficha{border:3px dashed #ccc;padding:40px;border-radius:20px;text-align:center;max-width:350px}
+    </style></head>
+    <body><div class="ficha">${content}</div></body></html>
+  `);
+  win.document.close();
+  setTimeout(()=>{win.print()},500);
+}
+
+function renderQRCodes(){if(typeof QRCode==='undefined'){document.getElementById('qr_container').innerHTML='<div class="msg err">QR não carregou.</div>';return}const base=location.href.substring(0,location.href.lastIndexOf('/')+1);const cu=base+'cliente.html';const c=document.getElementById('qr_container');c.innerHTML='';if(!D.tables.length){c.innerHTML='<div class="muted">Gere a primeira mesa acima.</div>';return}D.tables.forEach(t=>{const u=`${cu}?loja=${store.id}&mesa=${t.id}`;const d=document.createElement('div');d.className='qr-item';d.innerHTML=`<div id="qr_${t.id}"></div><div class="qr-label">Mesa ${t.table_number}</div><div style="margin-top:8px;display:flex;gap:6px;justify-content:center"><button class="btn btn-blue btn-sm" onclick="editMesa('${t.id}','${t.table_number}')">✏️</button><button class="btn btn-red btn-sm" onclick="delMesa('${t.id}')">🗑️</button></div>`;c.appendChild(d);new QRCode(document.getElementById('qr_'+t.id),{text:u,width:150,height:150})})}
+
+async function boot(){try{await waitForSupabase()}catch(e){return}const{data}=await supabase.auth.getSession();if(data.session){await enterAsOwner();return}showScreen('login')}
+boot();
+
+// Expor funções globais
+window.switchEntry=switchEntry;window.createStoreSingle=createStoreSingle;window.ownerLogin=ownerLogin;window.logout=logout;window.openTab=openTab;window.loadData=loadData;window.createCategory=createCategory;window.createProduct=createProduct;window.createCustomer=createCustomer;window.createOrder=createOrder;window.toggleMesa=toggleMesa;window.addOrderItem=addOrderItem;window.rmOrderItem=rmOrderItem;window.setStatus=setStatus;window.setPay=setPay;window.regenCode=regenCode;window.atenderAlerta=atenderAlerta;window.createMesaAndQR=createMesaAndQR;window.editMesa=editMesa;window.delMesa=delMesa;window.copyLink=copyLink;window.createStaff=createStaff;window.regenPin=regenPin;window.editPin=editPin;window.deleteStaff=deleteStaff;window.copyStaffLink=copyStaffLink;window.showFicha=showFicha;window.closeFicha=closeFicha;window.printFicha=printFicha;
+</script>
+</body>
+</html>
