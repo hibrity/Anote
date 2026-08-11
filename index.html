@@ -38,6 +38,7 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 .login-tab.active{background:var(--green);color:#052e16}
 .qr-item{display:inline-block;text-align:center;margin:10px;padding:14px;background:#fff;border-radius:12px;vertical-align:top}
 .qr-label{margin-top:8px;font-weight:700;color:#1c1917}
+.qr-link{margin-top:4px;font-size:10px;color:#94a3b8;word-break:break-all;max-width:180px}
 .tabs{display:flex;gap:8px;margin-bottom:14px}
 .tab{padding:10px 16px;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--mut);cursor:pointer;font-weight:700;font-size:14px}
 .tab.active{background:var(--green);color:#052e16}
@@ -62,23 +63,18 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 <div id="screen_app" class="hidden">
 <div class="topbar"><div><div class="title" id="app_store_name">Loja</div><div class="muted">👑 Dono</div></div>
 <div class="row" style="max-width:340px"><button class="btn btn-ghost" onclick="refreshAll()">🔄 Atualizar</button><button class="btn btn-red" onclick="logout()">Sair</button></div></div>
-
 <div id="alerts_wrap"></div>
-
 <div class="nav">
 <button class="btn btn-blue" onclick="location.href='catalogo.html'">📦 Catálogo</button>
 <button class="btn btn-blue" onclick="location.href='pedidos.html'">🧾 Pedidos</button>
 <button class="btn btn-blue" onclick="location.href='equipe.html'">👥 Equipe</button>
 <button class="btn btn-amber" id="btn_cozinha">👨‍🍳 Cozinha</button>
 </div>
-
 <div class="tabs">
 <div class="tab active" id="tb_painel" onclick="openTab('painel')">📊 Painel</div>
 <div class="tab" id="tb_mesas" onclick="openTab('mesas')">🔳 Mesas</div>
 </div>
-
 <div id="tab_painel"><div class="card"><h2>📊 Resumo</h2><div class="grid3" id="stats"></div></div></div>
-
 <div id="tab_mesas" class="hidden"><div class="card print-area"><h2>🔳 QR Codes das mesas</h2>
 <div style="padding:14px;background:var(--card2);border-radius:12px">
 <div class="row" style="margin-bottom:10px">
@@ -100,9 +96,8 @@ const $=id=>document.getElementById(id);
 let S={store:null,code:null},D={tables:[]},liveTimer=null,lastAlerts=0;
 function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t==='err'?'#ef4444':'#22c55e';e.style.color=t==='err'?'#fff':'#052e16';e.classList.add('show');clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500)}
 function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
-async function rpc(n,p={}){const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}
+async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}catch(e){console.warn(n+' exception:',e);return{data:null,error:e}}}
 
-// ---------- LOGIN ----------
 function switchEntry(m){['new','login'].forEach(x=>{$('lt_'+x).classList.toggle('active',x===m);$('entry_'+x).classList.toggle('hidden',x!==m)})}
 async function createStore(){
  const on=$('new_owner_name').value.trim(),e=$('new_email').value.trim(),p=$('new_pass').value,sn=$('new_store_name').value.trim(),b=$('new_result');
@@ -137,7 +132,6 @@ function openTab(t){['painel','mesas'].forEach(x=>{$('tab_'+x).classList.toggle(
 function startLive(){if(liveTimer)return;liveTimer=setInterval(refreshAll,5000)}
 function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null}}
 
-// ---------- DADOS ----------
 async function refreshAll(){
  if(!S.store)return;
  const{data}=await rpc('staff_carregar',{p_store_id:S.store.id,p_codigo:S.code});
@@ -147,7 +141,6 @@ async function refreshAll(){
  renderAlerts();
 }
 
-// ---------- ALERTAS ----------
 async function renderAlerts(){
  const{data}=await rpc('staff_alertas',{p_store_id:S.store.id,p_codigo:S.code});
  if(!data?.ok)return;
@@ -168,7 +161,6 @@ async function ackAlert(id){await rpc('staff_alerta_ack',{p_store_id:S.store.id,
 async function doneAlert(id){await rpc('staff_alerta_done',{p_store_id:S.store.id,p_codigo:S.code,p_alert_id:id});renderAlerts()}
 function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.1;o.start();setTimeout(()=>{o.stop();c.close()},300)}catch(e){}}
 
-// ---------- MESAS (AJUSTADO) ----------
 async function createMesa(){
  const n=$('qr_mesa_num').value.trim();
  if(!n){toast('Digite o número da mesa','err');return}
@@ -176,31 +168,37 @@ async function createMesa(){
  btn.disabled=true;btn.textContent='Criando...';
  const{data,error}=await rpc('dono_criar_mesa',{p_store_id:S.store.id,p_numero:n});
  btn.disabled=false;btn.textContent='➕ Gerar QR';
- if(data?.ok){
-  $('qr_mesa_num').value='';
-  toast('Mesa criada! ✅');
- }else{
-  console.warn('dono_criar_mesa:',error?.message||data?.error);
-  toast(error?.message||data?.error||'Erro ao criar mesa','err');
- }
- await reloadMesas(); // sempre recarrega a lista de mesas
+ if(data?.ok){$('qr_mesa_num').value='';toast('Mesa criada! ✅')}
+ else{const msg=error?.message||data?.error||'Erro ao criar mesa';console.warn('Erro criar mesa:',msg);toast(msg,'err')}
+ await reloadMesas();
 }
 async function reloadMesas(){
  const{data}=await rpc('staff_carregar',{p_store_id:S.store.id,p_codigo:S.code});
- if(data?.ok){D=data;renderMesasQR()}
+ if(data?.ok){D=data;requestAnimationFrame(()=>requestAnimationFrame(()=>renderMesasQR()))}
 }
 function forceRenderMesas(){toast('Atualizando...');reloadMesas()}
 function renderMesasQR(){
  const c=$('qr_container');
- if(typeof QRCode==='undefined'){c.innerHTML='<div class="msg err">QR não carregou. Recarregue a página.</div>';return}
  c.innerHTML='';
+ if(typeof QRCode==='undefined'){c.innerHTML='<div class="msg err">Biblioteca QR não carregou. Recarregue (Ctrl+F5).</div>';return}
  if(!D.tables||!D.tables.length){c.innerHTML='<div class="muted" style="text-align:center;padding:30px">Nenhuma mesa cadastrada.<br>Gere a primeira mesa acima! 👆</div>';return}
- D.tables.forEach(t=>{
-  const u=`${location.href.substring(0,location.href.lastIndexOf('/')+1)}cliente.html?loja=${S.store.id}&mesa=${t.id}`;
-  const d=document.createElement('div');d.className='qr-item';
-  d.innerHTML=`<div id="qr_${t.id}"></div><div class="qr-label">Mesa ${t.table_number}</div><div style="margin-top:8px;display:flex;gap:6px;justify-content:center"><button class="btn btn-blue btn-sm" onclick="editMesa('${t.id}','${t.table_number}')">✏️ Editar</button><button class="btn btn-red btn-sm" onclick="delMesa('${t.id}')">🗑️ Excluir</button></div>`;
-  c.appendChild(d);
-  try{new QRCode($('qr_'+t.id),{text:u,width:150,height:150})}catch(e){console.warn('Erro ao gerar QR:',e)}
+ const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
+ D.tables.forEach((t,idx)=>{
+  const link=`${base}cliente.html?loja=${S.store.id}&mesa=${t.id}`;
+  const card=document.createElement('div');card.className='qr-item';
+  const qrDiv=document.createElement('div');qrDiv.id='qr_'+idx;card.appendChild(qrDiv);
+  const label=document.createElement('div');label.className='qr-label';label.textContent='Mesa '+t.table_number;card.appendChild(label);
+  const linkDiv=document.createElement('div');linkDiv.className='qr-link';linkDiv.textContent=link;card.appendChild(linkDiv);
+  const actions=document.createElement('div');actions.style.cssText='margin-top:8px;display:flex;gap:6px;justify-content:center';
+  actions.innerHTML=`<button class="btn btn-blue btn-sm" onclick="editMesa('${t.id}','${t.table_number}')">✏️ Editar</button><button class="btn btn-red btn-sm" onclick="delMesa('${t.id}')">🗑️ Excluir</button>`;
+  card.appendChild(actions);
+  c.appendChild(card);
+ });
+ D.tables.forEach((t,idx)=>{
+  const link=`${base}cliente.html?loja=${S.store.id}&mesa=${t.id}`;
+  const qrDiv=document.getElementById('qr_'+idx);
+  if(!qrDiv)return;
+  setTimeout(()=>{try{new QRCode(qrDiv,{text:link,width:150,height:150,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H})}catch(e){console.warn('Erro QR mesa',t.table_number,e);qrDiv.innerHTML='<div style="color:red;font-size:12px">Erro ao gerar QR</div>'}},100*idx);
  });
 }
 async function editMesa(id,atual){
@@ -208,16 +206,15 @@ async function editMesa(id,atual){
  if(!novo||!novo.trim())return;
  const{data,error}=await rpc('dono_atualizar_mesa',{p_store_id:S.store.id,p_table_id:id,p_numero:novo.trim()});
  if(data?.ok){toast('Mesa atualizada! ✅');await reloadMesas()}
- else{console.warn('dono_atualizar_mesa:',error?.message||data?.error);toast(error?.message||data?.error||'Erro ao atualizar','err')}
+ else{const msg=error?.message||data?.error||'Erro';console.warn(msg);toast(msg,'err')}
 }
 async function delMesa(id){
  if(!confirm('Excluir esta mesa e o QR Code?'))return;
  const{data,error}=await rpc('dono_excluir_mesa',{p_store_id:S.store.id,p_table_id:id});
  if(data?.ok){toast('Mesa excluída! 🗑️');await reloadMesas()}
- else{console.warn('dono_excluir_mesa:',error?.message||data?.error);toast(error?.message||data?.error||'Erro ao excluir','err')}
+ else{const msg=error?.message||data?.error||'Erro';console.warn(msg);toast(msg,'err')}
 }
 
-// ---------- BOOT ----------
 async function boot(){try{await waitSB()}catch(e){return}const{data}=await supabase.auth.getSession();if(data.session)await enterApp();else show('login')}
 boot();
 window.switchEntry=switchEntry;window.createStore=createStore;window.ownerLogin=ownerLogin;window.logout=logout;window.refreshAll=refreshAll;window.openTab=openTab;window.ackAlert=ackAlert;window.doneAlert=doneAlert;window.createMesa=createMesa;window.forceRenderMesas=forceRenderMesas;window.editMesa=editMesa;window.delMesa=delMesa;
