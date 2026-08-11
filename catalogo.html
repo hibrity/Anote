@@ -1,93 +1,176 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Anote — Catálogo</title>
-<script type="module">
-import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
-window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
-window.dispatchEvent(new Event("supabase-ready"));
-</script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--red:#ef4444;--r:14px}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
-.wrap{max-width:1100px;margin:0 auto;padding:16px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
-h2{font-size:17px;margin-bottom:12px}h3{font-size:14px;margin-bottom:8px;color:var(--mut)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
-.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-red{background:var(--red);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}.btn-block{width:100%}
-input,select,textarea{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:14px;margin-bottom:8px;outline:none}
-textarea{min-height:70px;resize:vertical}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.muted{color:var(--mut);font-size:13px}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.title{font-size:20px;font-weight:800}
-.item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px}
-.msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
-.msg.err{background:#451a1a;color:#fca5a5}.msg.ok{background:#14351f;color:#86efac}
-.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:.3s;pointer-events:none}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(4px)}
-@media(max-width:800px){.grid2{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<div class="wrap">
-<div class="topbar"><div><div class="title" id="app_store_name">Catálogo</div><div class="muted">📦 Categorias e produtos</div></div>
-<button class="btn btn-ghost" onclick="location.href='index.html'">🏠 Painel</button></div>
-<div class="nav">
-<button class="btn btn-blue" onclick="location.href='pedidos.html'">🧾 Pedidos</button>
-<button class="btn btn-blue" onclick="location.href='equipe.html'">👥 Equipe</button>
-</div>
-<div class="grid2"><div>
-<div class="card"><h3>Nova categoria</h3><input id="cat_name"/><button class="btn btn-green" onclick="createCategory()">Salvar</button><div id="cat_res"></div></div>
-<div class="card"><h3>Novo produto</h3><input id="prod_name" placeholder="Nome"/><select id="prod_cat"></select><input id="prod_price" type="number" step="0.01" placeholder="Preço"/><textarea id="prod_desc" placeholder="Descrição"></textarea><button class="btn btn-green" onclick="createProduct()">Salvar</button><div id="prod_res"></div></div>
-</div><div>
-<div class="card"><h3>Categorias</h3><div id="list_cats"></div></div>
-<div class="card"><h3>Produtos</h3><div id="list_prods"></div></div>
-</div></div>
-</div>
-<div id="toast" class="toast"></div>
-<script>
-const $=id=>document.getElementById(id);
-let S={store:null,code:null},D={categories:[],products:[]};
-const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t==='err'?'#ef4444':'#22c55e';e.style.color=t==='err'?'#fff':'#052e16';e.classList.add('show');clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500)}
-function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
-async function rpc(n,p={}){const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}
-async function boot(){
- try{await waitSB()}catch(e){return}
- const{data:ses}=await supabase.auth.getSession();
- if(!ses.session){location.href='index.html';return}
- const{data}=await rpc('dono_entrar');
- if(!data?.ok||!data.store){location.href='index.html';return}
- S.store=data.store;
- if(!S.store.staff_code){const r=await rpc('dono_regenerar_codigo',{p_store_id:S.store.id});if(r.data?.ok)S.store.staff_code=r.data.staff_code;else{location.href='index.html';return}}
- S.code=S.store.staff_code;
- $('app_store_name').textContent=S.store.name+' — Catálogo';
- refresh();
-}
-async function refresh(){
- const{data}=await rpc('staff_carregar',{p_store_id:S.store.id,p_codigo:S.code});
- if(data?.ok){D=data;render()}
-}
-function render(){
- $('list_cats').innerHTML=D.categories.map(c=>`<div class="item">${c.name}</div>`).join('')||'<div class="muted">Nenhuma</div>';
- $('list_prods').innerHTML=D.products.map(p=>`<div class="item"><b>${p.name}</b><br><span class="muted">${money(p.price)}</span></div>`).join('')||'<div class="muted">Nenhum</div>';
- $('prod_cat').innerHTML='<option value="">Sem categoria</option>'+D.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-}
-async function createCategory(){const n=$('cat_name').value.trim();if(!n)return;const{data}=await rpc('dono_criar_categoria',{p_store_id:S.store.id,p_nome:n});$('cat_res').innerHTML=data?.ok?'<div class="msg ok">Criada!</div>':`<div class="msg err">${data?.error||'Erro'}</div>`;$('cat_name').value='';refresh()}
-async function createProduct(){
- const n=$('prod_name').value.trim();
- if(!n){$('prod_res').innerHTML='<div class="msg err">Digite o nome.</div>';return}
- const{data}=await rpc('dono_criar_produto',{p_store_id:S.store.id,p_categoria:$('prod_cat').value||null,p_nome:n,p_preco:Number($('prod_price').value||0),p_desc:$('prod_desc').value.trim()});
- $('prod_res').innerHTML=data?.ok?'<div class="msg ok">Criado!</div>':`<div class="msg err">${data?.error||'Erro'}</div>`;
- $('prod_name').value='';$('prod_price').value='';$('prod_desc').value='';refresh();
-}
-boot();
-window.createCategory=createCategory;window.createProduct=createProduct;
-</script>
-</body>
-</html>
+-- ============================================================
+-- ANOTE — SQL 2 CORRIGIDO: FUNÇÕES CLIENTE
+-- (com DROP FUNCTION para evitar conflito de tipo de retorno)
+-- ============================================================
+
+-- ========== cliente_cardapio ==========
+DROP FUNCTION IF EXISTS cliente_cardapio(uuid);
+CREATE OR REPLACE FUNCTION cliente_cardapio(p_store_id uuid)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_store record;
+BEGIN
+  SELECT id, name, address, phone, paused INTO v_store
+  FROM stores WHERE id = p_store_id LIMIT 1;
+  IF v_store IS NULL THEN
+    RETURN json_build_object('ok', false, 'error', 'Loja não encontrada');
+  END IF;
+  RETURN json_build_object(
+    'ok', true,
+    'store', json_build_object(
+      'id', v_store.id, 'name', v_store.name,
+      'address', v_store.address, 'phone', v_store.phone, 'paused', v_store.paused
+    ),
+    'categories', COALESCE((
+      SELECT json_agg(row_to_json(c)) FROM (
+        SELECT id, store_id, name, sort_order FROM categories
+        WHERE store_id = p_store_id ORDER BY sort_order, name
+      ) c
+    ), '[]'::json),
+    'products', COALESCE((
+      SELECT json_agg(row_to_json(p)) FROM (
+        SELECT id, store_id, category_id, name, description, price, image_url, sort_order
+        FROM products
+        WHERE store_id = p_store_id AND is_active = true
+        ORDER BY sort_order, name
+      ) p
+    ), '[]'::json)
+  );
+END;
+$$;
+
+
+-- ========== cliente_cadastrar ==========
+DROP FUNCTION IF EXISTS cliente_cadastrar(uuid, text, text);
+CREATE OR REPLACE FUNCTION cliente_cadastrar(p_store_id uuid, p_name text, p_phone text)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_id uuid;
+BEGIN
+  SELECT id INTO v_id FROM customers WHERE store_id = p_store_id AND phone = p_phone LIMIT 1;
+  IF v_id IS NULL THEN
+    INSERT INTO customers (store_id, name, phone) VALUES (p_store_id, p_name, p_phone) RETURNING id INTO v_id;
+  ELSE
+    UPDATE customers SET name = p_name WHERE id = v_id;
+  END IF;
+  RETURN json_build_object('ok', true, 'customer', json_build_object('id', v_id, 'name', p_name, 'phone', p_phone));
+END;
+$$;
+
+
+-- ========== cliente_pedido_status ==========
+DROP FUNCTION IF EXISTS cliente_pedido_status(uuid, uuid);
+CREATE OR REPLACE FUNCTION cliente_pedido_status(p_order_id uuid, p_customer_id uuid)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_order record;
+BEGIN
+  SELECT * INTO v_order FROM orders WHERE id = p_order_id AND customer_id = p_customer_id LIMIT 1;
+  IF v_order IS NULL THEN
+    RETURN json_build_object('ok', false, 'error', 'Pedido não encontrado');
+  END IF;
+  RETURN json_build_object(
+    'ok', true,
+    'status', v_order.status,
+    'order_number', v_order.order_number,
+    'total', v_order.total,
+    'items', COALESCE((
+      SELECT json_agg(json_build_object(
+        'qty', oi.qty,
+        'name', (SELECT name FROM products WHERE id = oi.product_id)
+      )) FROM order_items oi WHERE oi.order_id = p_order_id
+    ), '[]'::json)
+  );
+END;
+$$;
+
+
+-- ========== cliente_historico ==========
+DROP FUNCTION IF EXISTS cliente_historico(uuid, uuid);
+CREATE OR REPLACE FUNCTION cliente_historico(p_customer_id uuid, p_store_id uuid)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN json_build_object(
+    'ok', true,
+    'orders', COALESCE((
+      SELECT json_agg(row_to_json(o)) FROM (
+        SELECT ord.order_number, ord.status, ord.total, ord.created_at,
+          (
+            SELECT COALESCE(json_agg(json_build_object(
+              'qty', oi.qty,
+              'name', (SELECT name FROM products WHERE id = oi.product_id)
+            )), '[]'::json)
+            FROM order_items oi WHERE oi.order_id = ord.id
+          ) AS items
+        FROM orders ord
+        WHERE ord.customer_id = p_customer_id AND ord.store_id = p_store_id
+        ORDER BY ord.created_at DESC
+      ) o
+    ), '[]'::json)
+  );
+END;
+$$;
+
+
+-- ========== cliente_chamar ==========
+DROP FUNCTION IF EXISTS cliente_chamar(uuid, uuid, text);
+CREATE OR REPLACE FUNCTION cliente_chamar(p_store_id uuid, p_table_id uuid, p_type text)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_id uuid;
+BEGIN
+  INSERT INTO alerts (store_id, table_id, type) VALUES (p_store_id, p_table_id, p_type) RETURNING id INTO v_id;
+  RETURN json_build_object('ok', true, 'id', v_id);
+END;
+$$;
+
+
+-- ========== cliente_meus_alertas ==========
+DROP FUNCTION IF EXISTS cliente_meus_alertas(uuid, uuid);
+CREATE OR REPLACE FUNCTION cliente_meus_alertas(p_store_id uuid, p_table_id uuid)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN json_build_object(
+    'ok', true,
+    'alerts', COALESCE((
+      SELECT json_agg(row_to_json(a)) FROM (
+        SELECT id, store_id, table_id, type, status, created_at
+        FROM alerts WHERE store_id = p_store_id AND table_id = p_table_id
+        ORDER BY created_at DESC
+      ) a
+    ), '[]'::json)
+  );
+END;
+$$;
+
+
+-- ========== cliente_fechar_alerta ==========
+DROP FUNCTION IF EXISTS cliente_fechar_alerta(uuid, uuid);
+CREATE OR REPLACE FUNCTION cliente_fechar_alerta(p_store_id uuid, p_alert_id uuid)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  DELETE FROM alerts WHERE id = p_alert_id AND store_id = p_store_id;
+  RETURN json_build_object('ok', true);
+END;
+$$;
