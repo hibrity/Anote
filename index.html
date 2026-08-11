@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Anote — Painel</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script type="module">
 import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
 window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
@@ -177,30 +177,64 @@ async function reloadMesas(){
  if(data?.ok){D=data;requestAnimationFrame(()=>requestAnimationFrame(()=>renderMesasQR()))}
 }
 function forceRenderMesas(){toast('Atualizando...');reloadMesas()}
+
+/* ========== QR CODE CORRIGIDO ========== */
 function renderMesasQR(){
  const c=$('qr_container');
  c.innerHTML='';
- if(typeof QRCode==='undefined'){c.innerHTML='<div class="msg err">Biblioteca QR não carregou. Recarregue (Ctrl+F5).</div>';return}
- if(!D.tables||!D.tables.length){c.innerHTML='<div class="muted" style="text-align:center;padding:30px">Nenhuma mesa cadastrada.<br>Gere a primeira mesa acima! 👆</div>';return}
+ 
+ if(typeof QRCode==='undefined'){
+  c.innerHTML='<div class="msg err">Biblioteca QR não carregou. Recarregue (Ctrl+F5).</div>';
+  return;
+ }
+ if(!D.tables||!D.tables.length){
+  c.innerHTML='<div class="muted" style="text-align:center;padding:30px">Nenhuma mesa cadastrada.<br>Gere a primeira mesa acima! 👆</div>';
+  return;
+ }
+ 
  const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
+ 
+ // Cria cards primeiro (para garantir layout no DOM)
  D.tables.forEach((t,idx)=>{
-  const link=`${base}cliente.html?loja=${S.store.id}&mesa=${t.id}`;
   const card=document.createElement('div');card.className='qr-item';
-  const qrDiv=document.createElement('div');qrDiv.id='qr_'+idx;card.appendChild(qrDiv);
+  const qrDiv=document.createElement('div');
+  qrDiv.id='qr_'+idx;
+  qrDiv.style.cssText='width:150px;height:150px;margin:0 auto;background:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;';
+  card.appendChild(qrDiv);
   const label=document.createElement('div');label.className='qr-label';label.textContent='Mesa '+t.table_number;card.appendChild(label);
-  const linkDiv=document.createElement('div');linkDiv.className='qr-link';linkDiv.textContent=link;card.appendChild(linkDiv);
+  const linkDiv=document.createElement('div');linkDiv.className='qr-link';linkDiv.textContent=`${base}cliente.html?loja=${S.store.id}&mesa=${t.id}`;card.appendChild(linkDiv);
   const actions=document.createElement('div');actions.style.cssText='margin-top:8px;display:flex;gap:6px;justify-content:center';
   actions.innerHTML=`<button class="btn btn-blue btn-sm" onclick="editMesa('${t.id}','${t.table_number}')">✏️ Editar</button><button class="btn btn-red btn-sm" onclick="delMesa('${t.id}')">🗑️ Excluir</button>`;
   card.appendChild(actions);
   c.appendChild(card);
  });
- D.tables.forEach((t,idx)=>{
-  const link=`${base}cliente.html?loja=${S.store.id}&mesa=${t.id}`;
-  const qrDiv=document.getElementById('qr_'+idx);
-  if(!qrDiv)return;
-  setTimeout(()=>{try{new QRCode(qrDiv,{text:link,width:150,height:150,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H})}catch(e){console.warn('Erro QR mesa',t.table_number,e);qrDiv.innerHTML='<div style="color:red;font-size:12px">Erro ao gerar QR</div>'}},100*idx);
+ 
+ // Aguarda o navegador renderizar o layout antes de desenhar o QR
+ requestAnimationFrame(()=>{
+  requestAnimationFrame(()=>{
+   D.tables.forEach((t,idx)=>{
+    const link=`${base}cliente.html?loja=${S.store.id}&mesa=${t.id}`;
+    const qrDiv=document.getElementById('qr_'+idx);
+    if(!qrDiv)return;
+    qrDiv.innerHTML='';
+    const canvas=document.createElement('canvas');
+    qrDiv.appendChild(canvas);
+    QRCode.toCanvas(canvas,link,{
+     width:150,
+     margin:2,
+     color:{dark:'#000000',light:'#ffffff'},
+     errorCorrectionLevel:'M'
+    },function(err){
+     if(err){
+      console.warn('Erro QR mesa '+t.table_number,err);
+      qrDiv.innerHTML='<div style="color:red;font-size:11px">Erro</div>';
+     }
+    });
+   });
+  });
  });
 }
+
 async function editMesa(id,atual){
  const novo=prompt('Novo número da mesa:',atual);
  if(!novo||!novo.trim())return;
