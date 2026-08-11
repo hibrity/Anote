@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Anote — Catálogo</title>
+<script type="module">
+import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
+window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
+window.dispatchEvent(new Event("supabase-ready"));
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--red:#ef4444;--r:14px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+h2{font-size:17px;margin-bottom:12px}h3{font-size:14px;margin-bottom:8px;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-red{background:var(--red);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}.btn-block{width:100%}
+input,select,textarea{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:14px;margin-bottom:8px;outline:none}
+textarea{min-height:70px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.muted{color:var(--mut);font-size:13px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.title{font-size:20px;font-weight:800}
+.item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px}
+.msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
+.msg.err{background:#451a1a;color:#fca5a5}.msg.ok{background:#14351f;color:#86efac}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(4px)}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="topbar"><div><div class="title" id="app_store_name">Catálogo</div><div class="muted">📦 Categorias e produtos</div></div>
+<button class="btn btn-ghost" onclick="location.href='index.html'">🏠 Painel</button></div>
+<div class="nav">
+<button class="btn btn-blue" onclick="location.href='pedidos.html'">🧾 Pedidos</button>
+<button class="btn btn-blue" onclick="location.href='equipe.html'">👥 Equipe</button>
+</div>
+<div class="grid2"><div>
+<div class="card"><h3>Nova categoria</h3><input id="cat_name"/><button class="btn btn-green" onclick="createCategory()">Salvar</button><div id="cat_res"></div></div>
+<div class="card"><h3>Novo produto</h3><input id="prod_name" placeholder="Nome"/><select id="prod_cat"></select><input id="prod_price" type="number" step="0.01" placeholder="Preço"/><textarea id="prod_desc" placeholder="Descrição"></textarea><button class="btn btn-green" onclick="createProduct()">Salvar</button><div id="prod_res"></div></div>
+</div><div>
+<div class="card"><h3>Categorias</h3><div id="list_cats"></div></div>
+<div class="card"><h3>Produtos</h3><div id="list_prods"></div></div>
+</div></div>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+let S={store:null,code:null},D={categories:[],products:[]};
+const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t==='err'?'#ef4444':'#22c55e';e.style.color=t==='err'?'#fff':'#052e16';e.classList.add('show');clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500)}
+function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
+async function rpc(n,p={}){const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}
+async function boot(){
+ try{await waitSB()}catch(e){return}
+ const{data:ses}=await supabase.auth.getSession();
+ if(!ses.session){location.href='index.html';return}
+ const{data}=await rpc('dono_entrar');
+ if(!data?.ok||!data.store){location.href='index.html';return}
+ S.store=data.store;
+ if(!S.store.staff_code){const r=await rpc('dono_regenerar_codigo',{p_store_id:S.store.id});if(r.data?.ok)S.store.staff_code=r.data.staff_code;else{location.href='index.html';return}}
+ S.code=S.store.staff_code;
+ $('app_store_name').textContent=S.store.name+' — Catálogo';
+ refresh();
+}
+async function refresh(){
+ const{data}=await rpc('staff_carregar',{p_store_id:S.store.id,p_codigo:S.code});
+ if(data?.ok){D=data;render()}
+}
+function render(){
+ $('list_cats').innerHTML=D.categories.map(c=>`<div class="item">${c.name}</div>`).join('')||'<div class="muted">Nenhuma</div>';
+ $('list_prods').innerHTML=D.products.map(p=>`<div class="item"><b>${p.name}</b><br><span class="muted">${money(p.price)}</span></div>`).join('')||'<div class="muted">Nenhum</div>';
+ $('prod_cat').innerHTML='<option value="">Sem categoria</option>'+D.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+}
+async function createCategory(){const n=$('cat_name').value.trim();if(!n)return;const{data}=await rpc('dono_criar_categoria',{p_store_id:S.store.id,p_nome:n});$('cat_res').innerHTML=data?.ok?'<div class="msg ok">Criada!</div>':`<div class="msg err">${data?.error||'Erro'}</div>`;$('cat_name').value='';refresh()}
+async function createProduct(){
+ const n=$('prod_name').value.trim();
+ if(!n){$('prod_res').innerHTML='<div class="msg err">Digite o nome.</div>';return}
+ const{data}=await rpc('dono_criar_produto',{p_store_id:S.store.id,p_categoria:$('prod_cat').value||null,p_nome:n,p_preco:Number($('prod_price').value||0),p_desc:$('prod_desc').value.trim()});
+ $('prod_res').innerHTML=data?.ok?'<div class="msg ok">Criado!</div>':`<div class="msg err">${data?.error||'Erro'}</div>`;
+ $('prod_name').value='';$('prod_price').value='';$('prod_desc').value='';refresh();
+}
+boot();
+window.createCategory=createCategory;window.createProduct=createProduct;
+</script>
+</body>
+</html>
