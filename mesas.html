@@ -42,11 +42,22 @@ input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(
 .empty{text-align:center;padding:40px;color:var(--mut)}
 .empty .big{font-size:48px;margin-bottom:12px}
 .err-box{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d;border-radius:10px;padding:14px;margin-top:14px;font-size:13px;word-break:break-word}
+
+/* ✅ INSTRUÇÕES QUE APARECEM SÓ NA IMPRESSÃO */
+.print-only{display:none}
+
 @media print{
  body *{visibility:hidden}
  .print-area,.print-area *{visibility:visible}
  .print-area{position:absolute;left:0;top:0;width:100%}
  .no-print{display:none!important}
+ .print-only{display:block!important}
+ .qr-item{break-inside:avoid;page-break-inside:avoid;border:2px dashed #999;margin:0 0 16px 0}
+ .qr-grid{display:block}
+ .qr-grid .qr-item{margin-bottom:20px}
+ .print-instructions{margin-top:10px;padding-top:10px;border-top:1px dashed #999;font-size:12px;color:#333;text-align:left;line-height:1.7}
+ .print-instructions .store{font-weight:800;text-align:center;font-size:14px;color:#000;margin-bottom:6px}
+ .print-instructions .tip{margin-top:6px;font-size:10px;color:#666;text-align:center;font-style:italic}
 }
 </style>
 </head>
@@ -122,7 +133,7 @@ function drawQR(el,link,size){
  }else useImgFallback(el,link,size);
 }
 
-/* ===== CARREGAR MESAS (função dedicada + erro visível) ===== */
+/* ===== CARREGAR MESAS ===== */
 async function reloadMesas(){
  $('qr_container').innerHTML='<div class="empty"><div class="big">⏳</div>Carregando mesas...</div>';
  const{data,error}=await rpc('dono_mesas',{p_store_id:S.store.id});
@@ -158,13 +169,22 @@ function renderMesasQR(){
   return;
  }
  const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
+ const storeName=escapeHtml(S.store.name||'');
  const grid=document.createElement('div');grid.className='qr-grid';
  tables.forEach(t=>{
   const link=base+'cliente.html?loja='+S.store.id+'&mesa='+t.id;
   const item=document.createElement('div');item.className='qr-item';
   item.innerHTML='<div class="qr-box" id="qrbox_'+t.id+'"></div>'
    +'<div class="qr-label">'+escapeHtml('Mesa '+t.table_number)+'</div>'
-   +'<div class="qr-link">'+escapeHtml(link)+'</div>'
+   +'<div class="qr-link no-print">'+escapeHtml(link)+'</div>'
+   /* ✅ INSTRUÇÕES SÓ NA IMPRESSÃO */
+   +'<div class="print-only print-instructions">'
+   +'<div class="store">🍽️ '+storeName+'</div>'
+   +'<div><b>1️⃣</b> Abra a câmera e escaneie o QR Code</div>'
+   +'<div><b>2️⃣</b> Veja o cardápio e faça seu pedido</div>'
+   +'<div><b>3️⃣</b> Acompanhe o pedido pelo celular</div>'
+   +'<div class="tip">💡 Salve esta página nos favoritos para pedir mais itens sem escanear de novo!</div>'
+   +'</div>'
    +'<div class="qr-actions no-print">'
    +'<button class="btn btn-blue btn-sm" onclick="editMesa(\''+t.id+'\')">✏️ Editar</button>'
    +'<button class="btn btn-red btn-sm" onclick="delMesa(\''+t.id+'\')">🗑️ Excluir</button>'
