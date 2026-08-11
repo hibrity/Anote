@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Anote — Equipe</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
+window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
+window.dispatchEvent(new Event("supabase-ready"));
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--r:14px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+h2{font-size:17px;margin-bottom:12px}h3{font-size:14px;margin-bottom:8px;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-amber{background:var(--amber);color:#3b2503}.btn-red{background:var(--red);color:#fff}.btn-purple{background:var(--purple);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}.btn-block{width:100%}.btn-sm{padding:6px 10px;font-size:12px}
+input,select{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:14px;margin-bottom:8px;outline:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.muted{color:var(--mut);font-size:13px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.title{font-size:20px;font-weight:800}
+.item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px}
+.msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
+.msg.err{background:#451a1a;color:#fca5a5}.msg.ok{background:#14351f;color:#86efac}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.b-waiter{background:#dbeafe;color:#1d4ed8}.b-kitchen{background:#fef3c7;color:#b45309}.b-cashier{background:#dcfce7;color:#15803d}.b-manager{background:#ede9fe;color:#6d28d9}
+.staff-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.staff-info{flex:1;min-width:200px}
+.staff-info b{font-size:15px;display:block;margin-bottom:2px}
+.staff-pin{font-family:monospace;font-size:20px;font-weight:800;background:var(--card);padding:4px 12px;border-radius:8px;border:1px dashed var(--border);letter-spacing:3px}
+.staff-actions{display:flex;gap:6px;flex-wrap:wrap}
+.qr-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.qr-item{display:inline-block;text-align:center;margin:10px;padding:14px;background:#fff;border-radius:12px;vertical-align:top}
+.qr-label{margin-top:8px;font-weight:700;color:#1c1917}
+.link-box{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:8px;display:flex;gap:6px;align-items:center}
+.link-box input{margin:0;font-size:11px;flex:1}
+.link-box .btn{padding:6px 10px;flex:none}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(4px)}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="topbar"><div><div class="title" id="app_store_name">Equipe</div><div class="muted">👥 Funcionários e acessos</div></div>
+<button class="btn btn-ghost" onclick="location.href='index.html'">🏠 Painel</button></div>
+<div class="nav">
+<button class="btn btn-blue" onclick="location.href='catalogo.html'">📦 Catálogo</button>
+<button class="btn btn-blue" onclick="location.href='pedidos.html'">🧾 Pedidos</button>
+</div>
+<div class="grid2"><div>
+<div class="card"><h2>🔑 Código da loja</h2><div class="item" style="text-align:center;font-size:28px;font-weight:800;letter-spacing:4px" id="team_code">—</div><button class="btn btn-amber btn-block" onclick="regenCode()">🔄 Gerar novo código</button><p class="muted" style="margin-top:10px">⚠️ Ao regenerar, os QR Codes antigos param de funcionar.</p></div>
+<div class="card"><h2>📱 QR Codes de login</h2><p class="muted" style="margin-bottom:12px">Cada funcionário escaneia o QR do cargo e digita o PIN.</p><div class="qr-grid">
+<div class="qr-item"><div id="qr_waiter"></div><div class="qr-label">🤵 Garçom</div><div class="link-box"><input id="link_waiter" readonly/><button class="btn btn-ghost btn-sm" onclick="copyLink('link_waiter')">📋</button></div></div>
+<div class="qr-item"><div id="qr_kitchen"></div><div class="qr-label">👨‍ Cozinha</div><div class="link-box"><input id="link_kitchen" readonly/><button class="btn btn-ghost btn-sm" onclick="copyLink('link_kitchen')">📋</button></div></div>
+<div class="qr-item"><div id="qr_cashier"></div><div class="qr-label">💰 Caixa</div><div class="link-box"><input id="link_cashier" readonly/><button class="btn btn-ghost btn-sm" onclick="copyLink('link_cashier')">📋</button></div></div>
+</div></div>
+</div><div>
+<div class="card"><h2>👥 Funcionários</h2>
+<div style="background:var(--card2);padding:14px;border-radius:12px;margin-bottom:14px;border:1px solid var(--border)"><h3 style="margin-bottom:10px">➕ Novo funcionário</h3><input id="stf_name" placeholder="Nome"/><select id="stf_cargo"><option value="waiter">🤵 Garçom</option><option value="kitchen">👨‍🍳 Cozinha</option><option value="cashier">💰 Caixa</option><option value="manager">👔 Gerente</option></select><button class="btn btn-green btn-block" onclick="createStaff()">Criar funcionário</button><div id="stf_res"></div></div>
+<div id="list_staff"></div></div>
+<div class="card hidden" id="ficha_card"><h2>🎫 Ficha do funcionário</h2><div id="ficha_content" style="text-align:center;padding:20px;background:#fff;border-radius:12px;color:#1c1917"></div><button class="btn btn-blue btn-block" style="margin-top:12px" onclick="printFicha()">🖨️ Imprimir ficha</button><button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeFicha()">Fechar</button></div>
+</div></div>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+let S={store:null,code:null},staffList=[];
+const CARGO={waiter:'🤵 Garçom',kitchen:'👨‍🍳 Cozinha',cashier:'💰 Caixa',manager:'👔 Gerente'};
+const PAGE={waiter:'garcom.html',kitchen:'cozinha.html',cashier:'caixa.html',manager:'index.html'};
+function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t==='err'?'#ef4444':'#22c55e';e.style.color=t==='err'?'#fff':'#052e16';e.classList.add('show');clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500)}
+function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
+async function rpc(n,p={}){const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}
+function base(){return location.href.substring(0,location.href.lastIndexOf('/')+1)}
+async function boot(){
+ try{await waitSB()}catch(e){return}
+ const{data:ses}=await supabase.auth.getSession();
+ if(!ses.session){location.href='index.html';return}
+ const{data}=await rpc('dono_entrar');
+ if(!data?.ok||!data.store){location.href='index.html';return}
+ S.store=data.store;
+ if(!S.store.staff_code){const r=await rpc('dono_regenerar_codigo',{p_store_id:S.store.id});if(r.data?.ok)S.store.staff_code=r.data.staff_code;else{location.href='index.html';return}}
+ S.code=S.store.staff_code;
+ $('app_store_name').textContent=S.store.name+' — Equipe';
+ $('team_code').textContent=S.code;
+ renderLoginQRs();loadStaff();
+}
+async function loadStaff(){const{data}=await rpc('dono_listar_staff',{p_store_id:S.store.id});staffList=Array.isArray(data)?data:[];renderStaff()}
+function renderStaff(){
+ $('list_staff').innerHTML=staffList.length?staffList.map(s=>`<div class="staff-card"><div class="staff-info"><b>${s.nome}</b><span class="badge b-${s.cargo}">${CARGO[s.cargo]||s.cargo}</span>${s.last_login?`<div class="muted" style="font-size:11px;margin-top:4px">Último acesso: ${new Date(s.last_login).toLocaleString('pt-BR')}</div>`:''}</div><div class="staff-pin">${s.pin}</div><div class="staff-actions"><button class="btn btn-ghost btn-sm" onclick="copyStaffLink('${s.cargo}')">🔗</button><button class="btn btn-amber btn-sm" onclick="regenPin('${s.id}')">🔄</button><button class="btn btn-purple btn-sm" onclick="editPin('${s.id}','${s.pin}')">✏️</button><button class="btn btn-blue btn-sm" onclick="showFicha('${s.id}')">🎫</button><button class="btn btn-red btn-sm" onclick="deleteStaff('${s.id}','${s.nome}')">🗑️</button></div></div>`).join(''):'<div class="muted" style="text-align:center;padding:20px">Nenhum funcionário. Crie o primeiro! 👆</div>';
+}
+async function createStaff(){
+ const nome=$('stf_name').value.trim(),res=$('stf_res');
+ if(!nome){res.innerHTML='<div class="msg err">Digite o nome.</div>';return}
+ res.innerHTML='<div class="msg ok">Criando...</div>';
+ const{data}=await rpc('dono_criar_staff',{p_store_id:S.store.id,p_nome:nome,p_cargo:$('stf_cargo').value});
+ if(data?.ok){res.innerHTML=`<div class="msg ok">✅ Criado! PIN: <b style="font-size:18px;letter-spacing:2px">${data.pin}</b></div>`;$('stf_name').value='';await loadStaff();setTimeout(()=>{const f=staffList.find(s=>s.id===data.staff_id);if(f)showFicha(f.id)},300)}
+ else res.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;
+}
+async function regenPin(id){if(!confirm('Gerar novo PIN?'))return;const{data}=await rpc('dono_regenerar_pin',{p_store_id:S.store.id,p_staff_id:id});data?.ok?toast('Novo PIN: '+data.pin):toast(data?.error||'Erro','err');loadStaff()}
+async function editPin(id,cur){const n=prompt('Novo PIN (4 números):',cur);if(!n)return;if(!/^\d{4}$/.test(n)){toast('PIN deve ter 4 números','err');return}const{data}=await rpc('dono_definir_pin',{p_store_id:S.store.id,p_staff_id:id,p_pin:n});data?.ok?toast('PIN atualizado!'):toast(data?.error||'Erro','err');loadStaff()}
+async function deleteStaff(id,nome){if(!confirm(`Remover ${nome}?`))return;const{data}=await rpc('dono_excluir_staff',{p_store_id:S.store.id,p_staff_id:id});data?.ok?toast('Funcionário removido'):toast(data?.error||'Erro','err');loadStaff()}
+async function regenCode(){if(!confirm('Regenerar código? QR Codes antigos param de funcionar.'))return;const{data}=await rpc('dono_regenerar_codigo',{p_store_id:S.store.id});if(data?.ok){S.code=data.staff_code;$('team_code').textContent=S.code;toast('Novo código gerado!');renderLoginQRs()}else toast(data?.error||'Erro','err')}
+function copyStaffLink(c){navigator.clipboard.writeText(base()+PAGE[c]+'?loja='+encodeURIComponent(S.code)).then(()=>toast('Link copiado!')).catch(()=>toast('Erro ao copiar','err'))}
+function copyLink(id){const el=$(id);el.select();navigator.clipboard.writeText(el.value).then(()=>toast('Link copiado!')).catch(()=>toast('Erro ao copiar','err'))}
+function renderLoginQRs(){if(typeof QRCode==='undefined')return;['waiter','kitchen','cashier'].forEach(c=>{const el=$('qr_'+c),lk=$('link_'+c);if(!el)return;const u=base()+PAGE[c]+'?loja='+encodeURIComponent(S.code||'');el.innerHTML='';new QRCode(el,{text:u,width:120,height:120});if(lk)lk.value=u})}
+function showFicha(id){
+ const s=staffList.find(x=>x.id===id);if(!s)return;
+ const u=base()+PAGE[s.cargo]+'?loja='+encodeURIComponent(S.code||'');
+ $('ficha_content').innerHTML=`<div style="font-size:14px;color:#666;margin-bottom:8px">🍽️ ${S.store.name}</div><div style="font-size:22px;font-weight:800;margin-bottom:4px">${s.nome}</div><div style="font-size:14px;color:#666;margin-bottom:16px">${CARGO[s.cargo]||s.cargo}</div><div style="background:#f1f5f9;padding:16px;border-radius:12px;margin-bottom:16px"><div style="font-size:12px;color:#666;margin-bottom:6px">PIN DE ACESSO</div><div style="font-size:36px;font-weight:800;letter-spacing:8px;font-family:monospace">${s.pin}</div></div><div id="ficha_qr" style="display:inline-block"></div><div style="font-size:12px;color:#666;margin-top:12px">1️⃣ Escaneie o QR Code<br>2️⃣ Digite seu PIN<br>3️⃣ Comece a trabalhar! 🚀</div>`;
+ $('ficha_card').classList.remove('hidden');
+ setTimeout(()=>{const q=$('ficha_qr');if(q){q.innerHTML='';new QRCode(q,{text:u,width:140,height:140})}},100);
+ $('ficha_card').scrollIntoView({behavior:'smooth'});
+}
+function closeFicha(){$('ficha_card').classList.add('hidden')}
+function printFicha(){const w=window.open('','_blank');w.document.write(`<html><head><title>Ficha</title><style>body{font-family:Segoe UI,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#fff}.f{border:3px dashed #ccc;padding:40px;border-radius:20px;text-align:center;max-width:350px}</style></head><body><div class="f">${$('ficha_content').innerHTML}</div></body></html>`);w.document.close();setTimeout(()=>w.print(),500)}
+boot();
+window.regenCode=regenCode;window.createStaff=createStaff;window.regenPin=regenPin;window.editPin=editPin;window.deleteStaff=deleteStaff;window.copyStaffLink=copyStaffLink;window.copyLink=copyLink;window.showFicha=showFicha;window.closeFicha=closeFicha;window.printFicha=printFicha;
+</script>
+</body>
+</html>
