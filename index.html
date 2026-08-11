@@ -12,14 +12,14 @@ window.dispatchEvent(new Event("supabase-ready"));
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--r:14px}
+:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--cyan:#06b6d4;--r:14px}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
 .wrap{max-width:1100px;margin:0 auto;padding:16px}.hidden{display:none!important}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
 h2{font-size:17px;margin-bottom:12px}h3{font-size:14px;margin-bottom:8px;color:var(--mut)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-amber{background:var(--amber);color:#3b2503}.btn-red{background:var(--red);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}.btn-block{width:100%}.btn-sm{padding:6px 10px;font-size:12px}
+.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-amber{background:var(--amber);color:#3b2503}.btn-red{background:var(--red);color:#fff}.btn-purple{background:var(--purple);color:#fff}.btn-cyan{background:var(--cyan);color:#083344}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}.btn-block{width:100%}.btn-sm{padding:6px 10px;font-size:12px}
 input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:14px;margin-bottom:8px;outline:none}
 label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weight:600}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
@@ -32,6 +32,8 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 .msg.err{background:#451a1a;color:#fca5a5}.msg.ok{background:#14351f;color:#86efac}
 .nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .nav .btn{flex:1;min-width:120px;padding:14px}
+.nav-staff{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px}
+.nav-staff .btn{padding:12px;font-size:13px}
 .login-shell{max-width:440px;margin:50px auto 0}
 .login-tabs{display:flex;gap:8px;margin-bottom:16px}
 .login-tab{flex:1;padding:12px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--border);cursor:pointer;font-weight:700;color:var(--mut);font-size:13px}
@@ -64,12 +66,23 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 <div class="topbar"><div><div class="title" id="app_store_name">Loja</div><div class="muted">👑 Dono</div></div>
 <div class="row" style="max-width:340px"><button class="btn btn-ghost" onclick="refreshAll()">🔄 Atualizar</button><button class="btn btn-red" onclick="logout()">Sair</button></div></div>
 <div id="alerts_wrap"></div>
+
+<!-- GESTÃO -->
+<h3 style="margin-bottom:8px">📋 Gestão</h3>
 <div class="nav">
 <button class="btn btn-blue" onclick="location.href='catalogo.html'">📦 Catálogo</button>
 <button class="btn btn-blue" onclick="location.href='pedidos.html'">🧾 Pedidos</button>
 <button class="btn btn-blue" onclick="location.href='equipe.html'">👥 Equipe</button>
-<button class="btn btn-amber" id="btn_cozinha">👨‍🍳 Cozinha</button>
 </div>
+
+<!-- ✅ NOVOS BOTÕES: ACESSO RÁPIDO P/ GARÇOM, COZINHA E CAIXA -->
+<h3 style="margin-bottom:8px">⚡ Acessos rápidos da equipe</h3>
+<div class="nav-staff">
+<button class="btn btn-cyan" onclick="goStaff('garcom.html')">🤵 Garçom</button>
+<button class="btn btn-amber" onclick="goStaff('cozinha.html')">👨‍🍳 Cozinha</button>
+<button class="btn btn-green" onclick="goStaff('caixa.html')">💰 Caixa</button>
+</div>
+
 <div class="tabs">
 <div class="tab active" id="tb_painel" onclick="openTab('painel')">📊 Painel</div>
 <div class="tab" id="tb_mesas" onclick="openTab('mesas')">🔳 Mesas</div>
@@ -98,22 +111,29 @@ function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t
 function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}catch(e){console.warn(n+' exception:',e);return{data:null,error:e}}}
 
+/* ✅ ACESSO RÁPIDO P/ EQUIPE (usa o código da loja atual) */
+function goStaff(page){
+ if(!S||!S.code){toast('Código da loja não disponível','err');return}
+ const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
+ location.href=base+page+'?loja='+encodeURIComponent(S.code);
+}
+
 function switchEntry(m){['new','login'].forEach(x=>{$('lt_'+x).classList.toggle('active',x===m);$('entry_'+x).classList.toggle('hidden',x!==m)})}
 async function createStore(){
  const on=$('new_owner_name').value.trim(),e=$('new_email').value.trim(),p=$('new_pass').value,sn=$('new_store_name').value.trim(),b=$('new_result');
  if(!on||!e||!p||!sn){b.innerHTML='<div class="msg err">Preencha nome, email, senha e loja.</div>';return}
  b.innerHTML='<div class="msg ok">Criando conta...</div>';
  const{error}=await supabase.auth.signUp({email:e,password:p,options:{data:{name:on}}});
- if(error){b.innerHTML=`<div class="msg err">${error.message}</div>`;return}
+ if(error){b.innerHTML='<div class="msg err">'+error.message+'</div>';return}
  for(let i=0;i<10;i++){const{data}=await supabase.auth.getSession();if(data.session)break;await new Promise(r=>setTimeout(r,400))}
  const{data}=await rpc('dono_criar_loja',{p_nome:sn,p_telefone:$('new_store_phone').value.trim(),p_endereco:$('new_store_address').value.trim()});
- if(!data||!data.ok){b.innerHTML=`<div class="msg err">${data?.error||'Erro ao criar loja'}</div>`;return}
+ if(!data||!data.ok){b.innerHTML='<div class="msg err">'+(data?.error||'Erro ao criar loja')+'</div>';return}
  await enterApp();
 }
 async function ownerLogin(){
  const b=$('login_result');b.innerHTML='<div class="msg ok">Entrando...</div>';
  const{error}=await supabase.auth.signInWithPassword({email:$('log_email').value.trim(),password:$('log_pass').value});
- if(error){b.innerHTML=`<div class="msg err">${error.message}</div>`;return}
+ if(error){b.innerHTML='<div class="msg err">'+error.message+'</div>';return}
  await enterApp();
 }
 async function enterApp(){
@@ -123,7 +143,6 @@ async function enterApp(){
  if(!st.staff_code){const r=await rpc('dono_regenerar_codigo',{p_store_id:st.id});if(r.data?.ok)st.staff_code=r.data.staff_code;else{show('login');return}}
  S.store=st;S.code=st.staff_code;
  show('app');$('app_store_name').textContent=st.name;
- $('btn_cozinha').onclick=()=>location.href='cozinha.html?loja='+encodeURIComponent(S.code);
  refreshAll();startLive();
 }
 function logout(){supabase.auth.signOut();stopLive();show('login')}
@@ -137,7 +156,7 @@ async function refreshAll(){
  const{data}=await rpc('staff_carregar',{p_store_id:S.store.id,p_codigo:S.code});
  if(data&&data.ok){D=data;if(!$('tab_mesas').classList.contains('hidden'))renderMesasQR()}
  const d=await rpc('dono_dashboard',{p_store_id:S.store.id});
- if(d.data?.ok){const s=d.data.stats;$('stats').innerHTML=`<div class="stat">Produtos<b>${s.total_products}</b></div><div class="stat">Clientes<b>${s.total_customers}</b></div><div class="stat">Pedidos<b>${s.total_orders}</b></div><div class="stat">Em aberto<b>${s.open_orders}</b></div><div class="stat">Hoje<b>${s.today_orders}</b></div><div class="stat">Fat. hoje<b>${Number(s.today_revenue||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</b></div>`}
+ if(d.data?.ok){const s=d.data.stats;$('stats').innerHTML='<div class="stat">Produtos<b>'+s.total_products+'</b></div><div class="stat">Clientes<b>'+s.total_customers+'</b></div><div class="stat">Pedidos<b>'+s.total_orders+'</b></div><div class="stat">Em aberto<b>'+s.open_orders+'</b></div><div class="stat">Hoje<b>'+s.today_orders+'</b></div><div class="stat">Fat. hoje<b>'+Number(s.today_revenue||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</b></div>'}
  renderAlerts();
 }
 
@@ -150,11 +169,11 @@ async function renderAlerts(){
  $('alerts_wrap').innerHTML=a.map(x=>{
   const m=x.table_number||'?';
   if(x.type==='waiter')return x.status==='ack'
-   ?`<div class="msg ok" style="margin-bottom:8px">🏃 <b>Mesa ${m}</b> — garçom a caminho <button class="btn btn-green btn-sm" onclick="doneAlert('${x.id}')">✔ Concluir</button></div>`
-   :`<div class="msg err" style="margin-bottom:8px">🔔 <b>Mesa ${m}</b> chamando! <button class="btn btn-green btn-sm" onclick="ackAlert('${x.id}')">✅ Vou lá</button></div>`;
+   ?'<div class="msg ok" style="margin-bottom:8px">🏃 <b>Mesa '+m+'</b> — garçom a caminho <button class="btn btn-green btn-sm" onclick="doneAlert(\''+x.id+'\')">✔ Concluir</button></div>'
+   :'<div class="msg err" style="margin-bottom:8px">🔔 <b>Mesa '+m+'</b> chamando! <button class="btn btn-green btn-sm" onclick="ackAlert(\''+x.id+'\')">✅ Vou lá</button></div>';
   return x.status==='ack'
-   ?`<div class="msg ok" style="margin-bottom:8px">💳 <b>Mesa ${m}</b> — conta confirmada <button class="btn btn-blue btn-sm" onclick="doneAlert('${x.id}')">✔ Concluir</button></div>`
-   :`<div class="msg err" style="margin-bottom:8px">💳 <b>Mesa ${m}</b> pediu a conta! <button class="btn btn-blue btn-sm" onclick="ackAlert('${x.id}')">✅ Confirmar</button></div>`;
+   ?'<div class="msg ok" style="margin-bottom:8px">💳 <b>Mesa '+m+'</b> — conta confirmada <button class="btn btn-blue btn-sm" onclick="doneAlert(\''+x.id+'\')">✔ Concluir</button></div>'
+   :'<div class="msg err" style="margin-bottom:8px">💳 <b>Mesa '+m+'</b> pediu a conta! <button class="btn btn-blue btn-sm" onclick="ackAlert(\''+x.id+'\')">✅ Confirmar</button></div>';
  }).join('');
 }
 async function ackAlert(id){await rpc('staff_alerta_ack',{p_store_id:S.store.id,p_codigo:S.code,p_alert_id:id});renderAlerts()}
@@ -169,7 +188,7 @@ async function createMesa(){
  const{data,error}=await rpc('dono_criar_mesa',{p_store_id:S.store.id,p_numero:n});
  btn.disabled=false;btn.textContent='➕ Gerar QR';
  if(data?.ok){$('qr_mesa_num').value='';toast('Mesa criada! ✅')}
- else{const msg=error?.message||data?.error||'Erro ao criar mesa';console.warn('Erro criar mesa:',msg);toast(msg,'err')}
+ else{const msg=error?.message||data?.error||'Erro ao criar mesa';toast(msg,'err')}
  await reloadMesas();
 }
 async function reloadMesas(){
@@ -178,24 +197,45 @@ async function reloadMesas(){
 }
 function forceRenderMesas(){toast('Atualizando...');reloadMesas()}
 
-/* ========== QR CODE À PROVA DE FALHAS ========== */
-// Gera URL de imagem QR online (fallback garantido)
+/* ✅ QR CODE DEFINITIVO — 3 níveis de fallback */
 function qrImgUrl(link,size){
+ // API 1: qrserver (mais confiável)
  return 'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&data='+encodeURIComponent(link);
 }
-// Desenha o QR: usa a biblioteca se carregou, senão usa imagem online
+function qrImgUrl2(link,size){
+ // API 2: Google Charts (backup)
+ return 'https://chart.googleapis.com/chart?cht=qr&chs='+size+'x'+size+'&chl='+encodeURIComponent(link);
+}
 function drawQR(el,link,size){
  size=size||150;
  el.innerHTML='';
+ // Se a biblioteca local carregou, tenta usar
  if(window.QRCode&&QRCode.toCanvas){
   const cv=document.createElement('canvas');
   el.appendChild(cv);
-  QRCode.toCanvas(cv,link,{width:size,margin:2,color:{dark:'#000000',light:'#ffffff'}},function(err){
-   if(err){el.innerHTML='<img src="'+qrImgUrl(link,size)+'" width="'+size+'" height="'+size+'" style="display:block;margin:0 auto" alt="QR"/>';}
-  });
+  try{
+   QRCode.toCanvas(cv,link,{width:size,margin:2,color:{dark:'#000000',light:'#ffffff'}},function(err){
+    if(err){useImgFallback(el,link,size)}
+   });
+  }catch(e){useImgFallback(el,link,size)}
  }else{
-  el.innerHTML='<img src="'+qrImgUrl(link,size)+'" width="'+size+'" height="'+size+'" style="display:block;margin:0 auto" alt="QR"/>';
+  useImgFallback(el,link,size);
  }
+}
+function useImgFallback(el,link,size){
+ // Imagem com 2 APIs de fallback
+ const img=document.createElement('img');
+ img.width=size;img.height=size;
+ img.style.cssText='display:block;margin:0 auto;background:#fff';
+ img.alt='QR Code';
+ img.onerror=function(){
+  // Se a primeira API falhar, tenta a segunda
+  if(this.src.indexOf('qrserver')!==-1){this.src=qrImgUrl2(link,size)}
+  else{this.style.display='none';const p=document.createElement('div');p.style.cssText='font-size:10px;color:#c00;text-align:center;padding:8px';p.textContent='QR indisponível. Use o link abaixo.';el.appendChild(p)}
+ };
+ img.src=qrImgUrl(link,size);
+ el.innerHTML='';
+ el.appendChild(img);
 }
 
 function renderMesasQR(){
@@ -215,7 +255,7 @@ function renderMesasQR(){
   const label=document.createElement('div');label.className='qr-label';label.textContent='Mesa '+t.table_number;card.appendChild(label);
   const linkDiv=document.createElement('div');linkDiv.className='qr-link';linkDiv.textContent=link;card.appendChild(linkDiv);
   const actions=document.createElement('div');actions.style.cssText='margin-top:8px;display:flex;gap:6px;justify-content:center';
-  actions.innerHTML='<button class="btn btn-blue btn-sm" onclick="editMesa(\''+t.id+'\',\''+t.table_number+'\')">✏️ Editar</button><button class="btn btn-red btn-sm" onclick="delMesa(\''+t.id+'\')">🗑️ Excluir</button>';
+  actions.innerHTML='<button class="btn btn-blue btn-sm" onclick="editMesa(\''+t.id+'\',\''+t.table_number+'\')">✏️</button><button class="btn btn-red btn-sm" onclick="delMesa(\''+t.id+'\')">🗑️</button>';
   card.appendChild(actions);
   c.appendChild(card);
   drawQR(qrDiv,link,150);
@@ -227,18 +267,18 @@ async function editMesa(id,atual){
  if(!novo||!novo.trim())return;
  const{data,error}=await rpc('dono_atualizar_mesa',{p_store_id:S.store.id,p_table_id:id,p_numero:novo.trim()});
  if(data?.ok){toast('Mesa atualizada! ✅');await reloadMesas()}
- else{const msg=error?.message||data?.error||'Erro';console.warn(msg);toast(msg,'err')}
+ else{const msg=error?.message||data?.error||'Erro';toast(msg,'err')}
 }
 async function delMesa(id){
  if(!confirm('Excluir esta mesa e o QR Code?'))return;
  const{data,error}=await rpc('dono_excluir_mesa',{p_store_id:S.store.id,p_table_id:id});
  if(data?.ok){toast('Mesa excluída! 🗑️');await reloadMesas()}
- else{const msg=error?.message||data?.error||'Erro';console.warn(msg);toast(msg,'err')}
+ else{const msg=error?.message||data?.error||'Erro';toast(msg,'err')}
 }
 
 async function boot(){try{await waitSB()}catch(e){return}const{data}=await supabase.auth.getSession();if(data.session)await enterApp();else show('login')}
 boot();
-window.switchEntry=switchEntry;window.createStore=createStore;window.ownerLogin=ownerLogin;window.logout=logout;window.refreshAll=refreshAll;window.openTab=openTab;window.ackAlert=ackAlert;window.doneAlert=doneAlert;window.createMesa=createMesa;window.forceRenderMesas=forceRenderMesas;window.editMesa=editMesa;window.delMesa=delMesa;
+window.switchEntry=switchEntry;window.createStore=createStore;window.ownerLogin=ownerLogin;window.logout=logout;window.refreshAll=refreshAll;window.openTab=openTab;window.ackAlert=ackAlert;window.doneAlert=doneAlert;window.createMesa=createMesa;window.forceRenderMesas=forceRenderMesas;window.editMesa=editMesa;window.delMesa=delMesa;window.goStaff=goStaff;
 </script>
 </body>
 </html>
