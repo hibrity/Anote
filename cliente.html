@@ -109,13 +109,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 <div class="overlay hidden" id="modal_confirm"><div class="sheet" style="text-align:center"><div style="font-size:56px">✅</div><h2 style="margin-top:8px">Pedido enviado!</h2><p style="color:var(--muted);font-size:14px;margin-top:6px">Seu pedido <b id="confirm_num"></b> já está com a loja.</p><button class="btn btn-primary" onclick="goToTracking()">Acompanhar pedido</button><button class="btn btn-ghost" onclick="closeConfirm()">Voltar ao cardápio</button></div></div>
 
-<!-- MODAL DE ERRO (substitui alert) -->
 <div class="overlay hidden" id="modal_error" onclick="if(event.target===this)closeError()"><div class="sheet error-modal"><div class="ico">⚠️</div><h2>Ops!</h2><p id="error_text" style="color:var(--muted);font-size:14px;margin-top:8px"></p><button class="btn btn-primary" onclick="closeError()">Entendi</button></div></div>
 
 <script>
+const $=id=>document.getElementById(id);
 let storeId=null,tableId=null,storeInfo=null,categories=[],products=[],cart=[],currentCustomer=null,activeOrderId=null,trackTimer=null,alertTimer=null,selectedPayment=null;
 const PAYMENTS=[{id:'pix',label:'Pix',ico:'💠'},{id:'credit',label:'Crédito',ico:'💳'},{id:'debit',label:'Débito',ico:'💳'},{id:'cash',label:'Dinheiro',ico:'💵'}];
-const STATUS_LABEL={new:{txt:'Pedido recebido',desc:'A loja já vai confirmar',ico:'📥'},preparing:{txt:'Em preparação',desc:'Seu pedido está sendo feito',ico:'👨‍🍳'},ready:{txt:'Pronto',desc:'Pode retirar / a caminho',ico:'🔔'},delivered:{txt:'Entregue',desc:'Bom apetite!',ico:'✅'},cancelled:{txt:'Cancelado',desc:'Fale com a loja',ico:'❌'}};
+const STATUS_LABEL={new:{txt:'Pedido recebido',desc:'A loja já vai confirmar',ico:'📥'},preparing:{txt:'Em preparação',desc:'Seu pedido está sendo feito',ico:'👨‍'},ready:{txt:'Pronto',desc:'Pode retirar / a caminho',ico:'🔔'},delivered:{txt:'Entregue',desc:'Bom apetite!',ico:'✅'},cancelled:{txt:'Cancelado',desc:'Fale com a loja',ico:'❌'}};
 
 function money(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
