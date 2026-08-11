@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Anote — Catálogo</title>
+<title>Anote — Pedidos</title>
 <script type="module">
 import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
 window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
@@ -13,14 +13,15 @@ window.dispatchEvent(new Event("supabase-ready"));
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--red:#ef4444;--r:14px}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
-.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}.hidden{display:none!important}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
 h2{font-size:17px;margin-bottom:12px}h3{font-size:14px;margin-bottom:8px;color:var(--mut)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
-.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-red{background:var(--red);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}.btn-block{width:100%}
+.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-red{background:var(--red);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}.btn-block{width:100%}.btn-sm{padding:6px 10px;font-size:12px}
 input,select,textarea{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:14px;margin-bottom:8px;outline:none}
-textarea{min-height:70px;resize:vertical}
+label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weight:600}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:110px}
 .muted{color:var(--mut);font-size:13px}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .title{font-size:20px;font-weight:800}
@@ -28,6 +29,10 @@ textarea{min-height:70px;resize:vertical}
 .msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
 .msg.err{background:#451a1a;color:#fca5a5}.msg.ok{background:#14351f;color:#86efac}
 .nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.b-new{background:#dbeafe;color:#1d4ed8}.b-preparing{background:#fef3c7;color:#b45309}.b-ready{background:#dcfce7;color:#15803d}.b-delivered{background:#ede9fe;color:#6d28d9}.b-cancelled{background:#fee2e2;color:#b91c1c}
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+.order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:.3s;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(4px)}
 @media(max-width:800px){.grid2{grid-template-columns:1fr}}
@@ -35,28 +40,39 @@ textarea{min-height:70px;resize:vertical}
 </head>
 <body>
 <div class="wrap">
-<div class="topbar"><div><div class="title" id="app_store_name">Catálogo</div><div class="muted">📦 Categorias e produtos</div></div>
+<div class="topbar"><div><div class="title" id="app_store_name">Pedidos</div><div class="muted">🧾 Clientes e pedidos</div></div>
 <button class="btn btn-ghost" onclick="location.href='index.html'">🏠 Painel</button></div>
 <div class="nav">
-<button class="btn btn-blue" onclick="location.href='pedidos.html'">🧾 Pedidos</button>
+<button class="btn btn-blue" onclick="location.href='catalogo.html'">📦 Catálogo</button>
 <button class="btn btn-blue" onclick="location.href='equipe.html'">👥 Equipe</button>
 </div>
 <div class="grid2"><div>
-<div class="card"><h3>Nova categoria</h3><input id="cat_name"/><button class="btn btn-green" onclick="createCategory()">Salvar</button><div id="cat_res"></div></div>
-<div class="card"><h3>Novo produto</h3><input id="prod_name" placeholder="Nome"/><select id="prod_cat"></select><input id="prod_price" type="number" step="0.01" placeholder="Preço"/><textarea id="prod_desc" placeholder="Descrição"></textarea><button class="btn btn-green" onclick="createProduct()">Salvar</button><div id="prod_res"></div></div>
+<div class="card"><h3>Novo cliente</h3><input id="cli_nome" placeholder="Nome"/><input id="cli_fone" placeholder="Telefone"/><input id="cli_end" placeholder="Endereço"/><button class="btn btn-blue" onclick="createCustomer()">Salvar cliente</button><div id="cli_res"></div></div>
+<div class="card"><h3>Novo pedido</h3>
+<label>Cliente</label><select id="ord_cli"></select>
+<label>Tipo</label><select id="ord_tipo" onchange="toggleMesa()"><option value="counter">🏪 Balcão</option><option value="delivery">🛵 Delivery</option><option value="pickup">🥡 Retirada</option><option value="table">🍽️ Mesa</option></select>
+<select id="ord_mesa" class="hidden"></select>
+<label>Itens</label><div class="row"><select id="ord_prod"></select><input id="ord_qtd" type="number" min="1" value="1" style="max-width:90px"/></div>
+<button class="btn btn-blue" onclick="addOrderItem()">➕ Adicionar item</button><div id="ord_items" style="margin-top:8px"></div>
+<label style="margin-top:10px">Pagamento</label><select id="ord_pagamento"><option value="">Definir depois</option><option value="pix">💠 Pix</option><option value="credit">💳 Crédito</option><option value="debit">💳 Débito</option><option value="cash">💵 Dinheiro</option></select>
+<button class="btn btn-green btn-block" onclick="createOrder()">Criar pedido</button><div id="ord_res"></div></div>
 </div><div>
-<div class="card"><h3>Categorias</h3><div id="list_cats"></div></div>
-<div class="card"><h3>Produtos</h3><div id="list_prods"></div></div>
+<div class="card"><h3>Pedidos em andamento</h3><div id="list_orders"></div></div>
 </div></div>
 </div>
 <div id="toast" class="toast"></div>
 <script>
 const $=id=>document.getElementById(id);
-let S={store:null,code:null},D={categories:[],products:[]};
+let S={store:null,code:null},D={categories:[],products:[],tables:[],customers:[],orders:[]},orderItems=[];
+let lastSelectHash='';
+const STATUS={new:'Novo',preparing:'Preparando',ready:'Pronto',delivered:'Entregue',cancelled:'Cancelado'};
+const PAY={pix:'💠 Pix',credit:'💳 Crédito',debit:'💳 Débito',cash:'💵 Dinheiro'};
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t==='err'?'#ef4444':'#22c55e';e.style.color=t==='err'?'#fff':'#052e16';e.classList.add('show');clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500)}
 function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
-async function rpc(n,p={}){const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}
+async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}catch(e){return{data:null,error:e}}}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
 async function boot(){
  try{await waitSB()}catch(e){return}
  const{data:ses}=await supabase.auth.getSession();
@@ -66,28 +82,100 @@ async function boot(){
  S.store=data.store;
  if(!S.store.staff_code){const r=await rpc('dono_regenerar_codigo',{p_store_id:S.store.id});if(r.data?.ok)S.store.staff_code=r.data.staff_code;else{location.href='index.html';return}}
  S.code=S.store.staff_code;
- $('app_store_name').textContent=S.store.name+' — Catálogo';
- refresh();
+ $('app_store_name').textContent=S.store.name+' — Pedidos';
+ refresh();setInterval(refresh,5000);
 }
 async function refresh(){
  const{data}=await rpc('staff_carregar',{p_store_id:S.store.id,p_codigo:S.code});
- if(data?.ok){D=data;render()}
+ if(data?.ok){D=data;renderSelects();renderOrders()}
 }
-function render(){
- $('list_cats').innerHTML=D.categories.map(c=>`<div class="item">${c.name}</div>`).join('')||'<div class="muted">Nenhuma</div>';
- $('list_prods').innerHTML=D.products.map(p=>`<div class="item"><b>${p.name}</b><br><span class="muted">${money(p.price)}</span></div>`).join('')||'<div class="muted">Nenhum</div>';
- $('prod_cat').innerHTML='<option value="">Sem categoria</option>'+D.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+function renderSelects(){
+ // ✅ Só atualiza os selects quando os dados mudam (evita perder seleção)
+ const hash=(D.customers||[]).length+'_'+(D.tables||[]).length+'_'+(D.products||[]).length;
+ if(hash===lastSelectHash)return;
+ lastSelectHash=hash;
+ const curCli=$('ord_cli').value,curProd=$('ord_prod').value,curMesa=$('ord_mesa').value;
+ $('ord_cli').innerHTML='<option value="">Sem cliente</option>'+(D.customers||[]).map(c=>`<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+ $('ord_mesa').innerHTML='<option value="">Escolha a mesa</option>'+(D.tables||[]).map(t=>`<option value="${t.id}">Mesa ${escapeHtml(t.table_number)}</option>`).join('');
+ $('ord_prod').innerHTML=(D.products||[]).map(p=>`<option value="${p.id}">${escapeHtml(p.name)} — ${money(p.price)}</option>`).join('')||'<option value="">Sem produtos</option>';
+ if(curCli)$('ord_cli').value=curCli;
+ if(curProd)$('ord_prod').value=curProd;
+ if(curMesa)$('ord_mesa').value=curMesa;
 }
-async function createCategory(){const n=$('cat_name').value.trim();if(!n)return;const{data}=await rpc('dono_criar_categoria',{p_store_id:S.store.id,p_nome:n});$('cat_res').innerHTML=data?.ok?'<div class="msg ok">Criada!</div>':`<div class="msg err">${data?.error||'Erro'}</div>`;$('cat_name').value='';refresh()}
-async function createProduct(){
- const n=$('prod_name').value.trim();
- if(!n){$('prod_res').innerHTML='<div class="msg err">Digite o nome.</div>';return}
- const{data}=await rpc('dono_criar_produto',{p_store_id:S.store.id,p_categoria:$('prod_cat').value||null,p_nome:n,p_preco:Number($('prod_price').value||0),p_desc:$('prod_desc').value.trim()});
- $('prod_res').innerHTML=data?.ok?'<div class="msg ok">Criado!</div>':`<div class="msg err">${data?.error||'Erro'}</div>`;
- $('prod_name').value='';$('prod_price').value='';$('prod_desc').value='';refresh();
+function toggleMesa(){$('ord_mesa').classList.toggle('hidden',$('ord_tipo').value!=='table')}
+function addOrderItem(){
+ const pid=$('ord_prod').value,q=Number($('ord_qtd').value||1);
+ if(!pid){toast('Escolha um produto','err');return}
+ if(q<1){toast('Quantidade mínima é 1','err');return}
+ const e=orderItems.find(i=>i.product_id===pid);
+ if(e)e.quantity+=q;else orderItems.push({product_id:pid,quantity:q});
+ renderOrderItems();
+}
+function rmOrderItem(pid){orderItems=orderItems.filter(i=>i.product_id!==pid);renderOrderItems()}
+function renderOrderItems(){
+ $('ord_items').innerHTML=orderItems.length?orderItems.map(i=>{
+  const p=(D.products||[]).find(x=>x.id===i.product_id);
+  return`<div class="item" style="display:flex;justify-content:space-between;align-items:center">${i.quantity}x ${p?escapeHtml(p.name):'?'}<button class="btn btn-red btn-sm" onclick="rmOrderItem('${i.product_id}')">✕</button></div>`;
+ }).join(''):'<div class="muted">Nenhum item.</div>';
+}
+async function createCustomer(){
+ const n=$('cli_nome').value.trim();
+ if(!n){$('cli_res').innerHTML='<div class="msg err">Digite o nome.</div>';return}
+ const{data}=await rpc('staff_criar_cliente',{p_store_id:S.store.id,p_codigo:S.code,p_nome:n,p_telefone:$('cli_fone').value.trim(),p_endereco:$('cli_end').value.trim(),p_notes:null});
+ $('cli_res').innerHTML=data?.ok?'<div class="msg ok">Salvo!</div>':`<div class="msg err">${escapeHtml(data?.error||'Erro')}</div>`;
+ if(data?.ok){$('cli_nome').value='';$('cli_fone').value='';$('cli_end').value='';lastSelectHash='';refresh()}
+}
+async function createOrder(){
+ const tipo=$('ord_tipo').value;
+ if(!orderItems.length){$('ord_res').innerHTML='<div class="msg err">Adicione pelo menos 1 item.</div>';return}
+ // ✅ Validação de mesa
+ if(tipo==='table'&&!$('ord_mesa').value){$('ord_res').innerHTML='<div class="msg err">Escolha a mesa.</div>';return}
+ $('ord_res').innerHTML='<div class="msg ok">Criando...</div>';
+ const{data}=await rpc('staff_criar_pedido',{
+  p_store_id:S.store.id,p_codigo:S.code,p_customer_id:$('ord_cli').value||null,
+  p_table_id:tipo==='table'?$('ord_mesa').value:null,p_order_type:tipo,p_order_source:'counter',
+  p_notes:null,p_items:orderItems,p_payment_method:$('ord_pagamento').value||null
+ });
+ if(data?.ok){
+  $('ord_res').innerHTML=`<div class="msg ok">Pedido #${data.order_number} criado! Total ${money(data.total)}</div>`;
+  orderItems=[];renderOrderItems();refresh();
+ }else{
+  $('ord_res').innerHTML=`<div class="msg err">${escapeHtml(data?.error||'Erro')}</div>`;
+ }
+}
+function renderOrders(){
+ const a=(D.orders||[]).filter(o=>['new','preparing','ready'].includes(o.status));
+ const list=a.slice(0,40);
+ const hidden=a.length-list.length;
+ $('list_orders').innerHTML=list.length?list.map(o=>{
+  const items=(o.items||[]).map(i=>`${i.qty}x ${escapeHtml(i.name)}`).join('<br>')||'Sem itens';
+  return`<div class="order-card">
+   <div class="order-head"><b>#${o.order_number}</b><span class="badge b-${o.status}">${STATUS[o.status]}</span></div>
+   <div class="muted">${o.customer_name?escapeHtml(o.customer_name):'Balcão'}${o.table_number?' • Mesa '+escapeHtml(o.table_number):''}</div>
+   <div style="margin:8px 0">${items}</div>
+   <div style="display:flex;justify-content:space-between"><b>${money(o.total)}</b><span class="muted">${o.payment_method?PAY[o.payment_method]:''}</span></div>
+   <div class="row" style="margin-top:8px">
+    <button class="btn btn-blue btn-sm" onclick="setStatus('${o.id}','delivered')">✅ Entregue</button>
+    <button class="btn btn-green btn-sm" onclick="setPay('${o.id}')">💰 Pago</button>
+    <button class="btn btn-red btn-sm" onclick="cancelOrder('${o.id}',${o.order_number})">✕</button>
+   </div></div>`;
+ }).join('')+(hidden>0?`<div class="muted" style="text-align:center">+ ${hidden} pedido(s) mais antigo(s) ocultado(s)</div>`:''):'<div class="muted">Nenhum em andamento. 🎉</div>';
+}
+async function setStatus(id,s){
+ await rpc('staff_atualizar_pedido',{p_store_id:S.store.id,p_codigo:S.code,p_order_id:id,p_status:s,p_payment:null});
+ refresh();
+}
+async function setPay(id){
+ await rpc('staff_atualizar_pedido',{p_store_id:S.store.id,p_codigo:S.code,p_order_id:id,p_status:null,p_payment:'paid'});
+ refresh();
+}
+async function cancelOrder(id,num){
+ if(!confirm(`Cancelar o pedido #${num}? Esta ação não pode ser desfeita.`))return;
+ await rpc('staff_atualizar_pedido',{p_store_id:S.store.id,p_codigo:S.code,p_order_id:id,p_status:'cancelled',p_payment:null});
+ refresh();
 }
 boot();
-window.createCategory=createCategory;window.createProduct=createProduct;
+window.toggleMesa=toggleMesa;window.addOrderItem=addOrderItem;window.rmOrderItem=rmOrderItem;window.createCustomer=createCustomer;window.createOrder=createOrder;window.setStatus=setStatus;window.setPay=setPay;window.cancelOrder=cancelOrder;
 </script>
 </body>
 </html>
