@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Anote — Garçom</title>
 <script type="module">
 import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
@@ -10,492 +10,280 @@ window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGc
 window.dispatchEvent(new Event("supabase-ready"));
 </script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--radius:14px}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+.wrap{max-width:520px;margin:0 auto;min-height:100vh;padding:14px 14px 90px}
 .hidden{display:none!important}
-.wrap{max-width:600px;margin:0 auto;padding:16px}
-
-/* TOPBAR */
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
-.topbar-title{font-size:20px;font-weight:800}
-.topbar-sub{font-size:13px;color:var(--mut)}
-
-/* BOTÕES */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .1s}
-.btn:active{transform:scale(.97)}
-.btn-green{background:var(--green);color:#052e16}
-.btn-blue{background:var(--blue);color:#fff}
-.btn-amber{background:var(--amber);color:#3b2503}
-.btn-red{background:var(--red);color:#fff}
-.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.title{font-size:18px;font-weight:800}
+.muted{color:var(--mut);font-size:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 16px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-red{background:var(--red);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
+.btn-sm{padding:8px 12px;font-size:12px}
 .btn-block{width:100%}
-.btn-lg{padding:16px 20px;font-size:17px;border-radius:12px}
-.btn-sm{padding:8px 12px;font-size:13px}
-
-/* CARD */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
-h2{font-size:17px;margin-bottom:14px}
-h3{font-size:15px;margin-bottom:10px;color:var(--mut)}
-
-/* INPUTS */
-input,select,textarea{width:100%;padding:13px 14px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:15px;margin-bottom:10px;outline:none}
-input:focus,select:focus{border-color:var(--green)}
-input.pin-input{text-align:center;font-size:28px;letter-spacing:12px;font-weight:800;text-transform:none}
-textarea{min-height:70px;resize:vertical}
-label{font-size:13px;color:var(--mut);display:block;margin-bottom:5px;font-weight:600}
-
-/* LOGIN */
-.login-shell{max-width:400px;margin:70px auto 0;padding:0 16px}
-.title{font-size:32px;font-weight:800;text-align:center;margin-bottom:6px}
-.muted{color:var(--mut);font-size:13px}
-.msg{padding:12px;border-radius:10px;font-size:14px;margin-top:12px;text-align:center}
-.msg.err{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d}
-.msg.ok{background:#14351f;color:#86efac;border:1px solid #166534}
-
-/* BADGES */
-.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
-.b-new{background:#dbeafe;color:#1d4ed8}
-.b-preparing{background:#fef3c7;color:#b45309}
-.b-ready{background:#dcfce7;color:#15803d}
-.b-delivered{background:#ede9fe;color:#6d28d9}
-
-/* PEDIDO CARD */
-.order-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
-.order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.order-num{font-size:18px;font-weight:800}
-.order-meta{font-size:13px;color:var(--mut);margin-bottom:8px}
-.order-items{font-size:14px;line-height:1.6;margin-bottom:10px}
-.order-total{font-size:16px;font-weight:700;color:var(--green)}
-
-/* QUICK ORDER - GRID DE PRODUTOS */
-.prod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}
-.prod-btn{background:var(--card2);border:2px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s}
-.prod-btn:hover{border-color:var(--green)}
-.prod-btn.selected{border-color:var(--green);background:rgba(34,197,94,.1)}
-.prod-btn b{display:block;font-size:14px;margin-bottom:4px}
-.prod-btn span{font-size:13px;color:var(--green);font-weight:700}
-
-/* QUANTITY CONTROL */
-.qty-control{display:flex;align-items:center;justify-content:center;gap:16px;margin:14px 0}
-.qty-btn{width:48px;height:48px;border-radius:12px;font-size:22px;font-weight:800;background:var(--card2);border:1px solid var(--border);color:var(--txt);cursor:pointer}
-.qty-btn:active{background:var(--green);color:#052e16}
-.qty-value{font-size:28px;font-weight:800;min-width:60px;text-align:center}
-
-/* TABS DE MESAS */
-.mesa-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.mesa-tab{padding:10px 16px;border-radius:10px;background:var(--card2);border:2px solid var(--border);color:var(--mut);cursor:pointer;font-weight:700;font-size:14px}
-.mesa-tab.active{background:var(--green);color:#052e16;border-color:var(--green)}
-.mesa-tab.has-orders{position:relative}
-.mesa-tab.has-orders::after{content:'';position:absolute;top:-4px;right:-4px;width:12px;height:12px;background:var(--red);border-radius:50%}
-
-/* STATUS FILTER */
-.filter-tabs{display:flex;gap:8px;margin-bottom:14px}
-.filter-tab{flex:1;padding:10px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--mut);cursor:pointer;font-weight:700;font-size:13px}
-.filter-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
-
-@media(max-width:400px){
-  .prod-grid{grid-template-columns:1fr}
-}
+input,select,textarea{width:100%;padding:12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:15px;margin-bottom:10px;outline:none}
+textarea{min-height:60px;resize:vertical}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.login-shell{max-width:380px;margin:60px auto 0}
+.login-shell .logo{text-align:center;font-size:26px;font-weight:800;margin-bottom:6px}
+.msg{padding:11px;border-radius:10px;font-size:14px;margin-top:10px}
+.msg.err{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d}.msg.ok{background:#14351f;color:#86efac;border:1px solid #166534}
+.section-title{font-size:13px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px}
+.mesas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px}
+.mesa-btn{padding:14px 6px;border-radius:12px;border:1px solid var(--border);background:var(--card2);color:var(--txt);font-weight:700;font-size:14px;cursor:pointer;text-align:center}
+.mesa-btn.sel{background:var(--green);color:#052e16;border-color:var(--green)}
+.prod-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;cursor:pointer}
+.prod-item.sel{border-color:var(--green);background:#14351f}
+.prod-item .n{font-weight:700;font-size:14px}
+.prod-item .p{color:var(--mut);font-size:12px}
+.qty-row{display:flex;align-items:center;gap:12px;justify-content:center}
+.qty-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--txt);font-size:20px;font-weight:800;cursor:pointer}
+.qty-val{font-size:20px;font-weight:800;min-width:30px;text-align:center}
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+.order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.order-num{font-weight:800;font-size:16px}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.b-new{background:#dbeafe;color:#1d4ed8}.b-preparing{background:#fef3c7;color:#b45309}.b-ready{background:#dcfce7;color:#15803d}.b-delivered{background:#ede9fe;color:#6d28d9}.b-cancelled{background:#fee2e2;color:#b91c1c}
+.order-items{font-size:13px;color:var(--mut);margin:6px 0}
+.order-total{font-weight:800}
+.alert-card{border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;border:1px solid var(--border)}
+.alert-card .ico{font-size:26px;flex-shrink:0}
+.alert-card .info{flex:1;font-size:13px;font-weight:700}
+.alert-card .info small{display:block;font-weight:400;color:var(--mut);margin-top:2px}
+.alert-card.waiter-pending{background:#3b2503;border-color:var(--amber)}
+.alert-card.waiter-ack{background:#14351f;border-color:var(--green)}
+.alert-card.bill{background:#1e293b;border-color:var(--blue)}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:40}
+.nav-item{flex:1;text-align:center;padding:10px 0 12px;font-size:11px;color:var(--mut);cursor:pointer;font-weight:700;position:relative}
+.nav-item .ico{font-size:22px;display:block;margin-bottom:2px}
+.nav-item.active{color:var(--green)}
+.nav-badge{position:absolute;top:6px;left:calc(50% + 14px);background:var(--red);color:#fff;border-radius:999px;min-width:18px;height:18px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px}
+.spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:30px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<!-- ============ TELA DE LOGIN ============ -->
-<div id="screen_login">
-  <div class="login-shell">
-    <div style="text-align:center;margin-bottom:24px">
-      <div class="title">🤵</div>
-      <div class="title" style="font-size:24px">Garçom</div>
-      <div class="muted">Anote — Painel do Garçom</div>
-    </div>
-    <div class="card">
-      <div class="muted" style="text-align:center;margin-bottom:14px" id="login_store_name">Digite seu PIN para entrar</div>
-      <label style="text-align:center">Seu PIN</label>
-      <input type="password" inputmode="numeric" maxlength="4" id="login_pin" class="pin-input" placeholder="••••" autofocus/>
-      <button class="btn btn-green btn-block btn-lg" onclick="doLogin()">🔓 Entrar</button>
-      <div id="login_result"></div>
-      <div class="muted" style="margin-top:16px;text-align:center">
-        Esqueceu o PIN? Peça ao dono da loja.
-      </div>
-    </div>
-  </div>
+<!-- ============ LOGIN ============ -->
+<div id="screen_login" class="hidden"><div class="login-shell">
+<div class="logo">🤵 Anote Garçom</div>
+<div class="muted" style="text-align:center;margin-bottom:20px" id="login_store_name">Digite seu PIN</div>
+<div class="card">
+<input id="login_pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN (4 números)" style="text-align:center;font-size:22px;letter-spacing:8px"/>
+<button class="btn btn-green btn-block" onclick="doLogin()">Entrar</button>
+<div id="login_result"></div>
+</div>
+</div></div>
+
+<!-- ============ APP ============ -->
+<div id="screen_app" class="hidden">
+<div class="topbar">
+<div><div class="title" id="app_store_name">Loja</div><div class="muted" id="app_staff_name">🤵 Garçom</div></div>
+<button class="btn btn-red btn-sm" onclick="logout()">Sair</button>
 </div>
 
-<!-- ============ TELA DO GARÇOM ============ -->
-<div id="screen_app" class="hidden">
-  <div class="wrap">
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <div>
-        <div class="topbar-title">🤵 Garçom</div>
-        <div class="topbar-sub" id="app_info">—</div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost btn-sm" onclick="loadData()">🔄</button>
-        <button class="btn btn-red btn-sm" onclick="logout()">Sair</button>
-      </div>
-    </div>
+<!-- CHAMADOS / ALERTAS -->
+<div id="alerts_wrap"></div>
 
-    <!-- TABS: NOVO PEDIDO / PEDIDOS -->
-    <div class="filter-tabs">
-      <div class="filter-tab active" id="ft_new" onclick="switchView('new')">➕ Novo Pedido</div>
-      <div class="filter-tab" id="ft_list" onclick="switchView('list')">📋 Pedidos <span id="orders_count"></span></div>
-    </div>
+<!-- NOVO PEDIDO -->
+<div id="view_menu">
+<div class="section-title">1. Escolha a mesa</div>
+<div class="mesas-grid" id="mesas_grid"><div class="spinner"></div></div>
+<div class="section-title">2. Escolha o produto</div>
+<div id="prod_list"><div class="spinner"></div></div>
+<div id="selected_prod_info" class="card hidden">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b id="sel_prod_name"></b><span id="sel_prod_price" class="muted"></span></div>
+<div class="qty-row"><button class="qty-btn" onclick="changeQty(-1)">−</button><span class="qty-val" id="qty_val">1</span><button class="qty-btn" onclick="changeQty(1)">+</button></div>
+</div>
+<div class="section-title">3. Observações e envio</div>
+<textarea id="g_obs" placeholder="Observações (ex: sem cebola)"></textarea>
+<button class="btn btn-green btn-block" onclick="sendOrder()">🚀 Enviar pedido pra cozinha</button>
+<div id="g_res"></div>
+</div>
 
-    <!-- VIEW: NOVO PEDIDO -->
-    <div id="view_new">
-      <div class="card">
-        <h2>🍽️ Escolha a mesa</h2>
-        <div class="mesa-tabs" id="mesa_tabs"></div>
-        
-        <div id="order_form" class="hidden">
-          <h2 style="margin-top:16px">📦 Escolha os produtos</h2>
-          <div class="prod-grid" id="prod_grid"></div>
-          
-          <div id="selected_prod_info" class="hidden" style="background:var(--card2);padding:14px;border-radius:12px;margin-bottom:12px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-              <b id="sel_prod_name">—</b>
-              <span id="sel_prod_price" style="color:var(--green);font-weight:700">—</span>
-            </div>
-            <div class="qty-control">
-              <button class="qty-btn" onclick="changeQty(-1)">−</button>
-              <span class="qty-value" id="qty_value">1</span>
-              <button class="qty-btn" onclick="changeQty(1)">+</button>
-            </div>
-          </div>
-          
-          <label>📝 Observações (opcional)</label>
-          <textarea id="g_obs" placeholder="Ex: sem cebola, ponto da carne..."></textarea>
-          
-          <button class="btn btn-green btn-block btn-lg" onclick="sendOrder()">
-            🔥 Enviar pra cozinha
-          </button>
-          <div id="g_res"></div>
-        </div>
-      </div>
-    </div>
+<!-- LISTA DE PEDIDOS -->
+<div id="view_list" class="hidden">
+<div class="section-title">Pedidos ativos</div>
+<div id="orders_list"><div class="spinner"></div></div>
+</div>
+</div>
 
-    <!-- VIEW: LISTA DE PEDIDOS -->
-    <div id="view_list" class="hidden">
-      <div class="card">
-        <h2>📋 Pedidos ativos</h2>
-        <div id="orders_list"></div>
-      </div>
-    </div>
-
-  </div>
+<div class="bottom-nav hidden" id="bottom_nav">
+<div class="nav-item active" id="nav_menu" onclick="switchView('menu')"><span class="ico">➕</span>Novo pedido</div>
+<div class="nav-item" id="nav_list" onclick="switchView('list')"><span class="ico">📦</span>Pedidos<span id="orders_badge" class="nav-badge hidden">0</span></div>
+<div class="nav-item" id="nav_alerts" onclick="scrollToAlerts()"><span class="ico">🔔</span>Chamados<span id="alerts_badge" class="nav-badge hidden">0</span></div>
+</div>
 </div>
 
 <script>
-let store=null,staff=null,staffCode=null,D={tables:[],products:[],orders:[]};
-let liveTimer=null,selectedMesa=null,selectedProd=null,qty=1,currentView='new';
-
-const STATUS={new:'Novo',preparing:'Preparando',ready:'Pronto',delivered:'Entregue'};
+let store=null,staff=null,staffCode=null,D={tables:[],products:[],orders:[]},selectedMesa=null,selectedProd=null,qty=1,liveTimer=null,lastAlertCount=0;
+const STATUS={new:'Novo',preparing:'Preparando',ready:'Pronto',delivered:'Entregue',cancelled:'Cancelado'};
 const TYPE_LABEL={counter:'🏪 Balcão',delivery:'🛵 Delivery',pickup:'🥡 Retirada',table:'🍽️ Mesa'};
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-
-function waitForSupabase(){
-  return new Promise((res,rej)=>{
-    if(window.supabase)return res();
-    const t=setTimeout(()=>rej(),10000);
-    window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true});
-  });
-}
+function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
+function getLojaFromURL(){return new URLSearchParams(location.search).get('loja')||''}
 
 // ============ LOGIN ============
-function getLojaFromURL(){
-  const p=new URLSearchParams(location.search);
-  return p.get('loja')||'';
-}
-
 async function doLogin(){
-  const pin=document.getElementById('login_pin').value.trim();
-  const loja=getLojaFromURL();
-  const res=document.getElementById('login_result');
-  
-  if(!loja){
-    res.innerHTML='<div class="msg err">Código da loja não encontrado. Escaneie o QR Code.</div>';
-    return;
-  }
-  if(!pin||pin.length!==4){
-    res.innerHTML='<div class="msg err">Digite seu PIN de 4 números.</div>';
-    return;
-  }
-  
-  res.innerHTML='<div class="msg ok">Verificando...</div>';
-  
-  const{data}=await supabase.rpc('staff_login_pin',{p_store_code:loja,p_pin:pin});
-  
-  if(!data||!data.ok){
-    res.innerHTML=`<div class="msg err">${data?.error||'PIN inválido'}</div>`;
-    document.getElementById('login_pin').value='';
-    return;
-  }
-  
-  // Verificar se o cargo é compatível
-  if(data.staff.cargo!=='waiter'&&data.staff.cargo!=='manager'){
-    res.innerHTML='<div class="msg err">Este PIN não tem acesso de garçom.</div>';
-    return;
-  }
-  
-  store=data.store;
-  staff=data.staff;
-  staffCode=data.store.staff_code;
-  
-  // Salvar sessão
-  localStorage.setItem('anote_garcom_session',JSON.stringify({loja:loja,pin:pin}));
-  
-  enterApp();
+ const pin=document.getElementById('login_pin').value.trim(),loja=getLojaFromURL(),res=document.getElementById('login_result');
+ if(!loja){res.innerHTML='<div class="msg err">Código da loja não encontrado. Escaneie o QR Code.</div>';return}
+ if(!pin||pin.length!==4){res.innerHTML='<div class="msg err">Digite seu PIN de 4 números.</div>';return}
+ res.innerHTML='<div class="msg ok">Verificando...</div>';
+ const{data}=await supabase.rpc('staff_login_pin',{p_store_code:loja,p_pin:pin});
+ if(!data||!data.ok){res.innerHTML=`<div class="msg err">${data?.error||'PIN inválido'}</div>`;document.getElementById('login_pin').value='';return}
+ if(data.staff.cargo!=='waiter'&&data.staff.cargo!=='manager'){res.innerHTML='<div class="msg err">Este PIN não tem acesso de garçom.</div>';return}
+ store=data.store;staff=data.staff;staffCode=data.store.staff_code;
+ localStorage.setItem('anote_garcom_session',JSON.stringify({loja:loja,pin:pin}));
+ enterApp();
 }
+function logout(){localStorage.removeItem('anote_garcom_session');stopLive();location.reload()}
 
-function logout(){
-  localStorage.removeItem('anote_garcom_session');
-  stopLive();
-  location.reload();
+// ============ BOOT ============
+async function boot(){
+ try{await waitForSupabase()}catch(e){return}
+ const loja=getLojaFromURL();
+ const saved=localStorage.getItem('anote_garcom_session');
+ if(saved){
+  try{
+   const{loja:sLoja,pin:sPin}=JSON.parse(saved);
+   if(sLoja===loja&&sPin){
+    const{data}=await supabase.rpc('staff_login_pin',{p_store_code:sLoja,p_pin:sPin});
+    if(data&&data.ok&&(data.staff.cargo==='waiter'||data.staff.cargo==='manager')){store=data.store;staff=data.staff;staffCode=data.store.staff_code;enterApp();return}
+   }
+  }catch(e){}
+ }
+ if(loja){
+  const{data}=await supabase.rpc('staff_entrar',{p_codigo:loja});
+  if(data&&data.ok)document.getElementById('login_store_name').textContent=`${data.store.name} • Digite seu PIN`;
+ }
+ document.getElementById('screen_login').classList.remove('hidden');
 }
 
 function enterApp(){
-  document.getElementById('screen_login').classList.add('hidden');
-  document.getElementById('screen_app').classList.remove('hidden');
-  document.getElementById('app_info').textContent=`${store.name} • Olá, ${staff.nome}! 👋`;
-  loadData();
-  startLive();
+ document.getElementById('screen_login').classList.add('hidden');
+ document.getElementById('screen_app').classList.remove('hidden');
+ document.getElementById('bottom_nav').classList.remove('hidden');
+ document.getElementById('app_store_name').textContent=store.name;
+ document.getElementById('app_staff_name').textContent=`🤵 ${staff.nome}`;
+ loadData();startLive();refreshAlerts();
 }
 
 // ============ DADOS ============
 async function loadData(){
-  if(!store||!staffCode)return;
-  const{data}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:staffCode});
-  if(!data||!data.ok){
-    if(data?.error==='Código inválido'){logout();return}
-    return;
-  }
-  D=data;
-  renderMesas();
-  renderProducts();
-  renderOrders();
-  updateOrdersCount();
+ if(!store||!staffCode)return;
+ const{data}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:staffCode});
+ if(!data||!data.ok){if(data?.error==='Código inválido')logout();return}
+ D=data;renderMesas();renderProducts();renderOrders();updateOrdersCount();
 }
+function startLive(){if(liveTimer)return;liveTimer=setInterval(()=>{loadData();refreshAlerts()},5000)}
+function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null}}
 
-function startLive(){
-  if(liveTimer)return;
-  liveTimer=setInterval(loadData,4000);
-}
-function stopLive(){
-  if(liveTimer){clearInterval(liveTimer);liveTimer=null}
-}
-
-// ============ VIEWS ============
-function switchView(v){
-  currentView=v;
-  document.getElementById('ft_new').classList.toggle('active',v==='new');
-  document.getElementById('ft_list').classList.toggle('active',v==='list');
-  document.getElementById('view_new').classList.toggle('hidden',v!=='new');
-  document.getElementById('view_list').classList.toggle('hidden',v!=='list');
-}
-
-function updateOrdersCount(){
-  const active=D.orders.filter(o=>['new','preparing','ready'].includes(o.status)).length;
-  document.getElementById('orders_count').textContent=active>0?`(${active})`:'';
-}
-
-// ============ MESAS ============
+// ============ MESAS / PRODUTOS ============
 function renderMesas(){
-  const c=document.getElementById('mesa_tabs');
-  if(!D.tables.length){
-    c.innerHTML='<div class="muted">Nenhuma mesa cadastrada. Peça ao dono para criar.</div>';
-    return;
-  }
-  c.innerHTML=D.tables.map(t=>{
-    const hasOrders=D.orders.some(o=>o.table_id===t.id&&['new','preparing','ready'].includes(o.status));
-    return `<div class="mesa-tab ${selectedMesa===t.id?'active':''} ${hasOrders?'has-orders':''}" onclick="selectMesa('${t.id}')">
-      🍽️ Mesa ${t.table_number}
-    </div>`;
-  }).join('');
+ document.getElementById('mesas_grid').innerHTML=D.tables.map(t=>`<button class="mesa-btn ${selectedMesa===t.id?'sel':''}" onclick="selectMesa('${t.id}')">Mesa ${t.table_number}</button>`).join('')||'<div class="muted">Nenhuma mesa cadastrada.</div>';
 }
-
-function selectMesa(id){
-  selectedMesa=id;
-  selectedProd=null;
-  qty=1;
-  renderMesas();
-  document.getElementById('order_form').classList.remove('hidden');
-  document.getElementById('selected_prod_info').classList.add('hidden');
-  document.getElementById('g_obs').value='';
-  document.getElementById('g_res').innerHTML='';
-}
-
-// ============ PRODUTOS ============
+function selectMesa(id){selectedMesa=id;renderMesas()}
 function renderProducts(){
-  const c=document.getElementById('prod_grid');
-  if(!D.products.length){
-    c.innerHTML='<div class="muted">Nenhum produto cadastrado.</div>';
-    return;
-  }
-  c.innerHTML=D.products.map(p=>`
-    <div class="prod-btn ${selectedProd===p.id?'selected':''}" onclick="selectProd('${p.id}')">
-      <b>${p.name}</b>
-      <span>${money(p.price)}</span>
-    </div>
-  `).join('');
+ document.getElementById('prod_list').innerHTML=D.products.map(p=>`<div class="prod-item ${selectedProd===p.id?'sel':''}" onclick="selectProd('${p.id}')"><div><div class="n">${p.name}</div><div class="p">${money(p.price)}</div></div><div>${selectedProd===p.id?'✅':''}</div></div>`).join('')||'<div class="muted">Nenhum produto.</div>';
 }
-
 function selectProd(id){
-  selectedProd=id;
-  qty=1;
-  renderProducts();
-  
-  const p=D.products.find(x=>x.id===id);
-  if(p){
-    document.getElementById('selected_prod_info').classList.remove('hidden');
-    document.getElementById('sel_prod_name').textContent=p.name;
-    document.getElementById('sel_prod_price').textContent=money(p.price);
-    document.getElementById('qty_value').textContent=qty;
-  }
+ selectedProd=id;qty=1;
+ const p=D.products.find(x=>x.id===id);
+ document.getElementById('selected_prod_info').classList.remove('hidden');
+ document.getElementById('sel_prod_name').textContent=p.name;
+ document.getElementById('sel_prod_price').textContent=money(p.price);
+ document.getElementById('qty_val').textContent=qty;
+ renderProducts();
 }
-
-function changeQty(delta){
-  qty=Math.max(1,qty+delta);
-  document.getElementById('qty_value').textContent=qty;
-}
+function changeQty(d){qty=Math.max(1,qty+d);document.getElementById('qty_val').textContent=qty}
 
 // ============ ENVIAR PEDIDO ============
 async function sendOrder(){
-  const res=document.getElementById('g_res');
-  
-  if(!selectedMesa){
-    res.innerHTML='<div class="msg err">Escolha uma mesa.</div>';
-    return;
-  }
-  if(!selectedProd){
-    res.innerHTML='<div class="msg err">Escolha um produto.</div>';
-    return;
-  }
-  
-  res.innerHTML='<div class="msg ok">Enviando...</div>';
-  
-  const obs=document.getElementById('g_obs').value.trim()||null;
-  
-  const{data}=await supabase.rpc('staff_criar_pedido',{
-    p_store_id:store.id,
-    p_codigo:staffCode,
-    p_customer_id:null,
-    p_table_id:selectedMesa,
-    p_order_type:'table',
-    p_order_source:'waiter',
-    p_notes:obs,
-    p_items:[{product_id:selectedProd,quantity:qty,notes:null}],
-    p_payment_method:null
-  });
-  
-  if(data&&data.ok){
-    res.innerHTML=`<div class="msg ok">✅ Pedido #${data.order_number} enviado pra cozinha! 🔥</div>`;
-    // Reset
-    selectedProd=null;
-    qty=1;
-    document.getElementById('g_obs').value='';
-    document.getElementById('selected_prod_info').classList.add('hidden');
-    renderProducts();
-    await loadData();
-    // Mudar para lista após 1.5s
-    setTimeout(()=>switchView('list'),1500);
-  }else{
-    res.innerHTML=`<div class="msg err">${data?.error||'Erro ao enviar'}</div>`;
-  }
+ const res=document.getElementById('g_res');
+ if(!selectedMesa){res.innerHTML='<div class="msg err">Escolha uma mesa.</div>';return}
+ if(!selectedProd){res.innerHTML='<div class="msg err">Escolha um produto.</div>';return}
+ res.innerHTML='<div class="msg ok">Enviando...</div>';
+ const obs=document.getElementById('g_obs').value.trim()||null;
+ const{data}=await supabase.rpc('staff_criar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_customer_id:null,p_table_id:selectedMesa,p_order_type:'table',p_order_source:'waiter',p_notes:obs,p_items:[{product_id:selectedProd,quantity:qty,notes:null}],p_payment_method:null});
+ if(data&&data.ok){
+  res.innerHTML=`<div class="msg ok">✅ Pedido #${data.order_number} enviado pra cozinha! 🔥</div>`;
+  selectedProd=null;qty=1;
+  document.getElementById('g_obs').value='';
+  document.getElementById('selected_prod_info').classList.add('hidden');
+  renderProducts();await loadData();
+  setTimeout(()=>switchView('list'),1500);
+ }else{
+  res.innerHTML=`<div class="msg err">${data?.error||'Erro ao enviar'}</div>`;
+ }
 }
 
 // ============ LISTA DE PEDIDOS ============
 function renderOrders(){
-  const c=document.getElementById('orders_list');
-  const active=D.orders.filter(o=>['new','preparing','ready'].includes(o.status));
-  
-  if(!active.length){
-    c.innerHTML='<div class="muted" style="text-align:center;padding:30px">Nenhum pedido ativo. 🎉</div>';
-    return;
-  }
-  
-  c.innerHTML=active.map(o=>{
-    const mesa=D.tables.find(t=>t.id===o.table_id);
-    return `
-      <div class="order-card">
-        <div class="order-head">
-          <span class="order-num">#${o.order_number}</span>
-          <span class="badge b-${o.status}">${STATUS[o.status]}</span>
-        </div>
-        <div class="order-meta">
-          ${mesa?`🍽️ Mesa ${mesa.table_number}`:TYPE_LABEL[o.order_type]||o.order_type}
-          • ${new Date(o.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
-        </div>
-        <div class="order-items">
-          ${(o.items||[]).map(i=>`${i.qty}x ${i.name}${i.notes?` <span style="color:var(--amber)">(${i.notes})</span>`:''}`).join('<br>')||'Sem itens'}
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span class="order-total">${money(o.total)}</span>
-          ${o.status==='ready'?`<button class="btn btn-green btn-sm" onclick="markDelivered('${o.id}')">✅ Entregue</button>`:''}
-        </div>
-      </div>
-    `;
-  }).join('');
+ const c=document.getElementById('orders_list');
+ const active=D.orders.filter(o=>['new','preparing','ready'].includes(o.status));
+ if(!active.length){c.innerHTML='<div class="muted" style="text-align:center;padding:30px">Nenhum pedido ativo. 🎉</div>';return}
+ c.innerHTML=active.map(o=>{
+  const mesa=D.tables.find(t=>t.id===o.table_id);
+  return`<div class="order-card"><div class="order-head"><span class="order-num">#${o.order_number}</span><span class="badge b-${o.status}">${STATUS[o.status]}</span></div>
+  <div class="muted">${mesa?`🍽️ Mesa ${mesa.table_number}`:TYPE_LABEL[o.order_type]||o.order_type} • ${new Date(o.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+  <div class="order-items">${(o.items||[]).map(i=>`${i.qty}x ${i.name}${i.notes?` <span style="color:var(--amber)">(${i.notes})</span>`:''}`).join('<br>')||'Sem itens'}</div>
+  <div style="display:flex;justify-content:space-between;align-items:center"><span class="order-total">${money(o.total)}</span>${o.status==='ready'?`<button class="btn btn-green btn-sm" onclick="markDelivered('${o.id}')">✅ Entregue</button>`:''}</div></div>`;
+ }).join('');
 }
-
 async function markDelivered(id){
-  await supabase.rpc('staff_atualizar_pedido',{
-    p_store_id:store.id,
-    p_codigo:staffCode,
-    p_order_id:id,
-    p_status:'delivered',
-    p_payment:null
-  });
-  await loadData();
+ await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:'delivered',p_payment:null});
+ await loadData();
+}
+function updateOrdersCount(){
+ const n=D.orders.filter(o=>['new','preparing','ready'].includes(o.status)).length;
+ const b=document.getElementById('orders_badge');
+ b.textContent=n;b.classList.toggle('hidden',n===0);
 }
 
-// ============ BOOT ============
-async function boot(){
-  try{await waitForSupabase()}catch(e){return}
-  
-  const loja=getLojaFromURL();
-  
-  // Tentar sessão salva
-  const saved=localStorage.getItem('anote_garcom_session');
-  if(saved){
-    try{
-      const{loja:sLoja,pin:sPin}=JSON.parse(saved);
-      if(sLoja===loja&&sPin){
-        const{data}=await supabase.rpc('staff_login_pin',{p_store_code:sLoja,p_pin:sPin});
-        if(data&&data.ok&&(data.staff.cargo==='waiter'||data.staff.cargo==='manager')){
-          store=data.store;
-          staff=data.staff;
-          staffCode=data.store.staff_code;
-          enterApp();
-          return;
-        }
-      }
-    }catch(e){}
-  }
-  
-  // Mostrar tela de login
-  if(loja){
-    // Buscar nome da loja para mostrar no login
-    const{data}=await supabase.rpc('staff_entrar',{p_codigo:loja});
-    if(data&&data.ok){
-      document.getElementById('login_store_name').textContent=`${data.store.name} • Digite seu PIN`;
-    }
-  }
-  document.getElementById('screen_login').classList.remove('hidden');
+// ============ CHAMADOS / ALERTAS ============
+function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.1;o.start();setTimeout(()=>{o.stop();c.close()},300)}catch(e){}}
+async function refreshAlerts(){
+ if(!store||!staffCode)return;
+ const{data}=await supabase.rpc('staff_alertas',{p_store_id:store.id,p_codigo:staffCode});
+ if(!data||!data.ok)return;
+ const a=data.alerts||[];
+ const pending=a.filter(x=>x.status==='pending').length;
+ if(a.length>lastAlertCount)beep();
+ lastAlertCount=a.length;
+ const badge=document.getElementById('alerts_badge');
+ badge.textContent=pending;badge.classList.toggle('hidden',pending===0);
+ renderAlerts(a);
 }
+function renderAlerts(a){
+ const w=document.getElementById('alerts_wrap');
+ if(!a.length){w.innerHTML='';return}
+ w.innerHTML='<div class="section-title">🔔 Chamados da mesa</div>'+a.map(x=>{
+  if(x.type==='waiter'){
+   if(x.status==='ack')return`<div class="alert-card waiter-ack"><div class="ico">🏃</div><div class="info">Mesa ${x.table_number} — você está a caminho<small>Quando chegar, marque como atendido.</small></div><button class="btn btn-green btn-sm" onclick="doneAlerta('${x.id}')">✔ Atendido</button></div>`;
+   return`<div class="alert-card waiter-pending"><div class="ico">🔔</div><div class="info">Mesa ${x.table_number} está chamando!<small>Toque para confirmar que vai até lá.</small></div><button class="btn btn-amber btn-sm" style="background:var(--amber);color:#3b2503" onclick="ackAlerta('${x.id}')">✅ Vou lá</button></div>`;
+  }
+  // CONTA: garçom só visualiza, sem ação
+  if(x.status==='ack')return`<div class="alert-card bill"><div class="ico">💳</div><div class="info">Mesa ${x.table_number} — conta confirmada pelo caixa<small>Somente informativo.</small></div></div>`;
+  return`<div class="alert-card bill"><div class="ico">💳</div><div class="info">Mesa ${x.table_number} pediu a conta<small>Aguardando o caixa confirmar.</small></div></div>`;
+ }).join('');
+}
+async function ackAlerta(id){await supabase.rpc('staff_alerta_ack',{p_store_id:store.id,p_codigo:staffCode,p_alert_id:id});refreshAlerts()}
+async function doneAlerta(id){await supabase.rpc('staff_alerta_done',{p_store_id:store.id,p_codigo:staffCode,p_alert_id:id});refreshAlerts()}
+function scrollToAlerts(){document.getElementById('alerts_wrap').scrollIntoView({behavior:'smooth'})}
+
+// ============ NAVEGAÇÃO ============
+function switchView(v){
+ document.getElementById('view_menu').classList.toggle('hidden',v!=='menu');
+ document.getElementById('view_list').classList.toggle('hidden',v!=='list');
+ document.getElementById('nav_menu').classList.toggle('active',v==='menu');
+ document.getElementById('nav_list').classList.toggle('active',v==='list');
+ if(v==='list')renderOrders();
+}
+
 boot();
-
-// Expor funções
-window.doLogin=doLogin;
-window.logout=logout;
-window.loadData=loadData;
-window.switchView=switchView;
-window.selectMesa=selectMesa;
-window.selectProd=selectProd;
-window.changeQty=changeQty;
-window.sendOrder=sendOrder;
-window.markDelivered=markDelivered;
+window.doLogin=doLogin;window.logout=logout;window.selectMesa=selectMesa;window.selectProd=selectProd;window.changeQty=changeQty;window.sendOrder=sendOrder;window.markDelivered=markDelivered;window.switchView=switchView;window.ackAlerta=ackAlerta;window.doneAlerta=doneAlerta;window.scrollToAlerts=scrollToAlerts;
 </script>
 </body>
 </html>
