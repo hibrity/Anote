@@ -11,66 +11,491 @@ window.dispatchEvent(new Event("supabase-ready"));
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--red:#ef4444;--radius:14px}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
-.wrap{max-width:560px;margin:0 auto;padding:16px}.hidden{display:none!important}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
-h2{font-size:17px;margin-bottom:12px}
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
-.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-red{background:var(--red);color:#fff}.btn-block{width:100%}
-input,select,textarea{width:100%;padding:11px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:14px;margin-bottom:10px;outline:none}
-label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weight:600}
+:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--radius:14px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+.hidden{display:none!important}
+.wrap{max-width:600px;margin:0 auto;padding:16px}
+
+/* TOPBAR */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+.topbar-title{font-size:20px;font-weight:800}
+.topbar-sub{font-size:13px;color:var(--mut)}
+
+/* BOTÕES */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn-green{background:var(--green);color:#052e16}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-amber{background:var(--amber);color:#3b2503}
+.btn-red{background:var(--red);color:#fff}
+.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
+.btn-block{width:100%}
+.btn-lg{padding:16px 20px;font-size:17px;border-radius:12px}
+.btn-sm{padding:8px 12px;font-size:13px}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+h2{font-size:17px;margin-bottom:14px}
+h3{font-size:15px;margin-bottom:10px;color:var(--mut)}
+
+/* INPUTS */
+input,select,textarea{width:100%;padding:13px 14px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:15px;margin-bottom:10px;outline:none}
+input:focus,select:focus{border-color:var(--green)}
+input.pin-input{text-align:center;font-size:28px;letter-spacing:12px;font-weight:800;text-transform:none}
+textarea{min-height:70px;resize:vertical}
+label{font-size:13px;color:var(--mut);display:block;margin-bottom:5px;font-weight:600}
+
+/* LOGIN */
+.login-shell{max-width:400px;margin:70px auto 0;padding:0 16px}
+.title{font-size:32px;font-weight:800;text-align:center;margin-bottom:6px}
 .muted{color:var(--mut);font-size:13px}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.title{font-size:22px;font-weight:800}
-.order-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
-.order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}
-.b-new{background:#dbeafe;color:#1d4ed8}.b-preparing{background:#fef3c7;color:#b45309}.b-ready{background:#dcfce7;color:#15803d}
-.msg{padding:11px;border-radius:10px;font-size:14px;margin-bottom:8px}
+.msg{padding:12px;border-radius:10px;font-size:14px;margin-top:12px;text-align:center}
 .msg.err{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d}
-.login-shell{max-width:400px;margin:60px auto 0}
+.msg.ok{background:#14351f;color:#86efac;border:1px solid #166534}
+
+/* BADGES */
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.b-new{background:#dbeafe;color:#1d4ed8}
+.b-preparing{background:#fef3c7;color:#b45309}
+.b-ready{background:#dcfce7;color:#15803d}
+.b-delivered{background:#ede9fe;color:#6d28d9}
+
+/* PEDIDO CARD */
+.order-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.order-num{font-size:18px;font-weight:800}
+.order-meta{font-size:13px;color:var(--mut);margin-bottom:8px}
+.order-items{font-size:14px;line-height:1.6;margin-bottom:10px}
+.order-total{font-size:16px;font-weight:700;color:var(--green)}
+
+/* QUICK ORDER - GRID DE PRODUTOS */
+.prod-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}
+.prod-btn{background:var(--card2);border:2px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s}
+.prod-btn:hover{border-color:var(--green)}
+.prod-btn.selected{border-color:var(--green);background:rgba(34,197,94,.1)}
+.prod-btn b{display:block;font-size:14px;margin-bottom:4px}
+.prod-btn span{font-size:13px;color:var(--green);font-weight:700}
+
+/* QUANTITY CONTROL */
+.qty-control{display:flex;align-items:center;justify-content:center;gap:16px;margin:14px 0}
+.qty-btn{width:48px;height:48px;border-radius:12px;font-size:22px;font-weight:800;background:var(--card2);border:1px solid var(--border);color:var(--txt);cursor:pointer}
+.qty-btn:active{background:var(--green);color:#052e16}
+.qty-value{font-size:28px;font-weight:800;min-width:60px;text-align:center}
+
+/* TABS DE MESAS */
+.mesa-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.mesa-tab{padding:10px 16px;border-radius:10px;background:var(--card2);border:2px solid var(--border);color:var(--mut);cursor:pointer;font-weight:700;font-size:14px}
+.mesa-tab.active{background:var(--green);color:#052e16;border-color:var(--green)}
+.mesa-tab.has-orders{position:relative}
+.mesa-tab.has-orders::after{content:'';position:absolute;top:-4px;right:-4px;width:12px;height:12px;background:var(--red);border-radius:50%}
+
+/* STATUS FILTER */
+.filter-tabs{display:flex;gap:8px;margin-bottom:14px}
+.filter-tab{flex:1;padding:10px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--border);color:var(--mut);cursor:pointer;font-weight:700;font-size:13px}
+.filter-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+@media(max-width:400px){
+  .prod-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-<div id="screen_login"><div class="login-shell"><div class="card">
-<div class="title" style="text-align:center;margin-bottom:8px">🤵 Garçom</div>
-<label>Código da loja</label><input id="st_code" style="text-transform:uppercase"/>
-<button class="btn btn-green btn-block" onclick="login()">Entrar</button>
-<div id="res"></div></div></div></div>
+
+<!-- ============ TELA DE LOGIN ============ -->
+<div id="screen_login">
+  <div class="login-shell">
+    <div style="text-align:center;margin-bottom:24px">
+      <div class="title">🤵</div>
+      <div class="title" style="font-size:24px">Garçom</div>
+      <div class="muted">Anote — Painel do Garçom</div>
+    </div>
+    <div class="card">
+      <div class="muted" style="text-align:center;margin-bottom:14px" id="login_store_name">Digite seu PIN para entrar</div>
+      <label style="text-align:center">Seu PIN</label>
+      <input type="password" inputmode="numeric" maxlength="4" id="login_pin" class="pin-input" placeholder="••••" autofocus/>
+      <button class="btn btn-green btn-block btn-lg" onclick="doLogin()">🔓 Entrar</button>
+      <div id="login_result"></div>
+      <div class="muted" style="margin-top:16px;text-align:center">
+        Esqueceu o PIN? Peça ao dono da loja.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TELA DO GARÇOM ============ -->
 <div id="screen_app" class="hidden">
-<div class="topbar"><div><div class="title" id="store_name">Loja</div><div class="muted">🤵 Garçom</div></div><button class="btn btn-red" onclick="logout()">Sair</button></div>
-<div id="alerts"></div>
-<div class="card"><h2>📦 Pedidos pra entregar</h2><div id="list"></div></div>
-<div class="card"><h2>➕ Pedido rápido</h2>
-<label>Mesa</label><select id="g_mesa"></select>
-<label>Produto</label><select id="g_prod"></select>
-<label>Qtd</label><input id="g_qtd" type="number" min="1" value="1"/>
-<label>Obs</label><textarea id="g_obs"></textarea>
-<button class="btn btn-green btn-block" onclick="send()">Enviar pra cozinha</button>
-<div id="gres"></div></div>
+  <div class="wrap">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">🤵 Garçom</div>
+        <div class="topbar-sub" id="app_info">—</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="loadData()">🔄</button>
+        <button class="btn btn-red btn-sm" onclick="logout()">Sair</button>
+      </div>
+    </div>
+
+    <!-- TABS: NOVO PEDIDO / PEDIDOS -->
+    <div class="filter-tabs">
+      <div class="filter-tab active" id="ft_new" onclick="switchView('new')">➕ Novo Pedido</div>
+      <div class="filter-tab" id="ft_list" onclick="switchView('list')">📋 Pedidos <span id="orders_count"></span></div>
+    </div>
+
+    <!-- VIEW: NOVO PEDIDO -->
+    <div id="view_new">
+      <div class="card">
+        <h2>🍽️ Escolha a mesa</h2>
+        <div class="mesa-tabs" id="mesa_tabs"></div>
+        
+        <div id="order_form" class="hidden">
+          <h2 style="margin-top:16px">📦 Escolha os produtos</h2>
+          <div class="prod-grid" id="prod_grid"></div>
+          
+          <div id="selected_prod_info" class="hidden" style="background:var(--card2);padding:14px;border-radius:12px;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <b id="sel_prod_name">—</b>
+              <span id="sel_prod_price" style="color:var(--green);font-weight:700">—</span>
+            </div>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeQty(-1)">−</button>
+              <span class="qty-value" id="qty_value">1</span>
+              <button class="qty-btn" onclick="changeQty(1)">+</button>
+            </div>
+          </div>
+          
+          <label>📝 Observações (opcional)</label>
+          <textarea id="g_obs" placeholder="Ex: sem cebola, ponto da carne..."></textarea>
+          
+          <button class="btn btn-green btn-block btn-lg" onclick="sendOrder()">
+            🔥 Enviar pra cozinha
+          </button>
+          <div id="g_res"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: LISTA DE PEDIDOS -->
+    <div id="view_list" class="hidden">
+      <div class="card">
+        <h2>📋 Pedidos ativos</h2>
+        <div id="orders_list"></div>
+      </div>
+    </div>
+
+  </div>
 </div>
-</div>
+
 <script>
-let store=null,code=null,D={tables:[],products:[],orders:[]},last=0,timer=null;
+let store=null,staff=null,staffCode=null,D={tables:[],products:[],orders:[]};
+let liveTimer=null,selectedMesa=null,selectedProd=null,qty=1,currentView='new';
+
+const STATUS={new:'Novo',preparing:'Preparando',ready:'Pronto',delivered:'Entregue'};
+const TYPE_LABEL={counter:'🏪 Balcão',delivery:'🛵 Delivery',pickup:'🥡 Retirada',table:'🍽️ Mesa'};
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const STATUS={new:'Novo',preparing:'Preparando',ready:'Pronto'};
-function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
-async function login(){code=document.getElementById('st_code').value.trim().toUpperCase();const b=document.getElementById('res');b.innerHTML='<div class="msg err" style="background:#14351f;color:#86efac">Verificando...</div>';const{data}=await supabase.rpc('staff_entrar',{p_codigo:code});if(!data||!data.ok){b.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;return}store=data.store;enter()}
-function logout(){clearInterval(timer);store=null;document.getElementById('screen_app').classList.add('hidden');document.getElementById('screen_login').classList.remove('hidden')}
-async function enter(){document.getElementById('screen_login').classList.add('hidden');document.getElementById('screen_app').classList.remove('hidden');document.getElementById('store_name').textContent=store.name;await refresh();timer=setInterval(refresh,5000)}
-function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.1;o.start();setTimeout(()=>{o.stop();c.close()},300)}catch(e){}}
-async function refresh(){if(!store||!code)return;const[a,b]=await Promise.all([supabase.rpc('staff_alertas',{p_store_id:store.id,p_codigo:code}),supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:code})]);if(b.data&&b.ok){D=b.data;renderLists()}if(a.data&&a.ok){const al=(a.data.alerts||[]).filter(x=>x.type==='waiter');if(al.length>last)beep();last=al.length;renderAlerts(al)}}
-function renderAlerts(al){document.getElementById('alerts').innerHTML=al.map(x=>`<div class="msg err">🔔 <b>Mesa ${x.table_number}</b> chamando! <button class="btn btn-green" style="padding:6px 10px" onclick="attend('${x.id}')">✅ Atender</button></div>`).join('')}
-async function attend(id){await supabase.rpc('staff_alerta_ack',{p_store_id:store.id,p_codigo:code,p_alert_id:id});refresh()}
-function renderLists(){document.getElementById('g_mesa').innerHTML=D.tables.map(t=>`<option value="${t.id}">Mesa ${t.table_number}</option>`).join('')||'<option value="">Sem mesas</option>';document.getElementById('g_prod').innerHTML=D.products.map(p=>`<option value="${p.id}">${p.name} — ${money(p.price)}</option>`).join('');const a=D.orders.filter(o=>['new','preparing','ready'].includes(o.status));document.getElementById('list').innerHTML=a.length?a.map(o=>`<div class="order-card"><div class="order-head"><b>#${o.order_number}</b><span class="badge b-${o.status}">${STATUS[o.status]||o.status}</span></div><div class="muted">${o.table_number?'Mesa '+o.table_number:o.order_type} • ${money(o.total)}</div><div style="margin:6px 0">${(o.items||[]).map(i=>`${i.qty}x ${i.name}`).join('<br>')||''}</div><button class="btn btn-blue" onclick="deliver('${o.id}')">✅ Entregue</button></div>`).join(''):'<div class="muted">Nenhum pedido ativo.</div>'}
-async function deliver(id){await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:code,p_order_id:id,p_status:'delivered',p_payment:null});refresh()}
-async function send(){const m=document.getElementById('g_mesa').value,p=document.getElementById('g_prod').value,q=Number(document.getElementById('g_qtd').value||1),o=document.getElementById('g_obs').value.trim()||null,b=document.getElementById('gres');if(!m||!p){b.innerHTML='<div class="msg err">Escolha mesa e produto.</div>';return}const{data}=await supabase.rpc('staff_criar_pedido',{p_store_id:store.id,p_codigo:code,p_customer_id:null,p_table_id:m,p_order_type:'table',p_order_source:'waiter',p_notes:null,p_items:[{product_id:p,quantity:q,notes:o}]});b.innerHTML=data?.ok?`<div class="msg err" style="background:#14351f;color:#86efac">Pedido #${data.order_number} enviado! 🔥</div>`:`<div class="msg err">${data?.error}</div>`;refresh()}
-async function boot(){try{await waitForSupabase()}catch(e){return}
-const _p=new URLSearchParams(location.search);const _c=_p.get('codigo');if(_c)document.getElementById('st_code').value=_c;}
+
+function waitForSupabase(){
+  return new Promise((res,rej)=>{
+    if(window.supabase)return res();
+    const t=setTimeout(()=>rej(),10000);
+    window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true});
+  });
+}
+
+// ============ LOGIN ============
+function getLojaFromURL(){
+  const p=new URLSearchParams(location.search);
+  return p.get('loja')||'';
+}
+
+async function doLogin(){
+  const pin=document.getElementById('login_pin').value.trim();
+  const loja=getLojaFromURL();
+  const res=document.getElementById('login_result');
+  
+  if(!loja){
+    res.innerHTML='<div class="msg err">Código da loja não encontrado. Escaneie o QR Code.</div>';
+    return;
+  }
+  if(!pin||pin.length!==4){
+    res.innerHTML='<div class="msg err">Digite seu PIN de 4 números.</div>';
+    return;
+  }
+  
+  res.innerHTML='<div class="msg ok">Verificando...</div>';
+  
+  const{data}=await supabase.rpc('staff_login_pin',{p_store_code:loja,p_pin:pin});
+  
+  if(!data||!data.ok){
+    res.innerHTML=`<div class="msg err">${data?.error||'PIN inválido'}</div>`;
+    document.getElementById('login_pin').value='';
+    return;
+  }
+  
+  // Verificar se o cargo é compatível
+  if(data.staff.cargo!=='waiter'&&data.staff.cargo!=='manager'){
+    res.innerHTML='<div class="msg err">Este PIN não tem acesso de garçom.</div>';
+    return;
+  }
+  
+  store=data.store;
+  staff=data.staff;
+  staffCode=data.store.staff_code;
+  
+  // Salvar sessão
+  localStorage.setItem('anote_garcom_session',JSON.stringify({loja:loja,pin:pin}));
+  
+  enterApp();
+}
+
+function logout(){
+  localStorage.removeItem('anote_garcom_session');
+  stopLive();
+  location.reload();
+}
+
+function enterApp(){
+  document.getElementById('screen_login').classList.add('hidden');
+  document.getElementById('screen_app').classList.remove('hidden');
+  document.getElementById('app_info').textContent=`${store.name} • Olá, ${staff.nome}! 👋`;
+  loadData();
+  startLive();
+}
+
+// ============ DADOS ============
+async function loadData(){
+  if(!store||!staffCode)return;
+  const{data}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:staffCode});
+  if(!data||!data.ok){
+    if(data?.error==='Código inválido'){logout();return}
+    return;
+  }
+  D=data;
+  renderMesas();
+  renderProducts();
+  renderOrders();
+  updateOrdersCount();
+}
+
+function startLive(){
+  if(liveTimer)return;
+  liveTimer=setInterval(loadData,4000);
+}
+function stopLive(){
+  if(liveTimer){clearInterval(liveTimer);liveTimer=null}
+}
+
+// ============ VIEWS ============
+function switchView(v){
+  currentView=v;
+  document.getElementById('ft_new').classList.toggle('active',v==='new');
+  document.getElementById('ft_list').classList.toggle('active',v==='list');
+  document.getElementById('view_new').classList.toggle('hidden',v!=='new');
+  document.getElementById('view_list').classList.toggle('hidden',v!=='list');
+}
+
+function updateOrdersCount(){
+  const active=D.orders.filter(o=>['new','preparing','ready'].includes(o.status)).length;
+  document.getElementById('orders_count').textContent=active>0?`(${active})`:'';
+}
+
+// ============ MESAS ============
+function renderMesas(){
+  const c=document.getElementById('mesa_tabs');
+  if(!D.tables.length){
+    c.innerHTML='<div class="muted">Nenhuma mesa cadastrada. Peça ao dono para criar.</div>';
+    return;
+  }
+  c.innerHTML=D.tables.map(t=>{
+    const hasOrders=D.orders.some(o=>o.table_id===t.id&&['new','preparing','ready'].includes(o.status));
+    return `<div class="mesa-tab ${selectedMesa===t.id?'active':''} ${hasOrders?'has-orders':''}" onclick="selectMesa('${t.id}')">
+      🍽️ Mesa ${t.table_number}
+    </div>`;
+  }).join('');
+}
+
+function selectMesa(id){
+  selectedMesa=id;
+  selectedProd=null;
+  qty=1;
+  renderMesas();
+  document.getElementById('order_form').classList.remove('hidden');
+  document.getElementById('selected_prod_info').classList.add('hidden');
+  document.getElementById('g_obs').value='';
+  document.getElementById('g_res').innerHTML='';
+}
+
+// ============ PRODUTOS ============
+function renderProducts(){
+  const c=document.getElementById('prod_grid');
+  if(!D.products.length){
+    c.innerHTML='<div class="muted">Nenhum produto cadastrado.</div>';
+    return;
+  }
+  c.innerHTML=D.products.map(p=>`
+    <div class="prod-btn ${selectedProd===p.id?'selected':''}" onclick="selectProd('${p.id}')">
+      <b>${p.name}</b>
+      <span>${money(p.price)}</span>
+    </div>
+  `).join('');
+}
+
+function selectProd(id){
+  selectedProd=id;
+  qty=1;
+  renderProducts();
+  
+  const p=D.products.find(x=>x.id===id);
+  if(p){
+    document.getElementById('selected_prod_info').classList.remove('hidden');
+    document.getElementById('sel_prod_name').textContent=p.name;
+    document.getElementById('sel_prod_price').textContent=money(p.price);
+    document.getElementById('qty_value').textContent=qty;
+  }
+}
+
+function changeQty(delta){
+  qty=Math.max(1,qty+delta);
+  document.getElementById('qty_value').textContent=qty;
+}
+
+// ============ ENVIAR PEDIDO ============
+async function sendOrder(){
+  const res=document.getElementById('g_res');
+  
+  if(!selectedMesa){
+    res.innerHTML='<div class="msg err">Escolha uma mesa.</div>';
+    return;
+  }
+  if(!selectedProd){
+    res.innerHTML='<div class="msg err">Escolha um produto.</div>';
+    return;
+  }
+  
+  res.innerHTML='<div class="msg ok">Enviando...</div>';
+  
+  const obs=document.getElementById('g_obs').value.trim()||null;
+  
+  const{data}=await supabase.rpc('staff_criar_pedido',{
+    p_store_id:store.id,
+    p_codigo:staffCode,
+    p_customer_id:null,
+    p_table_id:selectedMesa,
+    p_order_type:'table',
+    p_order_source:'waiter',
+    p_notes:obs,
+    p_items:[{product_id:selectedProd,quantity:qty,notes:null}],
+    p_payment_method:null
+  });
+  
+  if(data&&data.ok){
+    res.innerHTML=`<div class="msg ok">✅ Pedido #${data.order_number} enviado pra cozinha! 🔥</div>`;
+    // Reset
+    selectedProd=null;
+    qty=1;
+    document.getElementById('g_obs').value='';
+    document.getElementById('selected_prod_info').classList.add('hidden');
+    renderProducts();
+    await loadData();
+    // Mudar para lista após 1.5s
+    setTimeout(()=>switchView('list'),1500);
+  }else{
+    res.innerHTML=`<div class="msg err">${data?.error||'Erro ao enviar'}</div>`;
+  }
+}
+
+// ============ LISTA DE PEDIDOS ============
+function renderOrders(){
+  const c=document.getElementById('orders_list');
+  const active=D.orders.filter(o=>['new','preparing','ready'].includes(o.status));
+  
+  if(!active.length){
+    c.innerHTML='<div class="muted" style="text-align:center;padding:30px">Nenhum pedido ativo. 🎉</div>';
+    return;
+  }
+  
+  c.innerHTML=active.map(o=>{
+    const mesa=D.tables.find(t=>t.id===o.table_id);
+    return `
+      <div class="order-card">
+        <div class="order-head">
+          <span class="order-num">#${o.order_number}</span>
+          <span class="badge b-${o.status}">${STATUS[o.status]}</span>
+        </div>
+        <div class="order-meta">
+          ${mesa?`🍽️ Mesa ${mesa.table_number}`:TYPE_LABEL[o.order_type]||o.order_type}
+          • ${new Date(o.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+        </div>
+        <div class="order-items">
+          ${(o.items||[]).map(i=>`${i.qty}x ${i.name}${i.notes?` <span style="color:var(--amber)">(${i.notes})</span>`:''}`).join('<br>')||'Sem itens'}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="order-total">${money(o.total)}</span>
+          ${o.status==='ready'?`<button class="btn btn-green btn-sm" onclick="markDelivered('${o.id}')">✅ Entregue</button>`:''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function markDelivered(id){
+  await supabase.rpc('staff_atualizar_pedido',{
+    p_store_id:store.id,
+    p_codigo:staffCode,
+    p_order_id:id,
+    p_status:'delivered',
+    p_payment:null
+  });
+  await loadData();
+}
+
+// ============ BOOT ============
+async function boot(){
+  try{await waitForSupabase()}catch(e){return}
+  
+  const loja=getLojaFromURL();
+  
+  // Tentar sessão salva
+  const saved=localStorage.getItem('anote_garcom_session');
+  if(saved){
+    try{
+      const{loja:sLoja,pin:sPin}=JSON.parse(saved);
+      if(sLoja===loja&&sPin){
+        const{data}=await supabase.rpc('staff_login_pin',{p_store_code:sLoja,p_pin:sPin});
+        if(data&&data.ok&&(data.staff.cargo==='waiter'||data.staff.cargo==='manager')){
+          store=data.store;
+          staff=data.staff;
+          staffCode=data.store.staff_code;
+          enterApp();
+          return;
+        }
+      }
+    }catch(e){}
+  }
+  
+  // Mostrar tela de login
+  if(loja){
+    // Buscar nome da loja para mostrar no login
+    const{data}=await supabase.rpc('staff_entrar',{p_codigo:loja});
+    if(data&&data.ok){
+      document.getElementById('login_store_name').textContent=`${data.store.name} • Digite seu PIN`;
+    }
+  }
+  document.getElementById('screen_login').classList.remove('hidden');
+}
 boot();
-window.login=login;window.logout=logout;window.attend=attend;window.deliver=deliver;window.send=send;
+
+// Expor funções
+window.doLogin=doLogin;
+window.logout=logout;
+window.loadData=loadData;
+window.switchView=switchView;
+window.selectMesa=selectMesa;
+window.selectProd=selectProd;
+window.changeQty=changeQty;
+window.sendOrder=sendOrder;
+window.markDelivered=markDelivered;
 </script>
 </body>
 </html>
