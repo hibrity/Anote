@@ -11,45 +11,605 @@ window.dispatchEvent(new Event("supabase-ready"));
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--red:#ef4444;--radius:14px}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
-.wrap{max-width:760px;margin:0 auto;padding:18px}
+:root{
+  --bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;
+  --txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;
+  --amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--radius:14px
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+.hidden{display:none!important}
+.wrap{max-width:1200px;margin:0 auto;padding:16px}
+
+/* TOPBAR */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
+.topbar-title{font-size:22px;font-weight:800}
+.topbar-sub{font-size:13px;color:var(--mut)}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+
+/* BOTÕES */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn-green{background:var(--green);color:#052e16}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-amber{background:var(--amber);color:#3b2503}
+.btn-red{background:var(--red);color:#fff}
+.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
+.btn-block{width:100%}
+.btn-lg{padding:16px 20px;font-size:17px;border-radius:12px}
+.btn-sm{padding:8px 12px;font-size:13px}
+
+/* CARD */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
-h2{font-size:18px;margin-bottom:14px}
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
-.btn-green{background:var(--green);color:#052e16}.btn-red{background:var(--red);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
-input{width:100%;padding:12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:15px;margin-bottom:10px;outline:none}
-label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weight:600}
-.row{display:flex;gap:8px}.row>*{flex:1}
+h2{font-size:17px;margin-bottom:14px}
+h3{font-size:15px;margin-bottom:10px;color:var(--mut)}
+
+/* LOGIN */
+.login-shell{max-width:420px;margin:70px auto 0;padding:0 16px}
+.title{font-size:32px;font-weight:800;text-align:center;margin-bottom:6px}
 .muted{color:var(--mut);font-size:13px}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.title{font-size:24px;font-weight:800}
-.item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
-.msg{padding:11px;border-radius:10px;font-size:14px;margin-top:10px}
-.msg.err{background:#451a1a;color:#fca5a5}.msg.ok{background:#14351f;color:#86efac}
-.big{font-size:26px;font-weight:800}
+input,select{width:100%;padding:13px 14px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:15px;margin-bottom:12px;outline:none}
+input.pin-input{text-align:center;font-size:28px;letter-spacing:12px;font-weight:800}
+input:focus,select:focus{border-color:var(--green)}
+label{font-size:13px;color:var(--mut);font-weight:600;display:block;margin-bottom:6px}
+.msg{padding:12px;border-radius:10px;font-size:14px;margin-top:12px;text-align:center}
+.msg.err{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d}
+.msg.ok{background:#14351f;color:#86efac;border:1px solid #166534}
+
+/* STATS DO DIA */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.stat-card .label{font-size:12px;color:var(--mut);margin-bottom:6px}
+.stat-card .value{font-size:24px;font-weight:800}
+.stat-card .value.green{color:var(--green)}
+.stat-card .value.amber{color:var(--amber)}
+.stat-card .value.red{color:var(--red)}
+
+/* FILTROS */
+.filter-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-tab{padding:12px 20px;border-radius:10px;background:var(--card2);border:2px solid var(--border);color:var(--mut);cursor:pointer;font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px}
+.filter-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.filter-tab .count{background:rgba(0,0,0,.2);padding:2px 8px;border-radius:999px;font-size:12px}
+.filter-tab.active .count{background:rgba(255,255,255,.2)}
+
+/* PEDIDO CARD */
+.order-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;cursor:pointer;transition:border-color .2s}
+.order-card:hover{border-color:var(--blue)}
+.order-card.selected{border-color:var(--green);background:rgba(34,197,94,.05)}
+.order-card.paid{opacity:.7;border-color:var(--green)}
+.order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.order-num{font-size:18px;font-weight:800}
+.order-meta{font-size:13px;color:var(--mut);margin-bottom:8px}
+.order-items{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--mut)}
+.order-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px dashed var(--border)}
+.order-total{font-size:20px;font-weight:800;color:var(--green)}
+
+/* BADGES */
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.b-pending{background:#fef3c7;color:#b45309}
+.b-paid{background:#dcfce7;color:#15803d}
+.b-cancelled{background:#fee2e2;color:#b91c1c}
+.type-badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px}
+.type-badge.table{background:#312e81;color:#c7d2fe}
+.type-badge.counter{background:#164e63;color:#67e8f9}
+.type-badge.delivery{background:#7c2d12;color:#fdba74}
+.type-badge.pickup{background:#4c1d95;color:#ddd6fe}
+
+/* PAGAMENTO */
+.pay-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+.pay-btn{padding:16px;border-radius:12px;background:var(--card2);border:2px solid var(--border);color:var(--txt);font-size:15px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.pay-btn:hover{border-color:var(--green)}
+.pay-btn.selected{border-color:var(--green);background:rgba(34,197,94,.1)}
+.pay-btn .icon{font-size:24px;display:block;margin-bottom:6px}
+
+/* TROCO */
+.troco-section{background:var(--card2);padding:16px;border-radius:12px;margin-top:14px}
+.troco-result{font-size:24px;font-weight:800;color:var(--amber);text-align:center;margin-top:10px}
+
+/* MODAL */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-size:20px;font-weight:800}
+.modal-close{background:none;border:none;color:var(--mut);font-size:24px;cursor:pointer}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px;color:var(--mut)}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .pay-methods{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-<div class="topbar"><div><div class="title">💰 Caixa</div><div class="muted" id="store_name">...</div></div><button class="btn btn-ghost" onclick="location.href='index.html'">← Voltar</button></div>
-<div id="bill_alerts"></div>
-<div class="card"><h2>Controle de caixa</h2><label>Valor de abertura</label><input id="cx_valor" type="number" step="0.01"/><div class="row"><button class="btn btn-green" onclick="caixa('abrir')">🔓 Abrir</button><button class="btn btn-red" onclick="caixa('fechar')">🔒 Fechar</button></div><div id="cx_res"></div></div>
-<div class="card"><h2>Caixa atual</h2><div id="cx_info"></div></div>
-<div class="card"><h2>Resumo de hoje</h2><div id="cx_resumo"></div></div>
+
+<!-- ============ TELA DE LOGIN ============ -->
+<div id="screen_login">
+  <div class="login-shell">
+    <div style="text-align:center;margin-bottom:24px">
+      <div class="title">💰</div>
+      <div class="title" style="font-size:24px">Caixa</div>
+      <div class="muted">Anote — Painel do Caixa</div>
+    </div>
+    <div class="card">
+      <div class="muted" style="text-align:center;margin-bottom:14px" id="login_store_name">Digite seu PIN para entrar</div>
+      <label style="text-align:center">Seu PIN</label>
+      <input type="password" inputmode="numeric" maxlength="4" id="login_pin" class="pin-input" placeholder="••••" autofocus/>
+      <button class="btn btn-green btn-block btn-lg" onclick="doLogin()">🔓 Abrir Caixa</button>
+      <div id="login_result"></div>
+      <div class="muted" style="margin-top:16px;text-align:center">Esqueceu o PIN? Peça ao dono da loja.</div>
+    </div>
+  </div>
 </div>
+
+<!-- ============ TELA DO CAIXA ============ -->
+<div id="screen_caixa" class="hidden">
+  <div class="wrap">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">💰 Caixa</div>
+        <div class="topbar-sub" id="caixa_info">—</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadData()">🔄</button>
+        <button class="btn btn-red btn-sm" onclick="logout()">Fechar Caixa</button>
+      </div>
+    </div>
+
+    <!-- STATS DO DIA -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">Faturamento Hoje</div>
+        <div class="value green" id="stat_faturamento">R$ 0,00</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Pedidos Pagos</div>
+        <div class="value" id="stat_pagos">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Pendentes</div>
+        <div class="value amber" id="stat_pendentes">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Ticket Médio</div>
+        <div class="value" id="stat_ticket">R$ 0,00</div>
+      </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filter-tabs">
+      <div class="filter-tab active" id="ft_pending" onclick="setFilter('pending')">
+        ⏳ Pendentes <span class="count" id="count_pending">0</span>
+      </div>
+      <div class="filter-tab" id="ft_paid" onclick="setFilter('paid')">
+        ✅ Pagos <span class="count" id="count_paid">0</span>
+      </div>
+      <div class="filter-tab" id="ft_all" onclick="setFilter('all')">
+        📋 Todos <span class="count" id="count_all">0</span>
+      </div>
+    </div>
+
+    <!-- LISTA DE PEDIDOS -->
+    <div class="card">
+      <h2 id="list_title">⏳ Pedidos pendentes de pagamento</h2>
+      <div id="orders_list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL DE PAGAMENTO ============ -->
+<div id="pay_modal" class="modal-overlay hidden" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal_order_num">Pedido #000</div>
+      <button class="modal-close" onclick="closePayModal()">✕</button>
+    </div>
+    
+    <div id="modal_order_details" style="margin-bottom:16px"></div>
+    
+    <div style="background:var(--card2);padding:16px;border-radius:12px;text-align:center;margin-bottom:16px">
+      <div class="muted">Total a pagar</div>
+      <div style="font-size:32px;font-weight:800;color:var(--green)" id="modal_total">R$ 0,00</div>
+    </div>
+    
+    <label>Forma de pagamento</label>
+    <div class="pay-methods">
+      <div class="pay-btn" onclick="selectPayMethod('pix')">
+        <span class="icon">💠</span> Pix
+      </div>
+      <div class="pay-btn" onclick="selectPayMethod('credit')">
+        <span class="icon">💳</span> Crédito
+      </div>
+      <div class="pay-btn" onclick="selectPayMethod('debit')">
+        <span class="icon">💳</span> Débito
+      </div>
+      <div class="pay-btn" onclick="selectPayMethod('cash')">
+        <span class="icon">💵</span> Dinheiro
+      </div>
+    </div>
+    
+    <!-- TROCO (só para dinheiro) -->
+    <div id="troco_section" class="troco-section hidden">
+      <label>💵 Valor recebido</label>
+      <input type="number" id="cash_received" placeholder="Ex: 100.00" oninput="calcTroco()"/>
+      <div class="troco-result" id="troco_result">Troco: R$ 0,00</div>
+    </div>
+    
+    <div id="pay_result"></div>
+    
+    <button class="btn btn-green btn-block btn-lg" style="margin-top:16px" onclick="confirmPayment()">
+      ✅ Confirmar Pagamento
+    </button>
+    <button class="btn btn-red btn-block" style="margin-top:8px" onclick="cancelOrder()">
+      🗑️ Cancelar Pedido
+    </button>
+  </div>
+</div>
+
 <script>
-let store=null;
+let store=null,staff=null,staffCode=null,D={orders:[],tables:[]};
+let liveTimer=null,currentFilter='pending',selectedOrder=null,selectedPayMethod=null;
+
+const PAY_LABEL={pix:'💠 Pix',credit:'💳 Crédito',debit:'💳 Débito',cash:'💵 Dinheiro'};
+const TYPE_LABEL={counter:'🏪 Balcão',delivery:'🛵 Delivery',pickup:'🥡 Retirada',table:'🍽️ Mesa'};
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
-async function boot(){try{await waitForSupabase()}catch(e){location.href='index.html';return}const{data:s}=await supabase.auth.getSession();if(!s.session){location.href='index.html';return}const{data}=await supabase.rpc('dono_entrar');if(!data||!data.ok){location.href='index.html';return}store=data.store;document.getElementById('store_name').textContent=store.name;loadCaixa();loadResumo();refreshBills();setInterval(refreshBills,5000)}
-async function caixa(a){const v=Number(document.getElementById('cx_valor').value||0);const{data}=await supabase.rpc('dono_caixa',{p_store_id:store.id,p_acao:a,p_valor:v});const b=document.getElementById('cx_res');if(!data||!data.ok){b.innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`}else if(a==='fechar'){b.innerHTML=`<div class="msg ok">Fechado! Vendas: ${money(data.sales_total)}</div>`}else{b.innerHTML='<div class="msg ok">Aberto!</div>'}document.getElementById('cx_valor').value='';loadCaixa();loadResumo()}
-async function loadCaixa(){const{data}=await supabase.rpc('dono_caixa',{p_store_id:store.id,p_acao:'info',p_valor:0});const b=document.getElementById('cx_info');if(!data||!data.ok){b.innerHTML='<div class="muted">Erro.</div>';return}b.innerHTML=data.open?`<div class="item"><b style="color:var(--green)">🟢 ABERTO</b><br>Abertura: ${money(data.opening_amount)}<br>${new Date(data.opened_at).toLocaleString('pt-BR')}</div>`:`<div class="item"><b style="color:var(--red)">🔴 FECHADO</b></div>`}
-async function loadResumo(){const{data}=await supabase.rpc('dono_dashboard',{p_store_id:store.id});if(!data||!data.ok)return;const s=data.stats;document.getElementById('cx_resumo').innerHTML=`<div class="item">Pedidos hoje: <span class="big">${s.today_orders}</span></div><div class="item">Faturamento: <span class="big" style="color:var(--green)">${money(s.today_revenue)}</span></div>`}
-async function refreshBills(){if(!store||!store.staff_code)return;const{data}=await supabase.rpc('staff_alertas',{p_store_id:store.id,p_codigo:store.staff_code});const{data:all}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:store.staff_code});const b=document.getElementById('bill_alerts');if(!data||!data.ok){b.innerHTML='';return}const bills=(data.alerts||[]).filter(a=>a.type==='bill');if(!bills.length){b.innerHTML='';return}const orders=(all&&all.ok)?all.orders:[];b.innerHTML='<div class="card"><h2>🔔 Pedidos de conta</h2>'+bills.map(a=>{const t=orders.filter(o=>String(o.table_number)===String(a.table_number)&&o.status!=='cancelled').reduce((s,o)=>s+Number(o.total||0),0);return`<div class="item">💳 <b>Mesa ${a.table_number}</b> pediu a conta! • Consumo: ${money(t)}<br><button class="btn btn-green" style="margin-top:8px" onclick="confirmarConta('${a.id}')">✅ Conferi, confirmar</button></div>`}).join('')+'</div>'}
-async function confirmarConta(id){await supabase.rpc('staff_alerta_ack',{p_store_id:store.id,p_codigo:store.staff_code,p_alert_id:id});refreshBills()}
+
+function waitForSupabase(){
+  return new Promise((res,rej)=>{
+    if(window.supabase)return res();
+    const t=setTimeout(()=>rej(),10000);
+    window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true});
+  });
+}
+
+// ============ LOGIN ============
+function getLojaFromURL(){
+  const p=new URLSearchParams(location.search);
+  return p.get('loja')||'';
+}
+
+async function doLogin(){
+  const pin=document.getElementById('login_pin').value.trim();
+  const loja=getLojaFromURL();
+  const res=document.getElementById('login_result');
+  
+  if(!loja){
+    res.innerHTML='<div class="msg err">Código da loja não encontrado. Escaneie o QR Code.</div>';
+    return;
+  }
+  if(!pin||pin.length!==4){
+    res.innerHTML='<div class="msg err">Digite seu PIN de 4 números.</div>';
+    return;
+  }
+  
+  res.innerHTML='<div class="msg ok">Verificando...</div>';
+  
+  const{data}=await supabase.rpc('staff_login_pin',{p_store_code:loja,p_pin:pin});
+  
+  if(!data||!data.ok){
+    res.innerHTML=`<div class="msg err">${data?.error||'PIN inválido'}</div>`;
+    document.getElementById('login_pin').value='';
+    return;
+  }
+  
+  if(data.staff.cargo!=='cashier'&&data.staff.cargo!=='manager'){
+    res.innerHTML='<div class="msg err">Este PIN não tem acesso ao caixa.</div>';
+    return;
+  }
+  
+  store=data.store;
+  staff=data.staff;
+  staffCode=data.store.staff_code;
+  
+  localStorage.setItem('anote_caixa_session',JSON.stringify({loja:loja,pin:pin}));
+  
+  enterCaixa();
+}
+
+function logout(){
+  if(!confirm('Fechar o caixa?'))return;
+  localStorage.removeItem('anote_caixa_session');
+  stopLive();
+  location.href='index.html';
+}
+
+function enterCaixa(){
+  document.getElementById('screen_login').classList.add('hidden');
+  document.getElementById('screen_caixa').classList.remove('hidden');
+  document.getElementById('caixa_info').textContent=`${store.name} • Operador: ${staff.nome} 💼`;
+  loadData();
+  startLive();
+}
+
+// ============ DADOS ============
+async function loadData(){
+  if(!store||!staffCode)return;
+  const{data}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:staffCode});
+  if(!data||!data.ok){
+    if(data?.error==='Código inválido'){logout();return}
+    return;
+  }
+  D=data;
+  renderStats();
+  renderOrders();
+}
+
+function startLive(){
+  if(liveTimer)return;
+  liveTimer=setInterval(loadData,5000);
+}
+function stopLive(){
+  if(liveTimer){clearInterval(liveTimer);liveTimer=null}
+}
+
+// ============ STATS DO DIA ============
+function renderStats(){
+  const today=new Date().toDateString();
+  const todayOrders=D.orders.filter(o=>new Date(o.created_at).toDateString()===today);
+  const paidOrders=todayOrders.filter(o=>o.payment_status==='paid');
+  const pendingOrders=D.orders.filter(o=>o.payment_status==='open'&&o.status!=='cancelled');
+  
+  const faturamento=paidOrders.reduce((s,o)=>s+Number(o.total||0),0);
+  const ticketMedio=paidOrders.length>0?faturamento/paidOrders.length:0;
+  
+  document.getElementById('stat_faturamento').textContent=money(faturamento);
+  document.getElementById('stat_pagos').textContent=paidOrders.length;
+  document.getElementById('stat_pendentes').textContent=pendingOrders.length;
+  document.getElementById('stat_ticket').textContent=money(ticketMedio);
+  
+  document.getElementById('count_pending').textContent=pendingOrders.length;
+  document.getElementById('count_paid').textContent=paidOrders.length;
+  document.getElementById('count_all').textContent=D.orders.length;
+}
+
+// ============ FILTROS ============
+function setFilter(f){
+  currentFilter=f;
+  ['pending','paid','all'].forEach(x=>{
+    document.getElementById('ft_'+x).classList.toggle('active',x===f);
+  });
+  
+  const titles={
+    pending:'⏳ Pedidos pendentes de pagamento',
+    paid:'✅ Pedidos pagos hoje',
+    all:'📋 Todos os pedidos'
+  };
+  document.getElementById('list_title').textContent=titles[f];
+  renderOrders();
+}
+
+// ============ RENDER PEDIDOS ============
+function renderOrders(){
+  const c=document.getElementById('orders_list');
+  let orders=[];
+  
+  if(currentFilter==='pending'){
+    orders=D.orders.filter(o=>o.payment_status==='open'&&o.status!=='cancelled');
+  }else if(currentFilter==='paid'){
+    orders=D.orders.filter(o=>o.payment_status==='paid');
+  }else{
+    orders=D.orders;
+  }
+  
+  if(!orders.length){
+    c.innerHTML=`<div class="empty-state"><div class="icon">${currentFilter==='pending'?'🎉':'📭'}</div>${currentFilter==='pending'?'Nenhum pagamento pendente!':'Nenhum pedido encontrado.'}</div>`;
+    return;
+  }
+  
+  c.innerHTML=orders.map(o=>{
+    const table=D.tables.find(t=>t.id===o.table_id);
+    const isPaid=o.payment_status==='paid';
+    const isCancelled=o.status==='cancelled';
+    
+    let statusBadge='';
+    if(isCancelled)statusBadge='<span class="badge b-cancelled">Cancelado</span>';
+    else if(isPaid)statusBadge=`<span class="badge b-paid">${PAY_LABEL[o.payment_method]||'Pago'}</span>`;
+    else statusBadge='<span class="badge b-pending">Pendente</span>';
+    
+    let typeBadge='';
+    if(o.order_type==='table')typeBadge=`<span class="type-badge table">🍽️ Mesa ${table?table.table_number:'?'}</span>`;
+    else if(o.order_type==='counter')typeBadge='<span class="type-badge counter">🏪 Balcão</span>';
+    else if(o.order_type==='delivery')typeBadge='<span class="type-badge delivery">🛵 Delivery</span>';
+    else typeBadge='<span class="type-badge pickup">🥡 Retirada</span>';
+    
+    return `
+      <div class="order-card ${isPaid?'paid':''}" onclick="${!isPaid&&!isCancelled?`openPayModal('${o.id}')`:''}">
+        <div class="order-head">
+          <span class="order-num">#${o.order_number}</span>
+          ${statusBadge}
+        </div>
+        <div class="order-meta">
+          ${typeBadge}
+          • ${new Date(o.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+          ${o.customer_name?`• 👤 ${o.customer_name}`:''}
+        </div>
+        <div class="order-items">
+          ${(o.items||[]).map(i=>`${i.qty}x ${i.name}`).join(' • ')||'Sem itens'}
+        </div>
+        <div class="order-footer">
+          <span class="order-total">${money(o.total)}</span>
+          ${!isPaid&&!isCancelled?'<span class="btn btn-green btn-sm">💰 Receber</span>':''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============ MODAL DE PAGAMENTO ============
+function openPayModal(orderId){
+  selectedOrder=D.orders.find(o=>o.id===orderId);
+  if(!selectedOrder)return;
+  
+  selectedPayMethod=null;
+  document.getElementById('modal_order_num').textContent=`Pedido #${selectedOrder.order_number}`;
+  document.getElementById('modal_total').textContent=money(selectedOrder.total);
+  
+  const table=D.tables.find(t=>t.id===selectedOrder.table_id);
+  document.getElementById('modal_order_details').innerHTML=`
+    <div class="muted">
+      ${TYPE_LABEL[selectedOrder.order_type]||''} 
+      ${table?`• Mesa ${table.table_number}`:''}
+      ${selectedOrder.customer_name?`• 👤 ${selectedOrder.customer_name}`:''}
+    </div>
+    <div style="margin-top:8px;font-size:14px">
+      ${(selectedOrder.items||[]).map(i=>`${i.qty}x ${i.name}`).join('<br>')}
+    </div>
+  `;
+  
+  // Reset
+  document.querySelectorAll('.pay-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('troco_section').classList.add('hidden');
+  document.getElementById('cash_received').value='';
+  document.getElementById('troco_result').textContent='Troco: R$ 0,00';
+  document.getElementById('pay_result').innerHTML='';
+  
+  document.getElementById('pay_modal').classList.remove('hidden');
+}
+
+function closePayModal(){
+  document.getElementById('pay_modal').classList.add('hidden');
+  selectedOrder=null;
+  selectedPayMethod=null;
+}
+
+function closeModalOutside(e){
+  if(e.target.id==='pay_modal')closePayModal();
+}
+
+function selectPayMethod(method){
+  selectedPayMethod=method;
+  document.querySelectorAll('.pay-btn').forEach(b=>b.classList.remove('selected'));
+  event.target.closest('.pay-btn').classList.add('selected');
+  
+  document.getElementById('troco_section').classList.toggle('hidden',method!=='cash');
+  if(method==='cash'){
+    document.getElementById('cash_received').focus();
+  }
+}
+
+function calcTroco(){
+  if(!selectedOrder)return;
+  const received=Number(document.getElementById('cash_received').value)||0;
+  const total=Number(selectedOrder.total)||0;
+  const troco=received-total;
+  
+  const el=document.getElementById('troco_result');
+  if(received<total){
+    el.textContent=`Falta: ${money(total-received)}`;
+    el.style.color='var(--red)';
+  }else{
+    el.textContent=`Troco: ${money(troco)}`;
+    el.style.color='var(--amber)';
+  }
+}
+
+async function confirmPayment(){
+  if(!selectedOrder)return;
+  if(!selectedPayMethod){
+    document.getElementById('pay_result').innerHTML='<div class="msg err">Escolha a forma de pagamento.</div>';
+    return;
+  }
+  
+  if(selectedPayMethod==='cash'){
+    const received=Number(document.getElementById('cash_received').value)||0;
+    if(received<Number(selectedOrder.total)){
+      document.getElementById('pay_result').innerHTML='<div class="msg err">Valor recebido insuficiente.</div>';
+      return;
+    }
+  }
+  
+  const{data}=await supabase.rpc('staff_atualizar_pedido',{
+    p_store_id:store.id,
+    p_codigo:staffCode,
+    p_order_id:selectedOrder.id,
+    p_status:'delivered',
+    p_payment:'paid'
+  });
+  
+  if(data&&data.ok){
+    // Atualizar método de pagamento
+    await supabase.rpc('staff_set_payment_method',{
+      p_store_id:store.id,
+      p_codigo:staffCode,
+      p_order_id:selectedOrder.id,
+      p_method:selectedPayMethod
+    }).catch(()=>{});
+    
+    document.getElementById('pay_result').innerHTML='<div class="msg ok">✅ Pagamento confirmado!</div>';
+    setTimeout(()=>{
+      closePayModal();
+      loadData();
+    },1000);
+  }else{
+    document.getElementById('pay_result').innerHTML=`<div class="msg err">${data?.error||'Erro'}</div>`;
+  }
+}
+
+async function cancelOrder(){
+  if(!selectedOrder)return;
+  if(!confirm(`Cancelar o pedido #${selectedOrder.order_number}?`))return;
+  
+  const{data}=await supabase.rpc('staff_atualizar_pedido',{
+    p_store_id:store.id,
+    p_codigo:staffCode,
+    p_order_id:selectedOrder.id,
+    p_status:'cancelled',
+    p_payment:null
+  });
+  
+  if(data&&data.ok){
+    closePayModal();
+    loadData();
+  }
+}
+
+// ============ BOOT ============
+async function boot(){
+  try{await waitForSupabase()}catch(e){return}
+  
+  const loja=getLojaFromURL();
+  
+  const saved=localStorage.getItem('anote_caixa_session');
+  if(saved){
+    try{
+      const{loja:sLoja,pin:sPin}=JSON.parse(saved);
+      if(sLoja===loja&&sPin){
+        const{data}=await supabase.rpc('staff_login_pin',{p_store_code:sLoja,p_pin:sPin});
+        if(data&&data.ok&&(data.staff.cargo==='cashier'||data.staff.cargo==='manager')){
+          store=data.store;
+          staff=data.staff;
+          staffCode=data.store.staff_code;
+          enterCaixa();
+          return;
+        }
+      }
+    }catch(e){}
+  }
+  
+  if(loja){
+    const{data}=await supabase.rpc('staff_entrar',{p_codigo:loja});
+    if(data&&data.ok){
+      document.getElementById('login_store_name').textContent=`${data.store.name} • Digite seu PIN`;
+    }
+  }
+  document.getElementById('screen_login').classList.remove('hidden');
+}
 boot();
-window.caixa=caixa;window.confirmarConta=confirmarConta;
+
+// Expor funções
+window.doLogin=doLogin;
+window.logout=logout;
+window.loadData=loadData;
+window.setFilter=setFilter;
+window.openPayModal=openPayModal;
+window.closePayModal=closePayModal;
+window.closeModalOutside=closeModalOutside;
+window.selectPayMethod=selectPayMethod;
+window.calcTroco=calcTroco;
+window.confirmPayment=confirmPayment;
+window.cancelOrder=cancelOrder;
 </script>
 </body>
 </html>
