@@ -11,7 +11,7 @@ window.dispatchEvent(new Event("supabase-ready"));
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--radius:14px}
+:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--radius:14px}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
 .hidden{display:none!important}
 .wrap{max-width:1200px;margin:0 auto;padding:16px}
@@ -21,7 +21,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .topbar-actions{display:flex;gap:8px;align-items:center}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:transform .1s}
 .btn:active{transform:scale(.97)}
-.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-amber{background:var(--amber);color:#3b2503}.btn-red{background:var(--red);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
+.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-amber{background:var(--amber);color:#3b2503}.btn-red{background:var(--red);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}.btn-purple{background:var(--purple);color:#fff}
 .btn-block{width:100%}.btn-lg{padding:16px 20px;font-size:17px;border-radius:12px}.btn-sm{padding:8px 12px;font-size:13px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px}
 h2{font-size:17px;margin-bottom:14px}h3{font-size:15px;margin-bottom:10px;color:var(--mut)}
@@ -38,23 +38,28 @@ label{font-size:13px;color:var(--mut);font-weight:600;display:block;margin-botto
 .stat-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
 .stat-card .label{font-size:12px;color:var(--mut);margin-bottom:6px}
 .stat-card .value{font-size:24px;font-weight:800}
-.stat-card .value.green{color:var(--green)}.stat-card .value.amber{color:var(--amber)}.stat-card .value.red{color:var(--red)}
+.stat-card .value.green{color:var(--green)}.stat-card .value.amber{color:var(--amber)}.stat-card .value.red{color:var(--red)}.stat-card .value.purple{color:var(--purple)}
 .filter-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
 .filter-tab{padding:12px 20px;border-radius:10px;background:var(--card2);border:2px solid var(--border);color:var(--mut);cursor:pointer;font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px}
 .filter-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .filter-tab .count{background:rgba(0,0,0,.2);padding:2px 8px;border-radius:999px;font-size:12px}
 .filter-tab.active .count{background:rgba(255,255,255,.2)}
+.filter-tab.ready-tab{border-color:var(--purple);color:var(--purple)}
+.filter-tab.ready-tab.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+.filter-tab.ready-tab.pulse{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.85;transform:scale(1.03)}}
 .order-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;cursor:pointer;transition:border-color .2s}
 .order-card:hover{border-color:var(--blue)}
 .order-card.paid{opacity:.7;border-color:var(--green)}
+.order-card.ready-delivery{border:2px solid var(--purple);background:linear-gradient(180deg,var(--card2),rgba(168,85,247,.08))}
 .order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .order-num{font-size:18px;font-weight:800}
 .order-meta{font-size:13px;color:var(--mut);margin-bottom:8px}
 .order-items{font-size:14px;line-height:1.6;margin-bottom:10px;color:var(--mut)}
-.order-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px dashed var(--border)}
+.order-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px dashed var(--border);gap:10px;flex-wrap:wrap}
 .order-total{font-size:20px;font-weight:800;color:var(--green)}
 .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
-.b-pending{background:#fef3c7;color:#b45309}.b-paid{background:#dcfce7;color:#15803d}.b-cancelled{background:#fee2e2;color:#b91c1c}
+.b-pending{background:#fef3c7;color:#b45309}.b-paid{background:#dcfce7;color:#15803d}.b-cancelled{background:#fee2e2;color:#b91c1c}.b-ready{background:#e9d5ff;color:#6d28d9}
 .type-badge{font-size:12px;font-weight:700;padding:4px 10px;border-radius:8px}
 .type-badge.table{background:#312e81;color:#c7d2fe}.type-badge.counter{background:#164e63;color:#67e8f9}.type-badge.delivery{background:#7c2d12;color:#fdba74}.type-badge.pickup{background:#4c1d95;color:#ddd6fe}
 .pay-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
@@ -71,6 +76,8 @@ label{font-size:13px;color:var(--mut);font-weight:600;display:block;margin-botto
 .modal-close{background:none;border:none;color:var(--mut);font-size:24px;cursor:pointer}
 .empty-state{text-align:center;padding:40px;color:var(--mut)}
 .empty-state .icon{font-size:48px;margin-bottom:12px}
+.delivery-address{background:var(--card);border:1px dashed var(--border);border-radius:10px;padding:10px;margin:8px 0;font-size:13px;color:var(--amber)}
+.customer-info{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;margin:8px 0;font-size:13px}
 @media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr)}.pay-methods{grid-template-columns:1fr}}
 </style>
 </head>
@@ -107,10 +114,11 @@ label{font-size:13px;color:var(--mut);font-weight:600;display:block;margin-botto
       <div class="stat-card"><div class="label">Faturamento Hoje</div><div class="value green" id="stat_faturamento">R$ 0,00</div></div>
       <div class="stat-card"><div class="label">Pedidos Pagos</div><div class="value" id="stat_pagos">0</div></div>
       <div class="stat-card"><div class="label">Pendentes</div><div class="value amber" id="stat_pendentes">0</div></div>
-      <div class="stat-card"><div class="label">Ticket Médio</div><div class="value" id="stat_ticket">R$ 0,00</div></div>
+      <div class="stat-card"><div class="label">Prontos p/ Entrega</div><div class="value purple" id="stat_ready">0</div></div>
     </div>
     <div class="filter-tabs">
       <div class="filter-tab active" id="ft_pending" onclick="setFilter('pending')">⏳ Pendentes <span class="count" id="count_pending">0</span></div>
+      <div class="filter-tab ready-tab" id="ft_ready" onclick="setFilter('ready')">🛵 Prontos p/ Entrega <span class="count" id="count_ready">0</span></div>
       <div class="filter-tab" id="ft_paid" onclick="setFilter('paid')">✅ Pagos <span class="count" id="count_paid">0</span></div>
       <div class="filter-tab" id="ft_all" onclick="setFilter('all')">📋 Todos <span class="count" id="count_all">0</span></div>
     </div>
@@ -146,13 +154,15 @@ label{font-size:13px;color:var(--mut);font-weight:600;display:block;margin-botto
 
 <script>
 let store=null,staff=null,staffCode=null,D={orders:[],tables:[]};
-let liveTimer=null,currentFilter='pending',selectedOrder=null,selectedPayMethod=null;
+let liveTimer=null,currentFilter='pending',selectedOrder=null,selectedPayMethod=null,lastReadyCount=0;
 const PAY_LABEL={pix:'💠 Pix',credit:'💳 Crédito',debit:'💳 Débito',cash:'💵 Dinheiro'};
 const TYPE_LABEL={counter:'🏪 Balcão',delivery:'🛵 Delivery',pickup:'🥡 Retirada',table:'🍽️ Mesa'};
 const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 function getLojaFromURL(){return new URLSearchParams(location.search).get('loja')||''}
+
+function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=660;g.gain.value=.15;o.start();setTimeout(()=>{o.stop();c.close()},250)}catch(e){}}
 
 async function doLogin(){
  const pin=document.getElementById('login_pin').value.trim(),loja=getLojaFromURL(),res=document.getElementById('login_result');
@@ -177,52 +187,103 @@ async function loadData(){
  if(!store||!staffCode)return;
  const{data}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:staffCode});
  if(!data||!data.ok){if(data?.error==='Código inválido'){logout();return}return}
- D=data;renderStats();renderOrders();
+ D=data;renderStats();renderOrders();checkReadyNotification();
 }
 function startLive(){if(liveTimer)return;liveTimer=setInterval(loadData,5000)}
 function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null}}
+
+function checkReadyNotification(){
+ const readyOrders=getReadyOrders();
+ if(readyOrders.length>lastReadyCount&&lastReadyCount>=0)beep();
+ lastReadyCount=readyOrders.length;
+ const ftReady=document.getElementById('ft_ready');
+ ftReady.classList.toggle('pulse',readyOrders.length>0);
+}
+
+function getReadyOrders(){
+ return (D.orders||[]).filter(o=>o.status==='ready'&&(o.order_type==='delivery'||o.order_type==='pickup'||o.order_type==='counter'));
+}
+
 function renderStats(){
  const today=new Date().toDateString();
  const todayOrders=(D.orders||[]).filter(o=>new Date(o.created_at).toDateString()===today);
  const paidOrders=todayOrders.filter(o=>o.payment_status==='paid');
  const pendingOrders=(D.orders||[]).filter(o=>o.payment_status==='open'&&o.status!=='cancelled');
+ const readyOrders=getReadyOrders();
  const faturamento=paidOrders.reduce((s,o)=>s+Number(o.total||0),0);
  const ticketMedio=paidOrders.length>0?faturamento/paidOrders.length:0;
  document.getElementById('stat_faturamento').textContent=money(faturamento);
  document.getElementById('stat_pagos').textContent=paidOrders.length;
  document.getElementById('stat_pendentes').textContent=pendingOrders.length;
- document.getElementById('stat_ticket').textContent=money(ticketMedio);
+ document.getElementById('stat_ready').textContent=readyOrders.length;
  document.getElementById('count_pending').textContent=pendingOrders.length;
  document.getElementById('count_paid').textContent=paidOrders.length;
  document.getElementById('count_all').textContent=(D.orders||[]).length;
+ document.getElementById('count_ready').textContent=readyOrders.length;
 }
+
 function setFilter(f){
  currentFilter=f;
- ['pending','paid','all'].forEach(x=>document.getElementById('ft_'+x).classList.toggle('active',x===f));
- const titles={pending:'⏳ Pedidos pendentes de pagamento',paid:'✅ Pedidos pagos hoje',all:'📋 Todos os pedidos'};
+ ['pending','paid','all','ready'].forEach(x=>document.getElementById('ft_'+x).classList.toggle('active',x===f));
+ const titles={pending:'⏳ Pedidos pendentes de pagamento',paid:'✅ Pedidos pagos hoje',all:'📋 Todos os pedidos',ready:'🛵 Prontos para entrega / retirada'};
  document.getElementById('list_title').textContent=titles[f];
  renderOrders();
 }
+
 function renderOrders(){
  const c=document.getElementById('orders_list');
  let orders=[];
  if(currentFilter==='pending')orders=(D.orders||[]).filter(o=>o.payment_status==='open'&&o.status!=='cancelled');
  else if(currentFilter==='paid')orders=(D.orders||[]).filter(o=>o.payment_status==='paid');
+ else if(currentFilter==='ready')orders=getReadyOrders();
  else orders=D.orders||[];
- if(!orders.length){c.innerHTML=`<div class="empty-state"><div class="icon">${currentFilter==='pending'?'🎉':'📭'}</div>${currentFilter==='pending'?'Nenhum pagamento pendente!':'Nenhum pedido encontrado.'}</div>`;return}
+
+ if(!orders.length){
+  let emptyIcon='📭',emptyMsg='Nenhum pedido encontrado.';
+  if(currentFilter==='pending'){emptyIcon='🎉';emptyMsg='Nenhum pagamento pendente!'}
+  if(currentFilter==='ready'){emptyIcon='✅';emptyMsg='Nenhum pedido pronto para entrega. Aguardando cozinha...'}
+  c.innerHTML=`<div class="empty-state"><div class="icon">${emptyIcon}</div>${emptyMsg}</div>`;
+  return;
+ }
+
  c.innerHTML=orders.map(o=>{
   const table=(D.tables||[]).find(t=>t.id===o.table_id);
   const isPaid=o.payment_status==='paid',isCancelled=o.status==='cancelled';
+  const isReadyDelivery=(currentFilter==='ready'||o.status==='ready')&&(o.order_type==='delivery'||o.order_type==='pickup'||o.order_type==='counter');
+
   let statusBadge='';
   if(isCancelled)statusBadge='<span class="badge b-cancelled">Cancelado</span>';
   else if(isPaid)statusBadge=`<span class="badge b-paid">${PAY_LABEL[o.payment_method]||'Pago'}</span>`;
+  else if(o.status==='ready')statusBadge='<span class="badge b-ready">🔔 Pronto</span>';
   else statusBadge='<span class="badge b-pending">Pendente</span>';
+
   let typeBadge='';
   if(o.order_type==='table')typeBadge=`<span class="type-badge table">🍽️ Mesa ${table?escapeHtml(table.table_number):'?'}</span>`;
   else if(o.order_type==='counter')typeBadge='<span class="type-badge counter">🏪 Balcão</span>';
   else if(o.order_type==='delivery')typeBadge='<span class="type-badge delivery">🛵 Delivery</span>';
   else typeBadge='<span class="type-badge pickup">🥡 Retirada</span>';
+
   const items=(o.items||[]).map(i=>`${i.qty}x ${escapeHtml(i.name)}`).join(' • ')||'Sem itens';
+  const address=o.notes&&o.notes.includes('📍')?`<div class="delivery-address">${escapeHtml(o.notes)}</div>`:'';
+  const customerInfo=o.customer_name?`<div class="customer-info">👤 <b>${escapeHtml(o.customer_name)}</b>${o.customer_phone?` • ${escapeHtml(o.customer_phone)}`:''}</div>`:'';
+
+  // Card de delivery/pickup pronto → botão grande "Entregar"
+  if(isReadyDelivery&&o.status==='ready'){
+   return `<div class="order-card ready-delivery">
+    <div class="order-head"><span class="order-num">#${o.order_number}</span>${statusBadge}</div>
+    <div class="order-meta">${typeBadge} • ${new Date(o.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+    ${customerInfo}
+    <div class="order-items">${items}</div>
+    ${address}
+    ${o.notes&&!o.notes.includes('📍')?`<div class="muted" style="font-size:12px;margin-top:4px">📝 ${escapeHtml(o.notes)}</div>`:''}
+    <div class="order-footer"><span class="order-total">${money(o.total)}</span>
+     <div style="display:flex;gap:6px">
+      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPayModal('${o.id}')">💰 Pagar</button>
+      <button class="btn btn-purple btn-sm" onclick="event.stopPropagation();markDelivered('${o.id}')">✅ Entregar</button>
+     </div>
+    </div></div>`;
+  }
+
   return `<div class="order-card ${isPaid?'paid':''}" onclick="${!isPaid&&!isCancelled?`openPayModal('${o.id}')`:''}">
    <div class="order-head"><span class="order-num">#${o.order_number}</span>${statusBadge}</div>
    <div class="order-meta">${typeBadge} • ${new Date(o.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}${o.customer_name?`• 👤 ${escapeHtml(o.customer_name)}`:''}</div>
@@ -230,6 +291,17 @@ function renderOrders(){
    <div class="order-footer"><span class="order-total">${money(o.total)}</span>${!isPaid&&!isCancelled?'<span class="btn btn-green btn-sm">💰 Receber</span>':''}</div></div>`;
  }).join('');
 }
+
+async function markDelivered(id){
+ if(!confirm('Confirmar que o pedido foi entregue ao cliente?'))return;
+ const{data}=await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:'delivered',p_payment:null});
+ if(data&&data.ok){
+  await loadData();
+  // Se estava na aba prontos e não tem mais, volta pra pendentes
+  if(currentFilter==='ready'&&getReadyOrders().length===0)setTimeout(()=>setFilter('pending'),800);
+ }
+}
+
 function openPayModal(orderId){
  selectedOrder=(D.orders||[]).find(o=>o.id===orderId);
  if(!selectedOrder)return;
@@ -305,7 +377,7 @@ async function boot(){
  document.getElementById('screen_login').classList.remove('hidden');
 }
 boot();
-window.doLogin=doLogin;window.logout=logout;window.loadData=loadData;window.setFilter=setFilter;window.openPayModal=openPayModal;window.closePayModal=closePayModal;window.closeModalOutside=closeModalOutside;window.selectPayMethod=selectPayMethod;window.calcTroco=calcTroco;window.confirmPayment=confirmPayment;window.cancelOrder=cancelOrder;
+window.doLogin=doLogin;window.logout=logout;window.loadData=loadData;window.setFilter=setFilter;window.openPayModal=openPayModal;window.closePayModal=closePayModal;window.closeModalOutside=closeModalOutside;window.selectPayMethod=selectPayMethod;window.calcTroco=calcTroco;window.confirmPayment=confirmPayment;window.cancelOrder=cancelOrder;window.markDelivered=markDelivered;
 </script>
 </body>
 </html>
