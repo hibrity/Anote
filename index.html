@@ -46,16 +46,26 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 .login-tabs{display:flex;gap:8px;margin-bottom:16px}
 .login-tab{flex:1;padding:12px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--border);cursor:pointer;font-weight:700;color:var(--mut);font-size:13px}
 .login-tab.active{background:var(--green);color:#052e16}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:.3s;pointer-events:none}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(4px)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.boot-shell{text-align:center;padding:100px 20px}
 @media(max-width:800px){.grid3{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<!-- LOGIN -->
-<div id="screen_login"><div class="login-shell">
+<!-- ✅ TELA NEUTRA DE CARREGAMENTO (evita piscar o login) -->
+<div id="screen_boot">
+ <div class="boot-shell">
+  <div class="title" style="margin-bottom:24px">Anote</div>
+  <div class="spinner"></div>
+  <div class="muted">Carregando...</div>
+ </div>
+</div>
+
+<!-- LOGIN (começa OCULTO) -->
+<div id="screen_login" class="hidden"><div class="login-shell">
 <div style="text-align:center;margin-bottom:24px"><div class="title">Anote</div><div class="muted">Crie sua loja ou entre</div></div>
 <div class="card"><div class="login-tabs">
 <div class="login-tab active" id="lt_new" onclick="switchEntry('new')">🏪 Criar loja</div>
@@ -71,10 +81,8 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
  <div class="row" style="max-width:340px"><button class="btn btn-ghost" onclick="refreshAll()">🔄 Atualizar</button><button class="btn btn-red" onclick="logout()">Sair</button></div>
 </div>
 
-<!-- ALERTAS -->
 <div id="alerts_wrap"></div>
 
-<!-- GESTÃO -->
 <h3 style="margin-bottom:8px">📋 Gestão</h3>
 <div class="nav">
  <button class="btn btn-blue" onclick="location.href='catalogo.html'">📦 Catálogo</button>
@@ -83,7 +91,6 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
  <button class="btn btn-blue" onclick="location.href='mesas.html'">🔳 Mesas</button>
 </div>
 
-<!-- ACESSOS DA EQUIPE -->
 <h3 style="margin-bottom:8px">⚡ Acessos da equipe</h3>
 <div class="nav-staff">
  <button class="btn btn-cyan" onclick="goStaff('garcom.html')">🤵 Garçom</button>
@@ -91,12 +98,11 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
  <button class="btn btn-green" onclick="goStaff('caixa.html')">💰 Caixa</button>
 </div>
 
-<!-- SÓ PAINEL (DASHBOARD) -->
 <div class="card"><h2>📊 Resumo</h2><div class="grid3" id="stats"></div></div>
 </div>
 
 </div>
-<div id="toast" class="toast"></div>
+<div id="toast" class="toast" style="position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:.3s;pointer-events:none"></div>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -106,9 +112,9 @@ function toast(m,t='ok'){
  const e=$('toast');e.textContent=m;
  e.style.background=t==='err'?'#ef4444':'#22c55e';
  e.style.color=t==='err'?'#fff':'#052e16';
- e.classList.add('show');
- clearTimeout(e._tm);
- e._tm=setTimeout(()=>e.classList.remove('show'),2500);
+ e.style.opacity='0';
+ e.classList.add('show');e.style.opacity='';
+ clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500);
 }
 function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}catch(e){return{data:null,error:e}}}
@@ -151,7 +157,13 @@ async function enterApp(){
 }
 
 function logout(){supabase.auth.signOut();stopLive();show('login')}
-function show(s){$('screen_login').classList.toggle('hidden',s!=='login');$('screen_app').classList.toggle('hidden',s!=='app')}
+
+/* ✅ Agora também esconde a tela de boot */
+function show(s){
+ $('screen_boot').classList.add('hidden');
+ $('screen_login').classList.toggle('hidden',s!=='login');
+ $('screen_app').classList.toggle('hidden',s!=='app');
+}
 function startLive(){if(liveTimer)return;liveTimer=setInterval(refreshAll,5000)}
 function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null}}
 
@@ -182,7 +194,12 @@ async function ackAlert(id){await rpc('staff_alerta_ack',{p_store_id:S.store.id,
 async function doneAlert(id){await rpc('staff_alerta_done',{p_store_id:S.store.id,p_codigo:S.code,p_alert_id:id});renderAlerts()}
 function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.1;o.start();setTimeout(()=>{o.stop();c.close()},300)}catch(e){}}
 
-async function boot(){try{await waitSB()}catch(e){return}const{data}=await supabase.auth.getSession();if(data.session)await enterApp();else show('login')}
+/* ✅ Boot: se der qualquer erro, mostra o login (nunca fica preso no loading) */
+async function boot(){
+ try{await waitSB()}catch(e){show('login');return}
+ const{data}=await supabase.auth.getSession();
+ if(data.session)await enterApp();else show('login');
+}
 boot();
 window.switchEntry=switchEntry;window.createStore=createStore;window.ownerLogin=ownerLogin;window.logout=logout;window.refreshAll=refreshAll;window.ackAlert=ackAlert;window.doneAlert=doneAlert;window.goStaff=goStaff;
 </script>
