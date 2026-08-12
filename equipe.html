@@ -56,13 +56,6 @@ input,select{width:100%;padding:10px 12px;background:var(--card2);border:1px sol
 <!-- CÓDIGO DA LOJA -->
 <div class="card"><h2>🔑 Código da loja</h2><div class="item" style="text-align:center;font-size:28px;font-weight:800;letter-spacing:4px" id="team_code">—</div><button class="btn btn-amber btn-block" onclick="regenCode()">🔄 Gerar novo código</button><p class="muted" style="margin-top:10px">⚠️ Ao regenerar, os acessos antigos param de funcionar.</p></div>
 
-<!-- COMO FUNCIONA -->
-<div class="card"><h2>ℹ️ Como a equipe entra</h2>
-<div class="item">1️⃣ No painel, toque em <b>🤵 Garçom</b>, <b>👨‍🍳 Cozinha</b> ou <b>💰 Caixa</b></div>
-<div class="item">2️⃣ Ou abra direto: <b>garcom.html</b>, <b>cozinha.html</b> ou <b>caixa.html</b>?loja=SEU_CÓDIGO</div>
-<div class="item">3️⃣ O funcionário digita o <b>PIN</b> que você definiu aqui (botão 🎫 mostra a ficha)</div>
-</div>
-
 </div><div>
 
 <!-- FUNCIONÁRIOS -->
@@ -89,7 +82,7 @@ input,select{width:100%;padding:10px 12px;background:var(--card2);border:1px sol
 <script>
 const $=id=>document.getElementById(id);
 let S={store:null,code:null},staffList=[],pinsVisible={};
-const CARGO={waiter:'🤵 Garçom',kitchen:'👨‍🍳 Cozinha',cashier:'💰 Caixa',manager:'👔 Gerente'};
+const CARGO={waiter:'🤵 Garçom',kitchen:'👨‍ Cozinha',cashier:'💰 Caixa',manager:'👔 Gerente'};
 const PAGE={waiter:'garcom.html',kitchen:'cozinha.html',cashier:'caixa.html',manager:'index.html'};
 
 function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t==='err'?'#ef4444':'#22c55e';e.style.color=t==='err'?'#fff':'#052e16';e.classList.add('show');clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500)}
@@ -150,7 +143,7 @@ function renderStaff(){
    <div class="staff-info"><b>${escapeHtml(s.nome)}</b><span class="badge b-${s.cargo}">${CARGO[s.cargo]||s.cargo}</span>${s.last_login?`<div class="muted" style="font-size:11px;margin-top:4px">Último acesso: ${new Date(s.last_login).toLocaleString('pt-BR')}</div>`:''}</div>
    <div class="staff-pin">${pinDisplay}</div>
    <div class="staff-actions">
-    <button class="btn btn-ghost btn-sm" onclick="togglePin('${s.id}')">${visible?'🙈':'️'}</button>
+    <button class="btn btn-ghost btn-sm" onclick="togglePin('${s.id}')">${visible?'🙈':'👁️'}</button>
     <button class="btn btn-ghost btn-sm" onclick="copyStaffLink('${s.cargo}')">🔗</button>
     <button class="btn btn-amber btn-sm" onclick="regenPin('${s.id}')">🔄</button>
     <button class="btn btn-purple btn-sm" onclick="editPin('${s.id}','${escapeHtml(s.pin)}')">✏️</button>
