@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Anote — Delivery</title>
 <meta name="theme-color" content="#ea580c"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="Anote"/>
+<link rel="icon" type="image/svg+xml" href="icon.svg"/>
 <script type="module">
 import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
 window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
@@ -20,6 +24,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .header h1{font-size:20px;font-weight:700}
 .header .sub{font-size:13px;opacity:.9;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .user-chip{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.install-chip{background:#fff;color:var(--primary);border:none;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;margin-top:10px;box-shadow:0 2px 8px rgba(0,0,0,.2);display:inline-flex;align-items:center;gap:6px}
+.install-chip:active{transform:scale(.96)}
 .cats{display:flex;gap:8px;overflow-x:auto;padding:14px 16px 4px;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
 .cat-chip{flex-shrink:0;padding:8px 16px;border-radius:999px;background:var(--card);border:1px solid var(--border);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer}
@@ -79,7 +85,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <body>
 <div class="app">
 <div class="header"><h1 id="store_name">Anote Delivery</h1>
-<div class="sub"><span id="store_address"></span><span id="user_chip" class="user-chip hidden"></span></div></div>
+<div class="sub"><span id="store_address"></span><span id="user_chip" class="user-chip hidden"></span></div>
+<button class="install-chip hidden" id="btn_install" onclick="installApp()">📲 Salvar na tela inicial</button></div>
 
 <div id="view_menu"><div class="cats" id="cats"></div><div id="menu_container"><div class="spinner"></div></div></div>
 <div id="view_tracking" class="hidden"><div id="track_container"></div></div>
@@ -91,28 +98,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 </div>
 </div>
 
-<!-- CARRINHO -->
 <div class="overlay hidden" id="modal_cart" onclick="if(event.target===this)closeCart()"><div class="sheet"><h2>Seu carrinho</h2><div id="cart_items"></div><div class="total-row"><span>Total</span><span id="cart_total">R$ 0,00</span></div><div class="field"><textarea id="cart_notes" rows="2" placeholder="Alguma observação?"></textarea></div><button class="btn btn-primary" onclick="checkout()">Continuar</button><button class="btn btn-ghost" onclick="closeCart()">Continuar comprando</button></div></div>
 
-<!-- CADASTRO BREVE + ENDEREÇO -->
-<div class="overlay hidden" id="modal_checkout" onclick="if(event.target===this)closeCheckout()"><div class="sheet"><h2>🛵 Dados de entrega</h2>
-<div class="field"><label>Seu nome</label><input id="co_name" placeholder="Como podemos te chamar?"></div>
-<div class="field"><label>Telefone (com DDD)</label><input id="co_phone" type="tel" placeholder="(11) 91234-5678" oninput="maskPhone(this)"></div>
+<div class="overlay hidden" id="modal_checkout" onclick="if(event.target===this)closeCheckout()"><div class="sheet"><h2 id="checkout_title">🛵 Dados de entrega</h2>
+<div id="co_identity">
+ <div class="field"><label>Seu nome</label><input id="co_name" placeholder="Como podemos te chamar?"></div>
+ <div class="field"><label>Telefone (com DDD)</label><input id="co_phone" type="tel" placeholder="(11) 91234-5678" oninput="maskPhone(this)"></div>
+</div>
 <div class="field"><label>📍 Endereço de entrega</label><textarea id="co_address" rows="2" placeholder="Rua, número, bairro, complemento"></textarea></div>
 <div id="checkout_msg"></div>
 <button class="btn btn-primary" id="btn_checkout" onclick="confirmCheckout()">Ir para pagamento</button>
 <button class="btn btn-ghost" onclick="closeCheckout()">Voltar</button>
 </div></div>
 
-<!-- PAGAMENTO -->
 <div class="overlay hidden" id="modal_payment" onclick="if(event.target===this)closePayment()"><div class="sheet"><h2>Como você vai pagar?</h2><div class="pay-grid" id="pay_grid"></div><button class="btn btn-primary" id="btn_pay" onclick="confirmPayment()" disabled style="opacity:.5">Confirmar pedido</button><button class="btn btn-ghost" onclick="closePayment()">Voltar</button></div></div>
 
-<!-- CONFIRMAÇÃO -->
 <div class="overlay hidden" id="modal_confirm"><div class="sheet" style="text-align:center"><div style="font-size:56px">✅</div><h2 style="margin-top:8px">Pedido enviado!</h2><p style="color:var(--muted);font-size:14px;margin-top:6px">Seu pedido <b id="confirm_num"></b> já está com a loja.</p><button class="btn btn-primary" onclick="goToTracking()">Acompanhar pedido</button><button class="btn btn-ghost" onclick="closeConfirm()">Voltar ao cardápio</button></div></div>
 
 <script>
 const $=id=>document.getElementById(id);
-let storeId=null,storeInfo=null,categories=[],products=[],cart=[],currentCustomer=null,activeOrderId=null,trackTimer=null,selectedPayment=null,deliveryAddress='';
+let storeId=null,storeInfo=null,categories=[],products=[],cart=[],currentCustomer=null,activeOrderId=null,trackTimer=null,selectedPayment=null,deliveryAddress='',deferredPrompt=null,veioDoLink=false;
 const PAYMENTS=[{id:'pix',label:'Pix',ico:'💠'},{id:'credit',label:'Crédito',ico:'💳'},{id:'debit',label:'Débito',ico:'💳'},{id:'cash',label:'Dinheiro',ico:'💵'}];
 const STATUS_LABEL={new:{txt:'Pedido recebido',desc:'A loja já vai confirmar',ico:'📥'},preparing:{txt:'Em preparação',desc:'Seu pedido está sendo feito',ico:'👨‍'},ready:{txt:'Pronto',desc:'Saiu para entrega',ico:'🔔'},delivered:{txt:'Entregue',desc:'Bom apetite!',ico:'✅'},cancelled:{txt:'Cancelado',desc:'Fale com a loja',ico:'❌'}};
 
@@ -122,37 +127,30 @@ function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)ret
 function maskPhone(el){let v=el.value.replace(/\D/g,'').slice(0,11);if(v.length>6)v=`(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;else if(v.length>2)v=`(${v.slice(0,2)}) ${v.slice(2)}`;el.value=v}
 function pageBase(){return location.href.substring(0,location.href.lastIndexOf('/')+1)}
 
-/* ===== TELA INICIAL (buscar loja) ===== */
-function renderHome(){
- $('store_name').textContent='Anote Delivery';
- $('cats').innerHTML='';
- let lastHtml='';
+/* ===== 📲 APP EXCLUSIVO DA LOJA ===== */
+function setupManifest(){
+ if(!storeId)return;
  try{
-  const l=JSON.parse(localStorage.getItem('anote_ultima_loja')||'null');
-  if(l&&l.id)lastHtml='<button class="btn btn-ghost" onclick="location.href=\''+pageBase()+'delivery.html?loja='+l.id+'\'">🔄 Pedir novamente em '+escapeHtml(l.name)+'</button>';
+  const manifest={name:'Anote — '+((storeInfo&&storeInfo.name)||'Delivery'),short_name:'Anote',start_url:pageBase()+'delivery.html?loja='+storeId,display:'standalone',background_color:'#f5f5f4',theme_color:'#ea580c',icons:[{src:pageBase()+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  let l=document.getElementById('dyn_manifest');
+  if(!l){l=document.createElement('link');l.id='dyn_manifest';l.rel='manifest';document.head.appendChild(l)}
+  l.href=URL.createObjectURL(blob);
+  $('btn_install').classList.remove('hidden');
  }catch(e){}
- $('menu_container').innerHTML='<div style="padding:40px 20px;text-align:center">'
- +'<div style="font-size:52px;margin-bottom:10px">🛵</div>'
- +'<h3 style="font-size:18px;font-weight:800">Peça delivery em casa</h3>'
- +'<p style="color:var(--muted);font-size:13px;margin:8px 0 18px">Digite o código da loja ou cole o link que você recebeu.</p>'
- +'<div class="field" style="text-align:left"><input id="home_code" placeholder="Código ou link da loja"/></div>'
- +'<button class="btn btn-primary" onclick="enterStore()">🍽️ Ver cardápio</button>'
- +lastHtml
- +'<div id="home_msg" style="text-align:left"></div></div>';
 }
-async function enterStore(){
- const v=($('home_code')?.value||'').trim();
- const m=$('home_msg');if(m)m.innerHTML='';
- if(!v){if(m)m.innerHTML='<div class="msg err">Digite o código ou cole o link.</div>';return}
- let id=null;
- const match=v.match(/loja=([a-f0-9-]{36})/i);
- if(match)id=match[1];
- else if(/^[a-f0-9-]{36}$/i.test(v))id=v;
- if(id){location.href=pageBase()+'delivery.html?loja='+id;return}
- try{await waitForSupabase()}catch(e){if(m)m.innerHTML='<div class="msg err">Sem conexão.</div>';return}
- const{data}=await supabase.rpc('cliente_buscar_loja',{p_codigo:v});
- if(data&&data.ok){location.href=pageBase()+'delivery.html?loja='+data.store_id}
- else if(m)m.innerHTML='<div class="msg err">'+escapeHtml(data?.error||'Loja não encontrada')+'</div>';
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
+window.addEventListener('appinstalled',()=>{const b=$('btn_install');if(b)b.classList.add('hidden')});
+async function installApp(){
+ if(deferredPrompt){
+  deferredPrompt.prompt();
+  const c=await deferredPrompt.userChoice;
+  if(c.outcome==='accepted'){deferredPrompt=null;$('btn_install').classList.add('hidden')}
+ }else{
+  const ua=navigator.userAgent;
+  const ios=/iphone|ipad|ipod/i.test(ua);
+  alert(ios?'Para instalar: toque em Compartilhar e depois em "Adicionar à Tela de Início" 📲\n\nO ícone abre sempre o delivery DESTA loja.':'Para instalar: toque no menu ⋮ e depois em "Adicionar à tela inicial" 📲\n\nO ícone abre sempre o delivery DESTA loja.');
+ }
 }
 
 /* ===== MENU ===== */
@@ -163,7 +161,11 @@ async function loadMenu(){
  $('store_name').textContent=escapeHtml(storeInfo.name)+' 🛵';
  $('store_address').textContent=escapeHtml(storeInfo.address||'');
  document.title=storeInfo.name+' — Delivery';
- try{localStorage.setItem('anote_ultima_loja',JSON.stringify({id:storeId,name:storeInfo.name}))}catch(e){}
+ try{
+  localStorage.setItem('anote_ultima_loja',JSON.stringify({id:storeId,name:storeInfo.name}));
+  if(veioDoLink)localStorage.setItem('anote_loja_fixa',JSON.stringify({id:storeId,name:storeInfo.name}));
+ }catch(e){}
+ setupManifest();
  renderCats();renderMenu('all');
 }
 function renderCats(){const c=$('cats');let h='<div class="cat-chip active" onclick="filterCat(this,\'all\')">Tudo</div>';categories.forEach(x=>h+=`<div class="cat-chip" onclick="filterCat(this,'${x.id}')">${escapeHtml(x.name)}</div>`);c.innerHTML=h}
@@ -200,12 +202,16 @@ function renderCartItems(){
  $('cart_total').textContent=money(t);
 }
 
-/* ===== CHECKOUT (cadastro breve) ===== */
+/* ===== CHECKOUT: cadastrado → só endereço | novo → cadastro breve ===== */
 function checkout(){
  if(!cart.length)return;
  if(storeInfo&&storeInfo.paused){closeCart();alert('A loja está pausada no momento. ⏸️');return}
  closeCart();
- if(currentCustomer){$('co_name').value=currentCustomer.name||'';$('co_phone').value=currentCustomer.phone||'';$('co_address').value=currentCustomer.address||''}
+ const hasPhone=currentCustomer&&currentCustomer.phone;
+ $('co_identity').classList.toggle('hidden',!!hasPhone);
+ $('checkout_title').textContent=hasPhone?'📍 Endereço de entrega':'🛵 Dados de entrega';
+ if(hasPhone){$('co_name').value=currentCustomer.name||'';$('co_phone').value=currentCustomer.phone||''}
+ $('co_address').value=(currentCustomer&&currentCustomer.address)||deliveryAddress||'';
  $('checkout_msg').innerHTML='';
  $('modal_checkout').classList.remove('hidden');
 }
@@ -268,7 +274,7 @@ function renderTrackingEmpty(){$('track_container').innerHTML='<div class="empty
 function renderTracking(d){
  const order=['new','preparing','ready','delivered'];
  const idx=order.indexOf(d.status);
- let s=order.map((st,i)=>{const inf=STATUS_LABEL[st];let cls=i<idx?'done':(i===idx?'now':'');if(d.status==='cancelled')cls='';return`<div class="step ${cls}">${i<3?'<div class="line"></div>':''}<div class="circle">${i<idx?'✓':inf.ico}</div><div class="lbl">${inf.txt}<small>${inf.desc}</small></div></div>`}).join('');
+ let s=order.map((st,i)=>{const inf=STATUS_LABEL[st];let cls=i<idx?'done':(i===idx?'now':'');if(d.status==='cancelled')cls='';return`<div class="step ${cls}">${i<3}'<div class="line"></div>':''}<div class="circle">${i<idx?'✓':inf.ico}</div><div class="lbl">${inf.txt}<small>${inf.desc}</small></div></div>`}).join('');
  const items=(d.items||[]).map(i=>`${i.qty}x ${escapeHtml(i.name)}`).join(' • ');
  $('track_container').innerHTML=`<div class="track-card"><div style="font-size:14px;color:var(--muted)">Pedido <b style="font-size:22px;color:var(--text)">#${d.order_number}</b> • ${money(d.total)}</div>${d.status==='cancelled'?'<div class="msg err">❌ Cancelado.</div>':''}<div class="steps">${s}</div><div style="margin-top:18px;font-size:13px;color:var(--muted)">${items}</div></div>`;
 }
@@ -282,18 +288,33 @@ function showView(v){
  if(v==='tracking')pollStatus();
 }
 
-/* ===== BOOT ===== */
+/* ===== BOOT: LOJA FIXA, SEM TELA DE CÓDIGO ===== */
 async function init(){
  const p=new URLSearchParams(location.search);
  storeId=p.get('loja');
- if(!storeId){renderHome();return}
+ veioDoLink=!!storeId;
+
+ // Sem link? Usa a loja FIXA deste aparelho (app instalado sempre tem o link)
+ if(!storeId){
+  try{
+   const f=JSON.parse(localStorage.getItem('anote_loja_fixa')||'null');
+   const l=JSON.parse(localStorage.getItem('anote_ultima_loja')||'null');
+   storeId=(f&&f.id)?f.id:((l&&l.id)?l.id:null);
+  }catch(e){}
+ }
+
+ if(!storeId){
+  $('store_name').textContent='Anote Delivery';
+  $('menu_container').innerHTML='<div class="empty"><div class="big">🛵</div><h3>Delivery da loja</h3><p>Abra pelo link da loja ou pelo ícone<br>instalado no seu celular. 📲</p></div>';
+  return;
+ }
  try{await waitForSupabase()}catch(e){$('menu_container').innerHTML='<div class="empty">Sem conexão.</div>';return}
  try{const r=localStorage.getItem('anote_cliente_'+storeId);if(r){currentCustomer=JSON.parse(r);deliveryAddress=currentCustomer.address||'';renderUserChip()}}catch(e){}
  await loadMenu();
  updateCartUI();
 }
 init();
-window.filterCat=filterCat;window.addToCart=addToCart;window.changeQty=changeQty;window.openCart=openCart;window.closeCart=closeCart;window.checkout=checkout;window.closeCheckout=closeCheckout;window.confirmCheckout=confirmCheckout;window.selectPayment=selectPayment;window.confirmPayment=confirmPayment;window.closePayment=closePayment;window.goToTracking=goToTracking;window.closeConfirm=closeConfirm;window.showView=showView;window.enterStore=enterStore;window.maskPhone=maskPhone;
+window.filterCat=filterCat;window.addToCart=addToCart;window.changeQty=changeQty;window.openCart=openCart;window.closeCart=closeCart;window.checkout=checkout;window.closeCheckout=closeCheckout;window.confirmCheckout=confirmCheckout;window.selectPayment=selectPayment;window.confirmPayment=confirmPayment;window.closePayment=closePayment;window.goToTracking=goToTracking;window.closeConfirm=closeConfirm;window.showView=showView;window.maskPhone=maskPhone;window.installApp=installApp;
 </script>
 </body>
 </html>
