@@ -25,7 +25,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .header .logo{font-size:44px}
 .header h1{font-size:26px;font-weight:800;margin-top:4px}
 .header .sub{font-size:14px;color:var(--muted);margin-top:4px}
-.last-chip{display:inline-flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;margin-top:10px}
+.store-chip{display:inline-flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;margin-top:10px}
 .cards{display:flex;flex-direction:column;gap:16px;margin-top:28px}
 .big-card{background:var(--card);border-radius:var(--radius);padding:28px 20px;text-align:center;cursor:pointer;border:2px solid var(--border);transition:all .15s;box-shadow:0 2px 10px rgba(0,0,0,.05)}
 .big-card:active{transform:scale(.97);border-color:var(--primary)}
@@ -33,14 +33,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .big-card .t{font-size:20px;font-weight:800}
 .big-card .d{font-size:13px;color:var(--muted);margin-top:4px}
 .big-card.mesa{border-color:var(--primary);background:linear-gradient(180deg,#fff, var(--primary-light))}
-.manual-link{text-align:center;margin-top:22px;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:underline}
-.manual-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-top:12px}
-.manual-box input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;outline:none;margin-bottom:8px}
-.btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px}
 .btn-primary{background:var(--primary);color:#fff}
-.btn-ghost{background:var(--primary-light);color:var(--primary)}
-.msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
-.msg.err{background:#fef2f2;color:#dc2626}
 .install-chip{background:#fff;color:var(--primary);border:1px solid var(--border);border-radius:999px;padding:8px 16px;font-size:12px;font-weight:800;cursor:pointer;margin-top:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
 .scan-box{width:100%;max-width:420px;text-align:center}
@@ -52,6 +46,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .scan-status{color:#fca5a5;font-size:13px;margin-top:12px;min-height:18px}
 .scan-tip{color:#9ca3af;font-size:12px;margin-top:8px}
 .hidden{display:none!important}
+.no-store{text-align:center;padding:40px 20px}
+.no-store .big{font-size:48px;margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -60,11 +56,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <div class="logo">🍽️</div>
   <h1>Anote</h1>
   <div class="sub">Como você quer pedir hoje?</div>
-  <div><span class="last-chip hidden" id="store_chip"></span></div>
+  <div><span class="store-chip hidden" id="store_chip"></span></div>
   <button class="install-chip" id="btn_install" onclick="installApp()">📲 Salvar na tela inicial</button>
  </div>
 
- <div class="cards">
+ <div class="cards" id="cards_container">
   <div class="big-card mesa" onclick="openScanner()">
    <span class="ico">🍽️</span>
    <div class="t">Mesa</div>
@@ -77,11 +73,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   </div>
  </div>
 
- <div class="manual-link" onclick="toggleManual()">⌨️ Digitar código da loja</div>
- <div class="manual-box hidden" id="manual_box">
-  <input id="manual_input" placeholder="Código ou link da loja"/>
-  <button class="btn btn-primary" onclick="enterCode()">Continuar</button>
-  <div id="manual_msg"></div>
+ <div id="no_store_msg" class="no-store hidden">
+  <div class="big">📲</div>
+  <h3>Abra pelo link da loja</h3>
+  <p style="color:var(--muted);font-size:13px;margin-top:8px">Peça o link do cardápio ou escaneie o QR Code da mesa para começar.</p>
  </div>
 </div>
 
@@ -97,56 +92,69 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 <script>
 const $=id=>document.getElementById(id);
-let stream=null,scanTimer=null,hq=null,scanned=false,deferredPrompt=null;
+let stream=null,scanTimer=null,hq=null,scanned=false,deferredPrompt=null,storeId=null;
 
 function pageBase(){return location.href.substring(0,location.href.lastIndexOf('/')+1)}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 function loadScript(src){return new Promise(res=>{const s=document.createElement('script');s.src=src;s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s)})}
 
-/* ===== LOJA FIXA desta instalação ===== */
+/* ===== LOJA FIXA (detectada automaticamente) ===== */
 function getFixed(){try{return JSON.parse(localStorage.getItem('anote_loja_fixa')||'null')}catch(e){return null}}
 function setFixed(id,name){try{localStorage.setItem('anote_loja_fixa',JSON.stringify({id:id,name:name||''}))}catch(e){}}
-function getStore(){return getFixed()}
 
-/* Manifest do app = exclusivo da loja fixada */
-function setAppManifest(){
- const f=getFixed();
- try{
-  const manifest={name:'Anote — '+((f&&f.name)||'Cardápio e Delivery'),short_name:'Anote',start_url:pageBase()+'clienteselect.html'+(f&&f.id?'?loja='+f.id:''),display:'standalone',background_color:'#f5f5f4',theme_color:'#ea580c',icons:[{src:pageBase()+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
-  const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-  const l=document.querySelector('link[rel="manifest"]');
-  if(l)l.href=URL.createObjectURL(blob);
- }catch(e){}
-}
-
-/* Boot: se o link tem ?loja=, fixa a loja no aparelho */
+/* Boot: detecta loja automaticamente */
 (async function(){
- const p=new URLSearchParams(location.search);
- const urlLoja=p.get('loja');
- if(urlLoja){
-  try{
-   await waitForSupabase();
+ try{
+  await waitForSupabase();
+  const p=new URLSearchParams(location.search);
+  const urlLoja=p.get('loja');
+  
+  // 1) Link com ?loja= fixa a loja
+  if(urlLoja){
    const{data}=await supabase.rpc('cliente_buscar_loja',{p_codigo:urlLoja});
-   if(data&&data.ok)setFixed(data.store_id,data.name);else setFixed(urlLoja,'');
-  }catch(e){setFixed(urlLoja,'')}
+   if(data&&data.ok){storeId=data.store_id;setFixed(data.store_id,data.name)}
+   else storeId=urlLoja;
+  }
+  
+  // 2) Senão, usa loja fixada no aparelho
+  if(!storeId){
+   const f=getFixed();
+   if(f&&f.id)storeId=f.id;
+  }
+  
+  // 3) Senão, se for o DONO logado, usa a loja dele
+  if(!storeId){
+   const{data:ses}=await supabase.auth.getSession();
+   if(ses&&ses.session){
+    const{data}=await supabase.rpc('dono_entrar');
+    if(data&&data.ok&&data.store){storeId=data.store.id;setFixed(data.store.id,data.store.name)}
+   }
+  }
+  
+  // Mostra chip da loja se detectada
+  if(storeId){
+   const f=getFixed();
+   if(f&&f.name){const c=$('store_chip');c.textContent='🏪 '+escapeHtml(f.name);c.classList.remove('hidden')}
+  }else{
+   // Sem loja: esconde cards e mostra mensagem
+   $('cards_container').classList.add('hidden');
+   $('no_store_msg').classList.remove('hidden');
+  }
+ }catch(e){
+  console.error(e);
+  $('cards_container').classList.add('hidden');
+  $('no_store_msg').classList.remove('hidden');
  }
- const f=getStore();
- if(f&&f.name){const c=$('store_chip');c.textContent='🏪 '+escapeHtml(f.name)+' — app oficial';c.classList.remove('hidden')}
- if(f&&f.id)setAppManifest();
 })();
 
-/* ===== CARD DELIVERY: sempre a loja fixada ===== */
+/* ===== CARD DELIVERY ===== */
 function goDelivery(){
- const f=getStore();
- if(f&&f.id){location.href=pageBase()+'delivery.html?loja='+f.id}
- else{
-  const mb=$('manual_box');
-  if(mb.classList.contains('hidden')){mb.classList.remove('hidden');mb.scrollIntoView({behavior:'smooth'})}
- }
+ if(storeId){location.href=pageBase()+'delivery.html?loja='+storeId}
+ else{$('cards_container').classList.add('hidden');$('no_store_msg').classList.remove('hidden')}
 }
 
-/* ===== LEITOR QR (MESA) ===== */
+/* ===== LEITOR QR ===== */
 async function openScanner(){
  scanned=false;
  $('scan_overlay').classList.remove('hidden');
@@ -156,7 +164,7 @@ async function openScanner(){
  }else{
   const ok=await loadScript('https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js');
   if(ok&&window.Html5Qrcode)startLib();
-  else $('scan_status').textContent='Leitor indisponível neste navegador. Feche e use "Digitar código" ou o link da loja.';
+  else $('scan_status').textContent='Leitor indisponível neste navegador.';
  }
 }
 async function startNative(){
@@ -175,7 +183,7 @@ async function startNative(){
   },400);
   $('scan_status').textContent='';
  }catch(e){
-  $('scan_status').textContent='Permita o acesso à câmera nas configurações do navegador.';
+  $('scan_status').textContent='Permita o acesso à câmera nas configurações.';
  }
 }
 function startLib(){
@@ -205,25 +213,6 @@ function stopCamera(){
 }
 function closeScanner(){stopCamera();$('scan_overlay').classList.add('hidden');$('scan_video').classList.add('hidden');$('scan_lib_wrap').classList.add('hidden');$('scan_lib_wrap').innerHTML=''}
 
-/* ===== CÓDIGO MANUAL (só na 1ª vez, fixa a loja) ===== */
-function toggleManual(){$('manual_box').classList.toggle('hidden')}
-async function enterCode(){
- const v=($('manual_input')?.value||'').trim();
- const msg=$('manual_msg');msg.innerHTML='';
- if(!v){msg.innerHTML='<div class="msg err">Digite o código ou cole o link da loja.</div>';return}
- let code=v;
- const match=v.match(/loja=([a-f0-9-]{36})/i);
- if(match)code=match[1];
- else if(/^[a-f0-9-]{36}$/i.test(v))code=v;
- try{await waitForSupabase()}catch(e){msg.innerHTML='<div class="msg err">Sem conexão.</div>';return}
- const{data}=await supabase.rpc('cliente_buscar_loja',{p_codigo:code});
- if(data&&data.ok){
-  setFixed(data.store_id,data.name);
-  setAppManifest();
-  location.href=pageBase()+'delivery.html?loja='+data.store_id;
- }else msg.innerHTML='<div class="msg err">'+escapeHtml(data?.error||'Loja não encontrada')+'</div>';
-}
-
 /* ===== INSTALAR ===== */
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
 window.addEventListener('appinstalled',()=>{const b=$('btn_install');if(b)b.classList.add('hidden')});
@@ -235,11 +224,11 @@ async function installApp(){
  }else{
   const ua=navigator.userAgent;
   const ios=/iphone|ipad|ipod/i.test(ua);
-  alert(ios?'Para instalar: toque em Compartilhar e depois em "Adicionar à Tela de Início" 📲\n\nO ícone é exclusivo desta loja.':'Para instalar: toque no menu ⋮ e depois em "Adicionar à tela inicial" 📲\n\nO ícone é exclusivo desta loja.');
+  alert(ios?'Para instalar: toque em Compartilhar e depois em "Adicionar à Tela de Início" 📲':'Para instalar: toque no menu ⋮ e depois em "Adicionar à tela inicial" 📲');
  }
 }
 
-window.openScanner=openScanner;window.closeScanner=closeScanner;window.goDelivery=goDelivery;window.toggleManual=toggleManual;window.enterCode=enterCode;window.installApp=installApp;
+window.openScanner=openScanner;window.closeScanner=closeScanner;window.goDelivery=goDelivery;window.installApp=installApp;
 </script>
 </body>
 </html>
