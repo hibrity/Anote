@@ -9,6 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Anote"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<link rel="icon" type="image/svg+xml" href="icon.svg"/>
 <script type="module">
 import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
 window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
@@ -40,7 +42,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
 .msg.err{background:#fef2f2;color:#dc2626}
 .install-chip{background:#fff;color:var(--primary);border:1px solid var(--border);border-radius:999px;padding:8px 16px;font-size:12px;font-weight:800;cursor:pointer;margin-top:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-/* SCANNER */
 .scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
 .scan-box{width:100%;max-width:420px;text-align:center}
 .scan-head{color:#fff;font-weight:700;font-size:15px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -84,7 +85,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
  </div>
 </div>
 
-<!-- LEITOR DE QR -->
 <div class="scan-overlay hidden" id="scan_overlay">
  <div class="scan-box">
   <div class="scan-head"><span>📷 Aponte para o QR Code da mesa</span><button class="scan-close" onclick="closeScanner()">✕</button></div>
@@ -104,7 +104,6 @@ function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;',
 function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 function loadScript(src){return new Promise(res=>{const s=document.createElement('script');s.src=src;s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s)})}
 
-/* ===== CHIP ÚLTIMA LOJA ===== */
 (function(){
  try{
   const l=JSON.parse(localStorage.getItem('anote_ultima_loja')||'null');
@@ -112,14 +111,12 @@ function loadScript(src){return new Promise(res=>{const s=document.createElement
  }catch(e){}
 })();
 
-/* ===== CARD DELIVERY ===== */
 function goDelivery(){
  let last=null;
  try{last=JSON.parse(localStorage.getItem('anote_ultima_loja')||'null')}catch(e){}
  location.href=pageBase()+'delivery.html'+(last&&last.id?'?loja='+last.id:'');
 }
 
-/* ===== CARD MESA → LEITOR QR ===== */
 async function openScanner(){
  scanned=false;
  $('scan_overlay').classList.remove('hidden');
@@ -178,7 +175,6 @@ function stopCamera(){
 }
 function closeScanner(){stopCamera();$('scan_overlay').classList.add('hidden');$('scan_video').classList.add('hidden');$('scan_lib_wrap').classList.add('hidden');$('scan_lib_wrap').innerHTML=''}
 
-/* ===== CÓDIGO MANUAL ===== */
 function toggleManual(){$('manual_box').classList.toggle('hidden')}
 async function enterCode(){
  const v=$('manual_input').value.trim();
@@ -195,15 +191,7 @@ async function enterCode(){
  else msg.innerHTML='<div class="msg err">'+escapeHtml(data?.error||'Loja não encontrada')+'</div>';
 }
 
-/* ===== INSTALAR (start_url = esta página) ===== */
-(function(){
- try{
-  const manifest={name:'Anote — Cardápio e Delivery',short_name:'Anote',start_url:pageBase()+'clienteselect.html',display:'standalone',background_color:'#f5f5f4',theme_color:'#ea580c',icons:[{src:pageBase()+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
-  const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(blob);
-  document.head.appendChild(l);
- }catch(e){}
-})();
+/* 📲 INSTALAR (manifest estático no head) */
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
 window.addEventListener('appinstalled',()=>{const b=$('btn_install');if(b)b.classList.add('hidden')});
 async function installApp(){
