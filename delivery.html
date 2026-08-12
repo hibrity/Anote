@@ -225,7 +225,7 @@ async function confirmCheckout(){
  if(phone.length<10){m.innerHTML='<div class="msg err">Telefone inválido.</div>';return}
  if(addr.length<8){m.innerHTML='<div class="msg err">Digite o endereço completo.</div>';return}
  const b=$('btn_checkout');b.disabled=true;b.textContent='Salvando...';
- const{data}=await supabase.rpc('cliente_cadastrar',{p_store_id:storeId,p_name:name,p_phone:phone});
+ const{data,error}=await supabase.rpc('cliente_cadastrar',{p_store_id:storeId,p_name:name,p_phone:phone});
  b.disabled=false;b.textContent='Ir para pagamento';
  if(data&&data.ok){
   currentCustomer={...data.customer,address:addr};
@@ -233,7 +233,7 @@ async function confirmCheckout(){
   try{localStorage.setItem('anote_cliente_'+storeId,JSON.stringify(currentCustomer))}catch(e){}
   renderUserChip();
   closeCheckout();openPayment();
- }else m.innerHTML='<div class="msg err">'+escapeHtml(data?.error||'Erro')+'</div>';
+ }else m.innerHTML='<div class="msg err">'+escapeHtml((data&&data.error)||(error&&error.message)||'Erro')+'</div>';
 }
 function renderUserChip(){const c=$('user_chip');if(currentCustomer){c.textContent='👤 '+escapeHtml((currentCustomer.name||'').split(' ')[0]);c.classList.remove('hidden')}}
 
@@ -251,7 +251,7 @@ async function submitOrder(){
  const notes=$('cart_notes').value.trim()||null;
  const items=cart.map(i=>({product_id:i.id,quantity:i.qty}));
  const{data,error}=await supabase.rpc('cliente_criar_pedido',{p_store_id:storeId,p_customer_id:currentCustomer.id,p_table_id:null,p_items:items,p_notes:notes,p_payment_method:selectedPayment,p_order_type:'delivery',p_endereco:deliveryAddress});
- if(error||!data||!data.ok){alert(data?.error||error?.message||'Erro ao criar pedido');return}
+ if(error||!data||!data.ok){alert((data&&data.error)||(error&&error.message)||'Erro ao criar pedido');return}
  activeOrderId=data.order_id;
  cart=[];updateCartUI();
  $('confirm_num').textContent='#'+data.order_number;
@@ -261,7 +261,7 @@ async function submitOrder(){
 function goToTracking(){$('modal_confirm').classList.add('hidden');showView('tracking')}
 function closeConfirm(){$('modal_confirm').classList.add('hidden')}
 
-/* ===== RASTREAMENTO ===== */
+/* ===== RASTREAMENTO (CORRIGIDO) ===== */
 function startTracking(){if(trackTimer)clearInterval(trackTimer);pollStatus();trackTimer=setInterval(pollStatus,6000)}
 async function pollStatus(){
  if(!activeOrderId||!currentCustomer)return renderTrackingEmpty();
@@ -274,7 +274,12 @@ function renderTrackingEmpty(){$('track_container').innerHTML='<div class="empty
 function renderTracking(d){
  const order=['new','preparing','ready','delivered'];
  const idx=order.indexOf(d.status);
- let s=order.map((st,i)=>{const inf=STATUS_LABEL[st];let cls=i<idx?'done':(i===idx?'now':'');if(d.status==='cancelled')cls='';return`<div class="step ${cls}">${i<3}'<div class="line"></div>':''}<div class="circle">${i<idx?'✓':inf.ico}</div><div class="lbl">${inf.txt}<small>${inf.desc}</small></div></div>`}).join('');
+ let s=order.map((st,i)=>{
+  const inf=STATUS_LABEL[st];
+  let cls=i<idx?'done':(i===idx?'now':'');
+  if(d.status==='cancelled')cls='';
+  return`<div class="step ${cls}">${i<3?'<div class="line"></div>':''}<div class="circle">${i<idx?'✓':inf.ico}</div><div class="lbl">${inf.txt}<small>${inf.desc}</small></div></div>`;
+ }).join('');
  const items=(d.items||[]).map(i=>`${i.qty}x ${escapeHtml(i.name)}`).join(' • ');
  $('track_container').innerHTML=`<div class="track-card"><div style="font-size:14px;color:var(--muted)">Pedido <b style="font-size:22px;color:var(--text)">#${d.order_number}</b> • ${money(d.total)}</div>${d.status==='cancelled'?'<div class="msg err">❌ Cancelado.</div>':''}<div class="steps">${s}</div><div style="margin-top:18px;font-size:13px;color:var(--muted)">${items}</div></div>`;
 }
@@ -288,18 +293,30 @@ function showView(v){
  if(v==='tracking')pollStatus();
 }
 
-/* ===== BOOT: LOJA FIXA, SEM TELA DE CÓDIGO ===== */
+/* ===== BOOT: LOJA FIXA + DONO, SEM TELA DE CÓDIGO ===== */
 async function init(){
  const p=new URLSearchParams(location.search);
  storeId=p.get('loja');
  veioDoLink=!!storeId;
 
- // Sem link? Usa a loja FIXA deste aparelho (app instalado sempre tem o link)
+ // Sem link? Usa a loja FIXA deste aparelho
  if(!storeId){
   try{
    const f=JSON.parse(localStorage.getItem('anote_loja_fixa')||'null');
    const l=JSON.parse(localStorage.getItem('anote_ultima_loja')||'null');
    storeId=(f&&f.id)?f.id:((l&&l.id)?l.id:null);
+  }catch(e){}
+ }
+
+ // Ainda nada? Se for o DONO logado, usa a loja dele
+ if(!storeId){
+  try{
+   await waitForSupabase();
+   const{data:ses}=await supabase.auth.getSession();
+   if(ses&&ses.session){
+    const{data}=await supabase.rpc('dono_entrar');
+    if(data&&data.ok&&data.store){storeId=data.store.id;veioDoLink=true}
+   }
   }catch(e){}
  }
 
