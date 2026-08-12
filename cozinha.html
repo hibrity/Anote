@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Anote — Cozinha PRO</title>
+<title>Anote — Cozinha</title>
 <script type="module">
 import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
 window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
@@ -11,400 +11,151 @@ window.dispatchEvent(new Event("supabase-ready"));
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--cyan:#06b6d4;--radius:14px}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
-.hidden{display:none!important}
-.wrap{max-width:1600px;margin:0 auto;padding:14px}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
-.topbar-title{font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px}
-.store-name{font-size:14px;color:var(--mut);font-weight:400}
-.topbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.live-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;animation:pulse 1.5s infinite}
-.live-dot.on{background:#22c55e}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .1s}
-.btn:active{transform:scale(.97)}
-.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-amber{background:var(--amber);color:#3b2503}.btn-red{background:var(--red);color:#fff}.btn-purple{background:var(--purple);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
-.btn-block{width:100%}.btn-lg{padding:16px 20px;font-size:16px;border-radius:12px}.btn-sm{padding:6px 10px;font-size:12px}
-.login-shell{max-width:420px;margin:60px auto 0;padding:0 16px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
-.title{font-size:28px;font-weight:800;text-align:center;margin-bottom:6px}
+:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--r:14px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+.wrap{max-width:1200px;margin:0 auto;padding:16px}.hidden{display:none!important}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.title{font-size:20px;font-weight:800}
 .muted{color:var(--mut);font-size:13px}
-input,select{width:100%;padding:13px 14px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:15px;margin-bottom:12px;outline:none}
-input.pin-input{text-align:center;font-size:28px;letter-spacing:12px;font-weight:800}
-input:focus,select:focus{border-color:var(--green)}
-label{font-size:13px;color:var(--mut);font-weight:600;display:block;margin-bottom:6px}
-.msg{padding:11px;border-radius:10px;font-size:14px;margin-top:10px;text-align:center}
-.msg.err{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d}.msg.ok{background:#14351f;color:#86efac;border:1px solid #166534}
-.pause-banner{background:linear-gradient(90deg,#7f1d1d,#b91c1c);color:#fff;padding:16px;border-radius:var(--radius);text-align:center;font-size:18px;font-weight:800;margin-bottom:14px;animation:pulse 2s infinite;display:none}
-.pause-banner.show{display:block}
-.main-tabs{display:flex;gap:8px;margin-bottom:14px}
-.main-tab{padding:12px 24px;border-radius:12px;background:var(--card2);border:2px solid var(--border);color:var(--mut);cursor:pointer;font-weight:800;font-size:15px}
-.main-tab.active{background:var(--green);color:#052e16;border-color:var(--green)}
-.type-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
-.type-filter{padding:10px 18px;border-radius:12px;background:var(--card2);border:2px solid var(--border);color:var(--mut);cursor:pointer;font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px}
-.type-filter.active{background:var(--blue);color:#fff;border-color:var(--blue)}
-.type-filter .count{background:rgba(0,0,0,.2);padding:2px 8px;border-radius:999px;font-size:12px}
-.cat-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius)}
-.cat-filter{padding:8px 16px;border-radius:999px;background:var(--card2);border:1px solid var(--border);color:var(--mut);cursor:pointer;font-weight:600;font-size:13px}
-.cat-filter.active{background:var(--purple);color:#fff;border-color:var(--purple)}
-.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
-.kcol{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:12px;min-height:60vh}
-.kcol-header{text-align:center;padding:12px;border-radius:10px;margin-bottom:12px;font-weight:800;font-size:16px}
-.kcol-new .kcol-header{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid #3b82f6}
-.kcol-prep .kcol-header{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid #f59e0b}
-.kcol-ready .kcol-header{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid #22c55e}
-.kcount{display:inline-block;background:rgba(0,0,0,.3);padding:2px 10px;border-radius:999px;font-size:13px;margin-left:6px}
-.order-card{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;transition:border-color .3s}
-.order-card.urgent{border-color:var(--red);animation:blink 1s infinite}
-.order-card.mine{border-color:var(--cyan)}
-@keyframes blink{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
-.order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed var(--border)}
-.order-num{font-size:20px;font-weight:800}
-.order-time{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--card2)}
-.order-time.fast{color:#4ade80}.order-time.medium{color:#fbbf24}.order-time.slow{color:#f87171}
-.order-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.type-badge{font-size:13px;font-weight:800;padding:6px 12px;border-radius:8px;display:inline-flex;align-items:center;gap:4px}
-.type-badge.table{background:#312e81;color:#c7d2fe}.type-badge.counter{background:#164e63;color:#67e8f9}.type-badge.delivery{background:#7c2d12;color:#fdba74}.type-badge.pickup{background:#4c1d95;color:#ddd6fe}
-.cook-badge{background:#164e63;color:#67e8f9;font-size:12px;padding:4px 10px;border-radius:999px}
-.order-items{font-size:16px;line-height:1.7;margin-bottom:12px}
-.order-items b{color:var(--amber);font-size:17px}
-.item-note{font-size:13px;color:var(--amber);font-style:italic;display:block;padding-left:20px}
-.item-cat{font-size:11px;color:var(--purple);font-weight:700}
-.empty-col{text-align:center;color:var(--mut);padding:40px 10px;font-size:14px}
-.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
-.b-ready{background:#dcfce7;color:#15803d}.b-pending{background:#fef3c7;color:#b45309}.b-cancelled{background:#fee2e2;color:#b91c1c}
-.hist-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
-.hist-stat{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
-.hist-stat .val{font-size:28px;font-weight:800}
-.hist-stat .lbl{font-size:12px;color:var(--mut);margin-top:4px}
-.hist-item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.modal-title{font-size:20px;font-weight:800}
-.modal-close{background:none;border:none;color:var(--mut);font-size:24px;cursor:pointer}
-.config-item{display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--card2);border:1px solid var(--border);border-radius:12px;margin-bottom:10px}
-.config-info{flex:1}
-.config-info b{display:block;font-size:15px;margin-bottom:2px}
-.config-info span{font-size:12px;color:var(--mut)}
-.switch{position:relative;width:52px;height:28px;flex:none}
-.switch input{opacity:0;width:0;height:0}
-.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);transition:.3s;border-radius:34px}
-.slider:before{position:absolute;content:"";height:22px;width:22px;left:3px;bottom:3px;background:#fff;transition:.3s;border-radius:50%}
-input:checked+.slider{background:var(--green)}
-input:checked+.slider:before{transform:translateX(24px)}
-@media(max-width:900px){.kanban{grid-template-columns:1fr}.kcol{min-height:auto}.type-filters,.cat-filters{flex-direction:column}.type-filter{width:100%;justify-content:center}.hist-stats{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;width:100%}
+.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-amber{background:var(--amber);color:#3b2503}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
+input{width:100%;padding:12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:16px;margin-bottom:8px;outline:none;text-align:center;letter-spacing:4px;font-weight:800}
+.login-shell{max-width:380px;margin:60px auto 0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
+.msg.err{background:#451a1a;color:#fca5a5}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.col{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:12px;min-height:60vh}
+.col h2{font-size:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.col h2 span{background:var(--card);padding:2px 10px;border-radius:999px;font-size:12px}
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px}
+.o-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.o-top b{font-size:18px}
+.badge{padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;background:var(--card2);color:var(--mut)}
+.o-who{font-size:12px;color:var(--mut);margin-bottom:6px}
+.item{font-size:14px;padding:3px 0;border-bottom:1px dashed var(--border)}
+.item small{color:var(--mut)}
+.o-notes{font-size:12px;color:var(--amber);margin:6px 0}
+.order-card .btn{margin-top:8px}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+@media(max-width:800px){.board{grid-template-columns:1fr}.col{min-height:auto}}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<div id="screen_login">
-  <div class="login-shell">
-    <div style="text-align:center;margin-bottom:20px">
-      <div class="title">👨‍🍳</div>
-      <div class="title" style="font-size:24px">Cozinha PRO</div>
-      <div class="muted">Anote — Painel da Cozinha</div>
-    </div>
-    <div class="card">
-      <div class="muted" style="text-align:center;margin-bottom:14px" id="login_store_name">Digite seu PIN</div>
-      <label style="text-align:center">Seu PIN</label>
-      <input type="password" inputmode="numeric" maxlength="4" id="login_pin" class="pin-input" placeholder="••••" autofocus/>
-      <button class="btn btn-green btn-block btn-lg" onclick="doLogin()">🔓 Entrar</button>
-      <div id="login_result"></div>
-    </div>
-  </div>
+<div id="screen_login" class="hidden"><div class="login-shell">
+<div class="card" style="text-align:center">
+<div class="title">👨‍🍳 Cozinha</div>
+<div class="muted" id="login_code_label" style="margin:6px 0 14px"></div>
+<input id="pin" type="password" maxlength="4" placeholder="PIN" inputmode="numeric"/>
+<button class="btn btn-green" onclick="doLogin()">Entrar</button>
+<div id="login_msg"></div>
+</div></div></div>
+
+<div id="screen_app" class="hidden">
+<div class="topbar">
+ <div><div class="title">👨‍🍳 <span id="app_name">Cozinha</span></div><div class="muted" id="app_staff"></div></div>
+ <div style="display:flex;gap:8px">
+  <button class="btn btn-ghost" style="width:auto" onclick="loadOrders()">🔄</button>
+  <button class="btn btn-ghost" style="width:auto" onclick="logout()">Sair</button>
+ </div>
+</div>
+<div class="board">
+ <div class="col"><h2>📥 Novos <span id="cnt_new">0</span></h2><div id="col_new"></div></div>
+ <div class="col"><h2>👨‍ Preparando <span id="cnt_prep">0</span></h2><div id="col_prep"></div></div>
+ <div class="col"><h2>🔔 Prontos <span id="cnt_ready">0</span></h2><div id="col_ready"></div></div>
+</div>
 </div>
 
-<div id="screen_kitchen" class="hidden">
-  <div class="wrap">
-    <div class="topbar">
-      <div class="topbar-title">👨‍🍳 Cozinha <span class="store-name" id="k_store_name"></span></div>
-      <div class="topbar-actions">
-        <span class="live-dot" id="live_dot"></span>
-        <span class="muted" id="last_update">—</span>
-        <button class="btn btn-ghost btn-sm" onclick="toggleSound()" id="btn_sound">🔊</button>
-        <button class="btn btn-amber btn-sm" onclick="togglePause()" id="btn_pause">⏸️ Pausar</button>
-        <button class="btn btn-purple btn-sm" onclick="openConfig()">⚙️</button>
-        <button class="btn btn-ghost btn-sm" onclick="loadData()">🔄</button>
-        <button class="btn btn-red btn-sm" onclick="logout()">Sair</button>
-      </div>
-    </div>
-    <div class="pause-banner" id="pause_banner">⏸️ COZINHA PAUSADA — Novos pedidos estão aguardando</div>
-    <div class="main-tabs">
-      <div class="main-tab active" id="mt_kanban" onclick="switchMain('kanban')">🍳 Preparo</div>
-      <div class="main-tab" id="mt_hist" onclick="switchMain('hist')">📊 Histórico</div>
-    </div>
-    <div id="view_kanban">
-      <div class="type-filters" id="type_filters">
-        <div class="type-filter active" id="filter_all" onclick="setTypeFilter('all')">📋 Todos <span class="count" id="count_all">0</span></div>
-        <div class="type-filter" id="filter_table" onclick="setTypeFilter('table')">🍽️ Mesas <span class="count" id="count_table">0</span></div>
-        <div class="type-filter" id="filter_counter" onclick="setTypeFilter('counter')">🏪 Balcão <span class="count" id="count_counter">0</span></div>
-        <div class="type-filter" id="filter_delivery" onclick="setTypeFilter('delivery')">🛵 Delivery <span class="count" id="count_delivery">0</span></div>
-        <div class="type-filter" id="filter_pickup" onclick="setTypeFilter('pickup')">🥡 Retirada <span class="count" id="count_pickup">0</span></div>
-      </div>
-      <div class="cat-filters" id="cat_filters">
-        <div class="cat-filter active" id="cat_all" onclick="setCatFilter('all')">🍽️ Todas</div>
-      </div>
-      <div class="kanban">
-        <div class="kcol kcol-new"><div class="kcol-header">🆕 NOVOS <span class="kcount" id="kcount_new">0</span></div><div id="k_new"></div></div>
-        <div class="kcol kcol-prep"><div class="kcol-header">👨‍🍳 PREPARANDO <span class="kcount" id="kcount_prep">0</span></div><div id="k_prep"></div></div>
-        <div class="kcol kcol-ready"><div class="kcol-header">🔔 PRONTOS <span class="kcount" id="kcount_ready">0</span></div><div id="k_ready"></div></div>
-      </div>
-    </div>
-    <div id="view_hist" class="hidden">
-      <div class="hist-stats">
-        <div class="hist-stat"><div class="val" id="hs_total">0</div><div class="lbl">Pedidos hoje</div></div>
-        <div class="hist-stat"><div class="val" style="color:var(--green)" id="hs_done">0</div><div class="lbl">Finalizados</div></div>
-        <div class="hist-stat"><div class="val" style="color:var(--red)" id="hs_cancel">0</div><div class="lbl">Cancelados</div></div>
-      </div>
-      <div class="card"><h2>📊 Pedidos de hoje</h2><div id="hist_list"></div></div>
-    </div>
-  </div>
 </div>
-
-<div id="config_modal" class="modal-overlay hidden" onclick="closeConfigOutside(event)">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title">⚙️ Configurações da Cozinha</div><button class="modal-close" onclick="closeConfig()">✕</button></div>
-    <div id="config_list"></div>
-    <div class="muted" style="margin-top:12px;text-align:center">As configurações são salvas neste dispositivo.</div>
-  </div>
-</div>
+<div id="toast" class="toast"></div>
 
 <script>
-let store=null,staff=null,staffCode=null,D={orders:[],tables:[],categories:[]};
-let histData={orders:[],stats:{}};
-let liveTimer=null,soundOn=true,kitchenPaused=false;
-let currentTypeFilter='all',currentCatFilter='all',currentView='kanban';
-let lastOrderIds=[],lastCatHash='';
+const $=id=>document.getElementById(id);
+let storeId=null,staffNome='',pollTimer=null,lastNew=-1,urlCode=null;
 
-const TYPE_LABEL={counter:'🏪 Balcão',delivery:'🛵 Delivery',pickup:'🥡 Retirada',table:'🍽️ Mesa'};
-const STATUS_LABEL={new:'Novo',preparing:'Preparando',ready:'Pronto',delivered:'Entregue',cancelled:'Cancelado'};
-const DEFAULT_CONFIG={autoPrint:false,showHistory:true,categoryFilter:true,pauseEnabled:true,multiCook:true};
-let CONFIG={...DEFAULT_CONFIG};
-
+function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t==='err'?'#ef4444':'#22c55e';e.style.color=t==='err'?'#fff':'#052e16';e.classList.add('show');clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500)}
+function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
+async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}catch(e){console.warn(n+' exception:',e);return{data:null,error:e}}}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function loadConfig(){try{const saved=localStorage.getItem('anote_kitchen_config');if(saved)CONFIG={...DEFAULT_CONFIG,...JSON.parse(saved)}}catch(e){}}
-function saveConfig(){localStorage.setItem('anote_kitchen_config',JSON.stringify(CONFIG))}
-function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
-function getLojaFromURL(){return new URLSearchParams(location.search).get('loja')||''}
 
-async function doLogin(){
- const pin=document.getElementById('login_pin').value.trim(),loja=getLojaFromURL(),res=document.getElementById('login_result');
- if(!loja){res.innerHTML='<div class="msg err">Escaneie o QR Code.</div>';return}
- if(!pin||pin.length!==4){res.innerHTML='<div class="msg err">PIN de 4 números.</div>';return}
- res.innerHTML='<div class="msg ok">Verificando...</div>';
- const{data}=await supabase.rpc('staff_login_pin',{p_store_code:loja,p_pin:pin});
- if(!data||!data.ok){res.innerHTML=`<div class="msg err">${escapeHtml(data?.error||'PIN inválido')}</div>`;document.getElementById('login_pin').value='';return}
- if(data.staff.cargo!=='kitchen'&&data.staff.cargo!=='manager'){res.innerHTML='<div class="msg err">Sem acesso à cozinha.</div>';return}
- store=data.store;staff=data.staff;staffCode=data.store.staff_code;
- sessionStorage.setItem('anote_kitchen_session',JSON.stringify({loja,pin}));
- enterKitchen();
-}
-function logout(){sessionStorage.removeItem('anote_kitchen_session');stopLive();location.href='index.html'}
-function enterKitchen(){
- document.getElementById('screen_login').classList.add('hidden');
- document.getElementById('screen_kitchen').classList.remove('hidden');
- document.getElementById('k_store_name').textContent='• '+store.name+' • '+staff.nome;
- applyConfig();loadData();startLive();
-}
-function applyConfig(){
- document.getElementById('cat_filters').classList.toggle('hidden',!CONFIG.categoryFilter);
- document.getElementById('mt_hist').classList.toggle('hidden',!CONFIG.showHistory);
- document.getElementById('btn_pause').classList.toggle('hidden',!CONFIG.pauseEnabled);
-}
-
-async function loadData(){
- if(!store||!staffCode)return;
- const{data}=await supabase.rpc('staff_carregar',{p_store_id:store.id,p_codigo:staffCode});
- if(!data||!data.ok){if(data?.error==='Código inválido'){logout();return}return}
- D=data;
- // ✅ Carrega estado de pausa do servidor
- kitchenPaused = !!(D.store && D.store.paused);
- updatePauseUI();
- renderCategoryFilters();renderKitchen();
- document.getElementById('live_dot').classList.add('on');
- document.getElementById('last_update').textContent=new Date().toLocaleTimeString('pt-BR');
-}
-async function loadHistory(){
- const{data}=await supabase.rpc('cozinha_historico',{p_store_id:store.id,p_codigo:staffCode});
- if(data&&data.ok){histData=data;renderHistory()}
-}
-function startLive(){if(liveTimer)return;liveTimer=setInterval(loadData,4000)}
-function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null}}
-function switchMain(v){
- currentView=v;
- document.getElementById('mt_kanban').classList.toggle('active',v==='kanban');
- document.getElementById('mt_hist').classList.toggle('active',v==='hist');
- document.getElementById('view_kanban').classList.toggle('hidden',v!=='kanban');
- document.getElementById('view_hist').classList.toggle('hidden',v!=='hist');
- if(v==='hist')loadHistory();
-}
-function setTypeFilter(t){
- currentTypeFilter=t;
- ['all','table','counter','delivery','pickup'].forEach(x=>document.getElementById('filter_'+x).classList.toggle('active',x===t));
- renderKitchen();
-}
-function setCatFilter(c){
- currentCatFilter=c;
- document.querySelectorAll('.cat-filter').forEach(el=>el.classList.remove('active'));
- const el=document.getElementById('cat_'+c);if(el)el.classList.add('active');
- renderKitchen();
-}
-function renderCategoryFilters(){
- if(!CONFIG.categoryFilter)return;
- // ✅ Só re-renderiza se as categorias mudaram
- const hash=(D.categories||[]).map(c=>c.id).join(',');
- if(hash===lastCatHash)return;
- lastCatHash=hash;
- const c=document.getElementById('cat_filters');
- let h='<div class="cat-filter '+(currentCatFilter==='all'?'active':'')+'" id="cat_all" onclick="setCatFilter(\'all\')">🍽️ Todas</div>';
- (D.categories||[]).forEach(cat=>{
-  h+=`<div class="cat-filter ${currentCatFilter===cat.id?'active':''}" id="cat_${cat.id}" onclick="setCatFilter('${cat.id}')">${escapeHtml(cat.name)}</div>`;
- });
- c.innerHTML=h;
-}
-function getFilteredOrders(){
- let orders=(D.orders||[]).filter(o=>['new','preparing','ready'].includes(o.status));
- if(currentTypeFilter!=='all')orders=orders.filter(o=>o.order_type===currentTypeFilter);
- if(currentCatFilter!=='all')orders=orders.filter(o=>(o.items||[]).some(i=>i.category_id===currentCatFilter));
- return orders;
-}
-function updateFilterCounts(){
- const active=(D.orders||[]).filter(o=>['new','preparing','ready'].includes(o.status));
- document.getElementById('count_all').textContent=active.length;
- document.getElementById('count_table').textContent=active.filter(o=>o.order_type==='table').length;
- document.getElementById('count_counter').textContent=active.filter(o=>o.order_type==='counter').length;
- document.getElementById('count_delivery').textContent=active.filter(o=>o.order_type==='delivery').length;
- document.getElementById('count_pickup').textContent=active.filter(o=>o.order_type==='pickup').length;
-}
-function getElapsed(createdAt){
- if(!createdAt)return{text:'--',cls:'fast'};
- const diff=Math.floor((Date.now()-new Date(createdAt).getTime())/60000);
- if(diff<5)return{text:diff+'min',cls:'fast'};
- if(diff<12)return{text:diff+'min',cls:'medium'};
- return{text:diff+'min ⚠️',cls:'slow'};
-}
-function renderKitchen(){
- const filtered=getFilteredOrders();
- updateFilterCounts();
- const g={new:[],preparing:[],ready:[]};
- filtered.forEach(o=>{if(g[o.status])g[o.status].push(o)});
- const newIds=g.new.map(o=>o.id);
- const freshOrders=g.new.filter(o=>!lastOrderIds.includes(o.id));
- if(lastOrderIds.length>0&&freshOrders.length>0&&soundOn)beep();
- lastOrderIds=newIds;
- document.getElementById('kcount_new').textContent=g.new.length;
- document.getElementById('kcount_prep').textContent=g.preparing.length;
- document.getElementById('kcount_ready').textContent=g.ready.length;
- document.getElementById('k_new').innerHTML=g.new.length?g.new.map(o=>renderCard(o,`<button class="btn btn-amber btn-block btn-lg" onclick="takeOrder('${o.id}')">👨‍🍳 ${CONFIG.multiCook?'PEGAR PEDIDO':'COMEÇAR'}</button>`)).join(''):'<div class="empty-col">Nenhum pedido novo 🎉</div>';
- document.getElementById('k_prep').innerHTML=g.preparing.length?g.preparing.map(o=>renderCard(o,`<button class="btn btn-green btn-block btn-lg" onclick="setStatus('${o.id}','ready')">🔔 PRONTO</button>`)).join(''):'<div class="empty-col">Nada em preparo</div>';
- document.getElementById('k_ready').innerHTML=g.ready.length?g.ready.map(o=>renderCard(o,'<div style="text-align:center;padding:10px"><span class="badge b-ready">✅ Aguardando entrega</span></div>')).join(''):'<div class="empty-col">Nenhum pronto</div>';
-}
-function renderCard(o,actionHtml){
- const elapsed=getElapsed(o.created_at);
- const isUrgent=o.status==='new'&&elapsed.cls==='slow';
- const table=(D.tables||[]).find(t=>t.id===o.table_id);
- const isMine=CONFIG.multiCook&&o.assigned_name===staff.nome;
- const items=(o.items||[]).map(i=>{
-  const catTag=CONFIG.categoryFilter&&i.category_name?` <span class="item-cat">[${escapeHtml(i.category_name)}]</span>`:'';
-  return `<div>🍴 <b>${i.qty}x</b> ${escapeHtml(i.name)}${catTag}${i.notes?`<span class="item-note">📝 ${escapeHtml(i.notes)}</span>`:''}</div>`;
- }).join('')||'<div class="muted">Sem itens</div>';
- let typeBadge='';
- if(o.order_type==='table')typeBadge=`<span class="type-badge table">🍽️ Mesa ${table?escapeHtml(table.table_number):'?'}</span>`;
- else if(o.order_type==='counter')typeBadge='<span class="type-badge counter">🏪 Balcão</span>';
- else if(o.order_type==='delivery')typeBadge='<span class="type-badge delivery">🛵 Delivery</span>';
- else typeBadge='<span class="type-badge pickup">🥡 Retirada</span>';
- const cookBadge=CONFIG.multiCook&&o.assigned_name?`<span class="cook-badge">👨‍🍳 ${escapeHtml(o.assigned_name)}</span>`:'';
- return `<div class="order-card ${isUrgent?'urgent':''} ${isMine?'mine':''}">
-  <div class="order-head"><span class="order-num">#${o.order_number}</span><span class="order-time ${elapsed.cls}">⏱️ ${elapsed.text}</span></div>
-  <div class="order-meta">${typeBadge}${cookBadge}</div>
-  <div class="order-items">${items}</div>
-  ${o.notes?`<div class="item-note" style="margin-bottom:10px">📝 ${escapeHtml(o.notes)}</div>`:''}
-  ${actionHtml}</div>`;
-}
-async function takeOrder(id){
- try{
-  if(CONFIG.multiCook){
-   await supabase.rpc('cozinha_pegar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_staff_id:staff.id,p_staff_nome:staff.nome});
-  }else{
-   await setStatus(id,'preparing',true);return;
-  }
- }catch(e){console.warn(e)}
- await loadData();
-}
-async function setStatus(id,s,skip){
- try{
-  await supabase.rpc('staff_atualizar_pedido',{p_store_id:store.id,p_codigo:staffCode,p_order_id:id,p_status:s,p_payment:null});
- }catch(e){console.warn(e)}
- if(!skip)await loadData();else await loadData();
-}
-async function togglePause(){
- kitchenPaused=!kitchenPaused;
- try{await supabase.rpc('cozinha_set_pausa',{p_store_id:store.id,p_codigo:staffCode,p_pausado:kitchenPaused})}catch(e){}
- updatePauseUI();
-}
-function updatePauseUI(){
- document.getElementById('pause_banner').classList.toggle('show',kitchenPaused);
- document.getElementById('btn_pause').innerHTML=kitchenPaused?'▶️ Retomar':'⏸️ Pausar';
- document.getElementById('btn_pause').className=kitchenPaused?'btn btn-green btn-sm':'btn btn-amber btn-sm';
-}
-function renderHistory(){
- const s=histData.stats||{};
- document.getElementById('hs_total').textContent=s.total_today||0;
- document.getElementById('hs_done').textContent=s.done_today||0;
- document.getElementById('hs_cancel').textContent=s.cancelled_today||0;
- const list=document.getElementById('hist_list');
- if(!(histData.orders||[]).length){list.innerHTML='<div class="empty-col">Nenhum pedido hoje.</div>';return}
- list.innerHTML=histData.orders.map(o=>{
-  const time=new Date(o.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  const items=(o.items||[]).map(i=>`${i.qty}x ${escapeHtml(i.name)}`).join(', ');
-  const badge=o.status==='cancelled'?'b-cancelled':(o.status==='delivered'||o.status==='ready')?'b-ready':'b-pending';
-  return `<div class="hist-item">
-   <div style="flex:1;min-width:200px"><b>#${o.order_number}</b> • ${time}${o.table_number?`• 🍽️ Mesa ${escapeHtml(o.table_number)}`:''}${o.assigned_name?`• 👨‍🍳 ${escapeHtml(o.assigned_name)}`:''}<div class="muted" style="font-size:12px">${items}</div></div>
-   <span class="badge ${badge}">${STATUS_LABEL[o.status]||o.status}</span></div>`;
- }).join('');
-}
-const CONFIG_ITEMS=[
- {key:'autoPrint',icon:'🖨️',title:'Impressão automática',desc:'Imprime a comanda quando chega pedido novo'},
- {key:'showHistory',icon:'📊',title:'Histórico do dia',desc:'Mostra a aba com pedidos finalizados'},
- {key:'categoryFilter',icon:'🎯',title:'Filtro por categoria',desc:'Filtra pedidos por categoria'},
- {key:'pauseEnabled',icon:'⏸️',title:'Pausar cozinha',desc:'Permite pausar quando estiver lotado'},
- {key:'multiCook',icon:'👨‍🍳',title:'Multi-cozinheiros',desc:'Cada cozinheiro pega um pedido'}
-];
-function openConfig(){
- document.getElementById('config_list').innerHTML=CONFIG_ITEMS.map(item=>`
-  <div class="config-item"><div class="config-info"><b>${item.icon} ${item.title}</b><span>${item.desc}</span></div>
-  <label class="switch"><input type="checkbox" ${CONFIG[item.key]?'checked':''} onchange="toggleConfig('${item.key}',this.checked)"/><span class="slider"></span></label></div>`).join('');
- document.getElementById('config_modal').classList.remove('hidden');
-}
-function toggleConfig(key,val){CONFIG[key]=val;saveConfig();applyConfig();lastCatHash='';renderCategoryFilters();renderKitchen()}
-function closeConfig(){document.getElementById('config_modal').classList.add('hidden')}
-function closeConfigOutside(e){if(e.target.id==='config_modal')closeConfig()}
-function toggleSound(){soundOn=!soundOn;document.getElementById('btn_sound').textContent=soundOn?'🔊':'🔇'}
-function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(()=>{o.stop();c.close()},200)}catch(e){}}
 async function boot(){
- loadConfig();
- try{await waitForSupabase()}catch(e){return}
- const loja=getLojaFromURL();
- const saved=sessionStorage.getItem('anote_kitchen_session');
- if(saved){
-  try{
-   const{loja:sLoja,pin:sPin}=JSON.parse(saved);
-   if(sLoja===loja&&sPin){
-    const{data}=await supabase.rpc('staff_login_pin',{p_store_code:sLoja,p_pin:sPin});
-    if(data&&data.ok&&(data.staff.cargo==='kitchen'||data.staff.cargo==='manager')){store=data.store;staff=data.staff;staffCode=data.store.staff_code;enterKitchen();return}
-   }
-  }catch(e){}
+ try{await waitSB()}catch(e){return}
+ // 1) Sessão salva da cozinha
+ try{
+  const s=JSON.parse(localStorage.getItem('anote_cozinha')||'null');
+  if(s&&s.store_id){storeId=s.store_id;staffNome=s.nome||'';enter();return}
+ }catch(e){}
+ // 2) Dono logado
+ const{data:ses}=await supabase.auth.getSession();
+ if(ses&&ses.session){
+  const{data}=await rpc('dono_entrar');
+  if(data&&data.ok&&data.store){storeId=data.store.id;staffNome='Dono';enter();return}
  }
- if(loja){
-  const{data}=await supabase.rpc('staff_entrar',{p_codigo:loja});
-  if(data&&data.ok)document.getElementById('login_store_name').textContent=`${escapeHtml(data.store.name)} • Digite seu PIN`;
- }
- document.getElementById('screen_login').classList.remove('hidden');
+ // 3) Tela de PIN
+ urlCode=new URLSearchParams(location.search).get('loja');
+ $('login_code_label').textContent=urlCode?'Código: '+urlCode:'Abra pelo painel (botão Cozinha)';
+ $('screen_login').classList.remove('hidden');
 }
+async function doLogin(){
+ const pin=$('pin').value.trim();
+ if(!urlCode){$('login_msg').innerHTML='<div class="msg err">Abra pelo botão Cozinha no painel.</div>';return}
+ const{data}=await rpc('cozinha_login',{p_codigo:urlCode,p_pin:pin});
+ if(data&&data.ok){
+  storeId=data.store_id;staffNome=data.staff_nome||'';
+  localStorage.setItem('anote_cozinha',JSON.stringify({store_id:storeId,nome:staffNome}));
+  enter();
+ }else $('login_msg').innerHTML='<div class="msg err">'+escapeHtml(data?.error||'Erro')+'</div>';
+}
+function logout(){localStorage.removeItem('anote_cozinha');location.reload()}
+function enter(){
+ $('screen_login').classList.add('hidden');
+ $('screen_app').classList.remove('hidden');
+ $('app_staff').textContent=staffNome?('👤 '+staffNome):'';
+ loadOrders();
+ if(pollTimer)clearInterval(pollTimer);
+ pollTimer=setInterval(loadOrders,5000);
+}
+
+async function loadOrders(){
+ if(!storeId)return;
+ const{data}=await rpc('cozinha_pedidos',{p_store_id:storeId});
+ if(!data||!data.ok)return;
+ renderBoard(data.orders||[]);
+}
+function renderBoard(orders){
+ $('col_new').innerHTML='';$('col_prep').innerHTML='';$('col_ready').innerHTML='';
+ const cnt={new:0,preparing:0,ready:0};
+ orders.forEach(o=>{
+  if(cnt[o.status]!==undefined)cnt[o.status]++;
+  const src=o.order_source==='delivery'?'🛵 Delivery':(o.order_type==='table'?'🪑 Mesa '+(o.table_number||''):'🥡 Balcão');
+  const items=(o.items||[]).map(i=>'<div class="item">'+i.qty+'x '+escapeHtml(i.product_name||'')+(i.item_notes?'<small> — '+escapeHtml(i.item_notes)+'</small>':'')+'</div>').join('');
+  let btn='';
+  if(o.status==='new')btn='<button class="btn btn-amber" onclick="avancar(\''+o.id+'\',\'preparing\')">👨‍ Iniciar preparo</button>';
+  if(o.status==='preparing')btn='<button class="btn btn-green" onclick="avancar(\''+o.id+'\',\'ready\')">🔔 Marcar pronto</button>';
+  if(o.status==='ready')btn='<button class="btn btn-blue" onclick="avancar(\''+o.id+'\',\'delivered\')">✅ Concluir</button>';
+  const card=document.createElement('div');card.className='order-card';
+  card.innerHTML='<div class="o-top"><b>#'+o.order_number+'</b><span class="badge">'+escapeHtml(src)+'</span></div>'
+   +(o.customer_name?'<div class="o-who">👤 '+escapeHtml(o.customer_name)+'</div>':'')
+   +'<div>'+items+'</div>'
+   +(o.notes?'<div class="o-notes">📝 '+escapeHtml(o.notes)+'</div>':'')
+   +btn;
+  $(o.status==='new'?'col_new':(o.status==='preparing'?'col_prep':'col_ready')).appendChild(card);
+ });
+ $('cnt_new').textContent=cnt.new;$('cnt_prep').textContent=cnt.preparing;$('cnt_ready').textContent=cnt.ready;
+ if(lastNew>=0&&cnt.new>lastNew)beep();
+ lastNew=cnt.new;
+}
+async function avancar(id,st){
+ const{data}=await rpc('cozinha_atualizar_status',{p_order_id:id,p_status:st});
+ if(data&&data.ok)loadOrders();else toast('Erro ao atualizar','err');
+}
+function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.15;o.start();setTimeout(()=>{o.stop();c.close()},400)}catch(e){}}
+
 boot();
-window.doLogin=doLogin;window.logout=logout;window.loadData=loadData;window.switchMain=switchMain;window.setTypeFilter=setTypeFilter;window.setCatFilter=setCatFilter;window.takeOrder=takeOrder;window.setStatus=setStatus;window.togglePause=togglePause;window.toggleSound=toggleSound;window.openConfig=openConfig;window.closeConfig=closeConfig;window.closeConfigOutside=closeConfigOutside;window.toggleConfig=toggleConfig;
+window.doLogin=doLogin;window.logout=logout;window.avancar=avancar;window.loadOrders=loadOrders;
 </script>
 </body>
 </html>
