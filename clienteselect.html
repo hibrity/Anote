@@ -60,7 +60,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <div class="logo">🍽️</div>
   <h1>Anote</h1>
   <div class="sub">Como você quer pedir hoje?</div>
-  <div><span class="last-chip hidden" id="last_chip"></span></div>
+  <div><span class="last-chip hidden" id="store_chip"></span></div>
   <button class="install-chip" id="btn_install" onclick="installApp()">📲 Salvar na tela inicial</button>
  </div>
 
@@ -73,7 +73,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <div class="big-card" onclick="goDelivery()">
    <span class="ico">🛵</span>
    <div class="t">Delivery</div>
-   <div class="d">Quero receber em casa</div>
+   <div class="d">Receber em casa</div>
   </div>
  </div>
 
@@ -104,19 +104,49 @@ function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;',
 function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 function loadScript(src){return new Promise(res=>{const s=document.createElement('script');s.src=src;s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s)})}
 
-(function(){
- try{
-  const l=JSON.parse(localStorage.getItem('anote_ultima_loja')||'null');
-  if(l&&l.name){const c=$('last_chip');c.textContent='🏪 '+l.name;c.classList.remove('hidden')}
- }catch(e){}
-})();
+/* ===== LOJA FIXA desta instalação ===== */
+function getFixed(){try{return JSON.parse(localStorage.getItem('anote_loja_fixa')||'null')}catch(e){return null}}
+function setFixed(id,name){try{localStorage.setItem('anote_loja_fixa',JSON.stringify({id:id,name:name||''}))}catch(e){}}
+function getStore(){return getFixed()}
 
-function goDelivery(){
- let last=null;
- try{last=JSON.parse(localStorage.getItem('anote_ultima_loja')||'null')}catch(e){}
- location.href=pageBase()+'delivery.html'+(last&&last.id?'?loja='+last.id:'');
+/* Manifest do app = exclusivo da loja fixada */
+function setAppManifest(){
+ const f=getFixed();
+ try{
+  const manifest={name:'Anote — '+((f&&f.name)||'Cardápio e Delivery'),short_name:'Anote',start_url:pageBase()+'clienteselect.html'+(f&&f.id?'?loja='+f.id:''),display:'standalone',background_color:'#f5f5f4',theme_color:'#ea580c',icons:[{src:pageBase()+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  const l=document.querySelector('link[rel="manifest"]');
+  if(l)l.href=URL.createObjectURL(blob);
+ }catch(e){}
 }
 
+/* Boot: se o link tem ?loja=, fixa a loja no aparelho */
+(async function(){
+ const p=new URLSearchParams(location.search);
+ const urlLoja=p.get('loja');
+ if(urlLoja){
+  try{
+   await waitForSupabase();
+   const{data}=await supabase.rpc('cliente_buscar_loja',{p_codigo:urlLoja});
+   if(data&&data.ok)setFixed(data.store_id,data.name);else setFixed(urlLoja,'');
+  }catch(e){setFixed(urlLoja,'')}
+ }
+ const f=getStore();
+ if(f&&f.name){const c=$('store_chip');c.textContent='🏪 '+escapeHtml(f.name)+' — app oficial';c.classList.remove('hidden')}
+ if(f&&f.id)setAppManifest();
+})();
+
+/* ===== CARD DELIVERY: sempre a loja fixada ===== */
+function goDelivery(){
+ const f=getStore();
+ if(f&&f.id){location.href=pageBase()+'delivery.html?loja='+f.id}
+ else{
+  const mb=$('manual_box');
+  if(mb.classList.contains('hidden')){mb.classList.remove('hidden');mb.scrollIntoView({behavior:'smooth'})}
+ }
+}
+
+/* ===== LEITOR QR (MESA) ===== */
 async function openScanner(){
  scanned=false;
  $('scan_overlay').classList.remove('hidden');
@@ -175,23 +205,26 @@ function stopCamera(){
 }
 function closeScanner(){stopCamera();$('scan_overlay').classList.add('hidden');$('scan_video').classList.add('hidden');$('scan_lib_wrap').classList.add('hidden');$('scan_lib_wrap').innerHTML=''}
 
+/* ===== CÓDIGO MANUAL (só na 1ª vez, fixa a loja) ===== */
 function toggleManual(){$('manual_box').classList.toggle('hidden')}
 async function enterCode(){
- const v=$('manual_input').value.trim();
+ const v=($('manual_input')?.value||'').trim();
  const msg=$('manual_msg');msg.innerHTML='';
- if(!v){msg.innerHTML='<div class="msg err">Digite o código ou cole o link.</div>';return}
- let id=null;
+ if(!v){msg.innerHTML='<div class="msg err">Digite o código ou cole o link da loja.</div>';return}
+ let code=v;
  const match=v.match(/loja=([a-f0-9-]{36})/i);
- if(match)id=match[1];
- else if(/^[a-f0-9-]{36}$/i.test(v))id=v;
- if(id){location.href=pageBase()+'delivery.html?loja='+id;return}
+ if(match)code=match[1];
+ else if(/^[a-f0-9-]{36}$/i.test(v))code=v;
  try{await waitForSupabase()}catch(e){msg.innerHTML='<div class="msg err">Sem conexão.</div>';return}
- const{data}=await supabase.rpc('cliente_buscar_loja',{p_codigo:v});
- if(data&&data.ok)location.href=pageBase()+'delivery.html?loja='+data.store_id;
- else msg.innerHTML='<div class="msg err">'+escapeHtml(data?.error||'Loja não encontrada')+'</div>';
+ const{data}=await supabase.rpc('cliente_buscar_loja',{p_codigo:code});
+ if(data&&data.ok){
+  setFixed(data.store_id,data.name);
+  setAppManifest();
+  location.href=pageBase()+'delivery.html?loja='+data.store_id;
+ }else msg.innerHTML='<div class="msg err">'+escapeHtml(data?.error||'Loja não encontrada')+'</div>';
 }
 
-/* 📲 INSTALAR (manifest estático no head) */
+/* ===== INSTALAR ===== */
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
 window.addEventListener('appinstalled',()=>{const b=$('btn_install');if(b)b.classList.add('hidden')});
 async function installApp(){
@@ -202,7 +235,7 @@ async function installApp(){
  }else{
   const ua=navigator.userAgent;
   const ios=/iphone|ipad|ipod/i.test(ua);
-  alert(ios?'No iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início" 📲':'No Android: toque no menu ⋮ e depois em "Adicionar à tela inicial" 📲');
+  alert(ios?'Para instalar: toque em Compartilhar e depois em "Adicionar à Tela de Início" 📲\n\nO ícone é exclusivo desta loja.':'Para instalar: toque no menu ⋮ e depois em "Adicionar à tela inicial" 📲\n\nO ícone é exclusivo desta loja.');
  }
 }
 
