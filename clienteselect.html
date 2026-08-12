@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Anote — Como você quer pedir?</title>
+<meta name="theme-color" content="#ea580c"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Anote"/>
+<script type="module">
+import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
+window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
+window.dispatchEvent(new Event("supabase-ready"));
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--primary:#ea580c;--primary-light:#fff7ed;--bg:#f5f5f4;--card:#fff;--text:#1c1917;--muted:#78716c;--border:#e7e5e4;--radius:20px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+.app{max-width:520px;margin:0 auto;min-height:100vh;padding:24px 16px;position:relative}
+.header{text-align:center;padding:20px 0 10px}
+.header .logo{font-size:44px}
+.header h1{font-size:26px;font-weight:800;margin-top:4px}
+.header .sub{font-size:14px;color:var(--muted);margin-top:4px}
+.last-chip{display:inline-flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:700;margin-top:10px}
+.cards{display:flex;flex-direction:column;gap:16px;margin-top:28px}
+.big-card{background:var(--card);border-radius:var(--radius);padding:28px 20px;text-align:center;cursor:pointer;border:2px solid var(--border);transition:all .15s;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.big-card:active{transform:scale(.97);border-color:var(--primary)}
+.big-card .ico{font-size:52px;display:block;margin-bottom:10px}
+.big-card .t{font-size:20px;font-weight:800}
+.big-card .d{font-size:13px;color:var(--muted);margin-top:4px}
+.big-card.mesa{border-color:var(--primary);background:linear-gradient(180deg,#fff, var(--primary-light))}
+.manual-link{text-align:center;margin-top:22px;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:underline}
+.manual-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-top:12px}
+.manual-box input{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;outline:none;margin-bottom:8px}
+.btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-ghost{background:var(--primary-light);color:var(--primary)}
+.msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
+.msg.err{background:#fef2f2;color:#dc2626}
+.install-chip{background:#fff;color:var(--primary);border:1px solid var(--border);border-radius:999px;padding:8px 16px;font-size:12px;font-weight:800;cursor:pointer;margin-top:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+/* SCANNER */
+.scan-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.scan-box{width:100%;max-width:420px;text-align:center}
+.scan-head{color:#fff;font-weight:700;font-size:15px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.scan-close{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:10px;width:36px;height:36px;font-size:16px;cursor:pointer}
+#scan_video{width:100%;border-radius:14px;background:#000}
+#scan_lib_wrap{width:100%;border-radius:14px;overflow:hidden;background:#000}
+#scan_lib_wrap video{border-radius:14px}
+.scan-status{color:#fca5a5;font-size:13px;margin-top:12px;min-height:18px}
+.scan-tip{color:#9ca3af;font-size:12px;margin-top:8px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+ <div class="header">
+  <div class="logo">🍽️</div>
+  <h1>Anote</h1>
+  <div class="sub">Como você quer pedir hoje?</div>
+  <div><span class="last-chip hidden" id="last_chip"></span></div>
+  <button class="install-chip" id="btn_install" onclick="installApp()">📲 Salvar na tela inicial</button>
+ </div>
+
+ <div class="cards">
+  <div class="big-card mesa" onclick="openScanner()">
+   <span class="ico">🍽️</span>
+   <div class="t">Mesa</div>
+   <div class="d">Estou no restaurante — escanear QR Code da mesa</div>
+  </div>
+  <div class="big-card" onclick="goDelivery()">
+   <span class="ico">🛵</span>
+   <div class="t">Delivery</div>
+   <div class="d">Quero receber em casa</div>
+  </div>
+ </div>
+
+ <div class="manual-link" onclick="toggleManual()">⌨️ Digitar código da loja</div>
+ <div class="manual-box hidden" id="manual_box">
+  <input id="manual_input" placeholder="Código ou link da loja"/>
+  <button class="btn btn-primary" onclick="enterCode()">Continuar</button>
+  <div id="manual_msg"></div>
+ </div>
+</div>
+
+<!-- LEITOR DE QR -->
+<div class="scan-overlay hidden" id="scan_overlay">
+ <div class="scan-box">
+  <div class="scan-head"><span>📷 Aponte para o QR Code da mesa</span><button class="scan-close" onclick="closeScanner()">✕</button></div>
+  <video id="scan_video" class="hidden" playsinline muted></video>
+  <div id="scan_lib_wrap" class="hidden"></div>
+  <div class="scan-status" id="scan_status">Abrindo câmera...</div>
+  <div class="scan-tip">O QR Code fica na plaquinha da sua mesa</div>
+ </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let stream=null,scanTimer=null,hq=null,scanned=false,deferredPrompt=null;
+
+function pageBase(){return location.href.substring(0,location.href.lastIndexOf('/')+1)}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
+function loadScript(src){return new Promise(res=>{const s=document.createElement('script');s.src=src;s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s)})}
+
+/* ===== CHIP ÚLTIMA LOJA ===== */
+(function(){
+ try{
+  const l=JSON.parse(localStorage.getItem('anote_ultima_loja')||'null');
+  if(l&&l.name){const c=$('last_chip');c.textContent='🏪 '+l.name;c.classList.remove('hidden')}
+ }catch(e){}
+})();
+
+/* ===== CARD DELIVERY ===== */
+function goDelivery(){
+ let last=null;
+ try{last=JSON.parse(localStorage.getItem('anote_ultima_loja')||'null')}catch(e){}
+ location.href=pageBase()+'delivery.html'+(last&&last.id?'?loja='+last.id:'');
+}
+
+/* ===== CARD MESA → LEITOR QR ===== */
+async function openScanner(){
+ scanned=false;
+ $('scan_overlay').classList.remove('hidden');
+ $('scan_status').textContent='Abrindo câmera...';
+ if(window.BarcodeDetector&&navigator.mediaDevices){
+  await startNative();
+ }else{
+  const ok=await loadScript('https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js');
+  if(ok&&window.Html5Qrcode)startLib();
+  else $('scan_status').textContent='Leitor indisponível neste navegador. Feche e use "Digitar código" ou o link da loja.';
+ }
+}
+async function startNative(){
+ try{
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+  const v=$('scan_video');
+  v.srcObject=stream;
+  v.classList.remove('hidden');
+  await v.play();
+  const det=new BarcodeDetector({formats:['qr_code']});
+  scanTimer=setInterval(async()=>{
+   try{
+    const codes=await det.detect(v);
+    if(codes&&codes.length)handleScan(codes[0].rawValue);
+   }catch(e){}
+  },400);
+  $('scan_status').textContent='';
+ }catch(e){
+  $('scan_status').textContent='Permita o acesso à câmera nas configurações do navegador.';
+ }
+}
+function startLib(){
+ $('scan_lib_wrap').classList.remove('hidden');
+ try{
+  hq=new Html5Qrcode('scan_lib_wrap');
+  hq.start({facingMode:'environment'},{fps:10,qrbox:{width:220,height:220}},
+   text=>handleScan(text),
+   ()=>{}
+  ).catch(()=>{$('scan_status').textContent='Permita o acesso à câmera.'});
+ }catch(e){$('scan_status').textContent='Erro ao abrir a câmera.'}
+}
+function handleScan(text){
+ if(scanned)return;
+ const t=String(text);
+ const m=t.match(/loja=([a-f0-9-]{36})/i);
+ const mm=t.match(/mesa=([a-f0-9-]{36})/i);
+ if(!m){$('scan_status').textContent='Este não é um QR Code de mesa. Tente novamente.';return}
+ scanned=true;
+ stopCamera();
+ location.href=pageBase()+'cliente.html?loja='+m[1]+(mm?'&mesa='+mm[1]:'');
+}
+function stopCamera(){
+ if(scanTimer){clearInterval(scanTimer);scanTimer=null}
+ if(stream){stream.getTracks().forEach(tr=>tr.stop());stream=null}
+ if(hq){try{hq.stop()}catch(e){} hq=null}
+}
+function closeScanner(){stopCamera();$('scan_overlay').classList.add('hidden');$('scan_video').classList.add('hidden');$('scan_lib_wrap').classList.add('hidden');$('scan_lib_wrap').innerHTML=''}
+
+/* ===== CÓDIGO MANUAL ===== */
+function toggleManual(){$('manual_box').classList.toggle('hidden')}
+async function enterCode(){
+ const v=$('manual_input').value.trim();
+ const msg=$('manual_msg');msg.innerHTML='';
+ if(!v){msg.innerHTML='<div class="msg err">Digite o código ou cole o link.</div>';return}
+ let id=null;
+ const match=v.match(/loja=([a-f0-9-]{36})/i);
+ if(match)id=match[1];
+ else if(/^[a-f0-9-]{36}$/i.test(v))id=v;
+ if(id){location.href=pageBase()+'delivery.html?loja='+id;return}
+ try{await waitForSupabase()}catch(e){msg.innerHTML='<div class="msg err">Sem conexão.</div>';return}
+ const{data}=await supabase.rpc('cliente_buscar_loja',{p_codigo:v});
+ if(data&&data.ok)location.href=pageBase()+'delivery.html?loja='+data.store_id;
+ else msg.innerHTML='<div class="msg err">'+escapeHtml(data?.error||'Loja não encontrada')+'</div>';
+}
+
+/* ===== INSTALAR (start_url = esta página) ===== */
+(function(){
+ try{
+  const manifest={name:'Anote — Cardápio e Delivery',short_name:'Anote',start_url:pageBase()+'clienteselect.html',display:'standalone',background_color:'#f5f5f4',theme_color:'#ea580c',icons:[{src:pageBase()+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(blob);
+  document.head.appendChild(l);
+ }catch(e){}
+})();
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
+window.addEventListener('appinstalled',()=>{const b=$('btn_install');if(b)b.classList.add('hidden')});
+async function installApp(){
+ if(deferredPrompt){
+  deferredPrompt.prompt();
+  const c=await deferredPrompt.userChoice;
+  if(c.outcome==='accepted'){deferredPrompt=null;$('btn_install').classList.add('hidden')}
+ }else{
+  const ua=navigator.userAgent;
+  const ios=/iphone|ipad|ipod/i.test(ua);
+  alert(ios?'No iPhone: toque em Compartilhar e depois em "Adicionar à Tela de Início" 📲':'No Android: toque no menu ⋮ e depois em "Adicionar à tela inicial" 📲');
+ }
+}
+
+window.openScanner=openScanner;window.closeScanner=closeScanner;window.goDelivery=goDelivery;window.toggleManual=toggleManual;window.enterCode=enterCode;window.installApp=installApp;
+</script>
+</body>
+</html>
