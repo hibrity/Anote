@@ -4,6 +4,11 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Cardápio</title>
+<meta name="theme-color" content="#ea580c"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Anote"/>
 <script type="module">
 import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
 window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
@@ -19,6 +24,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .header h1{font-size:20px;font-weight:700}
 .header .sub{font-size:13px;opacity:.9;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .user-chip{background:rgba(255,255,255,.2);padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.install-chip{background:#fff;color:var(--primary);border:none;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;margin-top:10px;box-shadow:0 2px 8px rgba(0,0,0,.2);display:inline-flex;align-items:center;gap:6px}
+.install-chip:active{transform:scale(.96)}
 .cats{display:flex;gap:8px;overflow-x:auto;padding:14px 16px 4px;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
 .cat-chip{flex-shrink:0;padding:8px 16px;border-radius:999px;background:var(--card);border:1px solid var(--border);font-size:14px;font-weight:600;color:var(--muted);cursor:pointer}
@@ -81,12 +88,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 @keyframes spin{to{transform:rotate(360deg)}}
 .error-modal{text-align:center;padding:10px}
 .error-modal .ico{font-size:52px;margin-bottom:12px}
+.guide-step{display:flex;gap:12px;align-items:flex-start;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;font-size:14px;line-height:1.5}
+.g-num{flex:none;width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
 </style>
 </head>
 <body>
 <div class="app">
 <div class="header"><h1 id="store_name">Carregando...</h1>
-<div class="sub"><span id="store_address"></span><span id="table_chip" class="user-chip hidden"></span><span id="user_chip" class="user-chip hidden"></span></div></div>
+<div class="sub"><span id="store_address"></span><span id="table_chip" class="user-chip hidden"></span><span id="user_chip" class="user-chip hidden"></span></div>
+<button class="install-chip" id="btn_install" onclick="installApp()">📲 Salvar na tela inicial</button></div>
 <div id="table_actions" style="display:none;gap:8px;padding:10px 16px 0">
 <button onclick="chamarGarcom()" style="flex:1;background:var(--primary-light);color:var(--primary);border:2px solid var(--primary);border-radius:12px;padding:10px;font-weight:700;cursor:pointer">🔔 Chamar garçom</button>
 <button onclick="fecharConta()" style="flex:1;background:var(--primary-light);color:var(--primary);border:2px solid var(--primary);border-radius:12px;padding:10px;font-weight:700;cursor:pointer">💳 Fechar conta</button></div>
@@ -111,9 +121,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 <div class="overlay hidden" id="modal_error" onclick="if(event.target===this)closeError()"><div class="sheet error-modal"><div class="ico">⚠️</div><h2>Ops!</h2><p id="error_text" style="color:var(--muted);font-size:14px;margin-top:8px"></p><button class="btn btn-primary" onclick="closeError()">Entendi</button></div></div>
 
+<!-- GUIA DE INSTALAÇÃO -->
+<div class="overlay hidden" id="modal_install" onclick="if(event.target===this)closeInstall()"><div class="sheet">
+<h2>📲 Instalar na tela inicial</h2>
+<div id="guide_android" class="hidden">
+ <div class="guide-step"><span class="g-num">1</span><span>Toque no menu <b>⋮</b> no canto do navegador</span></div>
+ <div class="guide-step"><span class="g-num">2</span><span>Toque em <b>"Adicionar à tela inicial"</b> ou <b>"Instalar app"</b></span></div>
+ <div class="guide-step"><span class="g-num">3</span><span>Confirme tocando em <b>Adicionar</b></span></div>
+</div>
+<div id="guide_ios" class="hidden">
+ <div class="guide-step"><span class="g-num">1</span><span>Toque no botão <b>Compartilhar</b> (quadrado com seta pra cima)</span></div>
+ <div class="guide-step"><span class="g-num">2</span><span>Role a lista e toque em <b>"Adicionar à Tela de Início"</b></span></div>
+ <div class="guide-step"><span class="g-num">3</span><span>Toque em <b>Adicionar</b> no canto superior</span></div>
+</div>
+<p style="font-size:12px;color:var(--muted);margin-top:12px">Depois disso o cardápio abre como um app, direto do ícone na sua tela! 🚀</p>
+<button class="btn btn-primary" onclick="closeInstall()">Entendi</button>
+</div></div>
+
 <script>
 const $=id=>document.getElementById(id);
-let storeId=null,tableId=null,storeInfo=null,categories=[],products=[],cart=[],currentCustomer=null,activeOrderId=null,trackTimer=null,alertTimer=null,selectedPayment=null;
+let storeId=null,tableId=null,storeInfo=null,categories=[],products=[],cart=[],currentCustomer=null,activeOrderId=null,trackTimer=null,alertTimer=null,selectedPayment=null,deferredPrompt=null;
 const PAYMENTS=[{id:'pix',label:'Pix',ico:'💠'},{id:'credit',label:'Crédito',ico:'💳'},{id:'debit',label:'Débito',ico:'💳'},{id:'cash',label:'Dinheiro',ico:'💵'}];
 const STATUS_LABEL={new:{txt:'Pedido recebido',desc:'A loja já vai confirmar',ico:'📥'},preparing:{txt:'Em preparação',desc:'Seu pedido está sendo feito',ico:'👨‍'},ready:{txt:'Pronto',desc:'Pode retirar / a caminho',ico:'🔔'},delivered:{txt:'Entregue',desc:'Bom apetite!',ico:'✅'},cancelled:{txt:'Cancelado',desc:'Fale com a loja',ico:'❌'}};
 
@@ -121,9 +148,46 @@ function money(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',c
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function waitForSupabase(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 function maskPhone(el){let v=el.value.replace(/\D/g,'').slice(0,11);if(v.length>6)v=`(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;else if(v.length>2)v=`(${v.slice(0,2)}) ${v.slice(2)}`;el.value=v}
-
 function showError(msg){$('error_text').textContent=msg;$('modal_error').classList.remove('hidden')}
 function closeError(){$('modal_error').classList.add('hidden')}
+
+/* ========== 📲 INSTALAR NA TELA INICIAL ========== */
+function setupManifest(){
+ try{
+  const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
+  const manifest={
+   name:'Anote — Cardápio',
+   short_name:'Anote',
+   start_url:location.href,
+   display:'standalone',
+   background_color:'#f5f5f4',
+   theme_color:'#ea580c',
+   icons:[{src:base+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]
+  };
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  const link=document.createElement('link');
+  link.rel='manifest';
+  link.href=URL.createObjectURL(blob);
+  document.head.appendChild(link);
+ }catch(e){}
+}
+setupManifest();
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});
+window.addEventListener('appinstalled',()=>{const b=$('btn_install');if(b)b.classList.add('hidden')});
+async function installApp(){
+ if(deferredPrompt){
+  deferredPrompt.prompt();
+  const choice=await deferredPrompt.userChoice;
+  if(choice.outcome==='accepted'){deferredPrompt=null;$('btn_install').classList.add('hidden')}
+ }else{
+  const ua=navigator.userAgent;
+  const isIOS=/iphone|ipad|ipod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  $('guide_ios').classList.toggle('hidden',!isIOS);
+  $('guide_android').classList.toggle('hidden',isIOS);
+  $('modal_install').classList.remove('hidden');
+ }
+}
+function closeInstall(){$('modal_install').classList.add('hidden')}
 
 /* ========== CARRINHO PERSISTIDO ========== */
 function saveCart(){try{localStorage.setItem('anote_cart_'+storeId,JSON.stringify(cart))}catch(e){}}
@@ -306,7 +370,7 @@ function renderAlertBanner(a){
  }).join('');
 }
 init();
-window.openCart=openCart;window.closeCart=closeCart;window.addToCart=addToCart;window.changeQty=changeQty;window.checkout=checkout;window.handleIdentify=handleIdentify;window.closeIdentify=closeIdentify;window.selectPayment=selectPayment;window.confirmPayment=confirmPayment;window.closePayment=closePayment;window.goToTracking=goToTracking;window.closeConfirm=closeConfirm;window.showView=showView;window.filterCat=filterCat;window.maskPhone=maskPhone;window.chamarGarcom=chamarGarcom;window.fecharConta=fecharConta;window.confirmarAlerta=confirmarAlerta;window.closeError=closeError;
+window.openCart=openCart;window.closeCart=closeCart;window.addToCart=addToCart;window.changeQty=changeQty;window.checkout=checkout;window.handleIdentify=handleIdentify;window.closeIdentify=closeIdentify;window.selectPayment=selectPayment;window.confirmPayment=confirmPayment;window.closePayment=closePayment;window.goToTracking=goToTracking;window.closeConfirm=closeConfirm;window.showView=showView;window.filterCat=filterCat;window.maskPhone=maskPhone;window.chamarGarcom=chamarGarcom;window.fecharConta=fecharConta;window.confirmarAlerta=confirmarAlerta;window.closeError=closeError;window.installApp=installApp;window.closeInstall=closeInstall;
 </script>
 </body>
 </html>
