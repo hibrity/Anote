@@ -202,7 +202,7 @@ function renderCartItems(){
  $('cart_total').textContent=money(t);
 }
 
-/* ===== CHECKOUT: cadastrado → só endereço | novo → cadastro breve ===== */
+/* ===== CHECKOUT ===== */
 function checkout(){
  if(!cart.length)return;
  if(storeInfo&&storeInfo.paused){closeCart();alert('A loja está pausada no momento. ⏸️');return}
@@ -253,6 +253,7 @@ async function submitOrder(){
  const{data,error}=await supabase.rpc('cliente_criar_pedido',{p_store_id:storeId,p_customer_id:currentCustomer.id,p_table_id:null,p_items:items,p_notes:notes,p_payment_method:selectedPayment,p_order_type:'delivery',p_endereco:deliveryAddress});
  if(error||!data||!data.ok){alert((data&&data.error)||(error&&error.message)||'Erro ao criar pedido');return}
  activeOrderId=data.order_id;
+ try{localStorage.setItem('anote_pedido_ativo_'+storeId,activeOrderId)}catch(e){}
  cart=[];updateCartUI();
  $('confirm_num').textContent='#'+data.order_number;
  $('modal_confirm').classList.remove('hidden');
@@ -261,14 +262,17 @@ async function submitOrder(){
 function goToTracking(){$('modal_confirm').classList.add('hidden');showView('tracking')}
 function closeConfirm(){$('modal_confirm').classList.add('hidden')}
 
-/* ===== RASTREAMENTO (CORRIGIDO) ===== */
+/* ===== RASTREAMENTO (persistente) ===== */
 function startTracking(){if(trackTimer)clearInterval(trackTimer);pollStatus();trackTimer=setInterval(pollStatus,6000)}
 async function pollStatus(){
  if(!activeOrderId||!currentCustomer)return renderTrackingEmpty();
  const{data}=await supabase.rpc('cliente_pedido_status',{p_order_id:activeOrderId,p_customer_id:currentCustomer.id});
  if(!data||!data.ok)return renderTrackingEmpty();
  renderTracking(data);
- if(data.status==='delivered'||data.status==='cancelled'){clearInterval(trackTimer);trackTimer=null}
+ if(data.status==='delivered'||data.status==='cancelled'){
+  clearInterval(trackTimer);trackTimer=null;
+  setTimeout(()=>{try{localStorage.removeItem('anote_pedido_ativo_'+storeId)}catch(e){}activeOrderId=null},10000);
+ }
 }
 function renderTrackingEmpty(){$('track_container').innerHTML='<div class="empty"><div class="big">📦</div>Nenhum pedido em andamento.</div>'}
 function renderTracking(d){
@@ -293,13 +297,12 @@ function showView(v){
  if(v==='tracking')pollStatus();
 }
 
-/* ===== BOOT: LOJA FIXA + DONO, SEM TELA DE CÓDIGO ===== */
+/* ===== BOOT ===== */
 async function init(){
  const p=new URLSearchParams(location.search);
  storeId=p.get('loja');
  veioDoLink=!!storeId;
 
- // Sem link? Usa a loja FIXA deste aparelho
  if(!storeId){
   try{
    const f=JSON.parse(localStorage.getItem('anote_loja_fixa')||'null');
@@ -308,7 +311,6 @@ async function init(){
   }catch(e){}
  }
 
- // Ainda nada? Se for o DONO logado, usa a loja dele
  if(!storeId){
   try{
    await waitForSupabase();
@@ -327,8 +329,10 @@ async function init(){
  }
  try{await waitForSupabase()}catch(e){$('menu_container').innerHTML='<div class="empty">Sem conexão.</div>';return}
  try{const r=localStorage.getItem('anote_cliente_'+storeId);if(r){currentCustomer=JSON.parse(r);deliveryAddress=currentCustomer.address||'';renderUserChip()}}catch(e){}
+ try{const a=localStorage.getItem('anote_pedido_ativo_'+storeId);if(a)activeOrderId=a}catch(e){}
  await loadMenu();
  updateCartUI();
+ if(activeOrderId)startTracking();
 }
 init();
 window.filterCat=filterCat;window.addToCart=addToCart;window.changeQty=changeQty;window.openCart=openCart;window.closeCart=closeCart;window.checkout=checkout;window.closeCheckout=closeCheckout;window.confirmCheckout=confirmCheckout;window.selectPayment=selectPayment;window.confirmPayment=confirmPayment;window.closePayment=closePayment;window.goToTracking=goToTracking;window.closeConfirm=closeConfirm;window.showView=showView;window.maskPhone=maskPhone;window.installApp=installApp;
