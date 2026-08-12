@@ -35,12 +35,6 @@ input,select{width:100%;padding:10px 12px;background:var(--card2);border:1px sol
 .staff-info b{font-size:15px;display:block;margin-bottom:2px}
 .staff-pin{font-family:monospace;font-size:20px;font-weight:800;background:var(--card);padding:4px 12px;border-radius:8px;border:1px dashed var(--border);letter-spacing:3px}
 .staff-actions{display:flex;gap:6px;flex-wrap:wrap}
-.qr-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
-.qr-item{display:inline-block;text-align:center;margin:10px;padding:14px;background:#fff;border-radius:12px;vertical-align:top}
-.qr-label{margin-top:8px;font-weight:700;color:#1c1917}
-.link-box{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px;margin-top:8px;display:flex;gap:6px;align-items:center}
-.link-box input{margin:0;font-size:11px;flex:1}
-.link-box .btn{padding:6px 10px;flex:none}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:.3s;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(4px)}
 .ficha-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
@@ -58,16 +52,24 @@ input,select{width:100%;padding:10px 12px;background:var(--card2);border:1px sol
 <button class="btn btn-blue" onclick="location.href='pedidos.html'">🧾 Pedidos</button>
 </div>
 <div class="grid2"><div>
-<div class="card"><h2>🔑 Código da loja</h2><div class="item" style="text-align:center;font-size:28px;font-weight:800;letter-spacing:4px" id="team_code">—</div><button class="btn btn-amber btn-block" onclick="regenCode()">🔄 Gerar novo código</button><p class="muted" style="margin-top:10px">⚠️ Ao regenerar, os QR Codes antigos param de funcionar.</p></div>
-<div class="card"><h2>📱 QR Codes de login</h2><p class="muted" style="margin-bottom:12px">Cada funcionário escaneia o QR do cargo e digita o PIN.</p><div class="qr-grid">
-<div class="qr-item"><div id="qr_waiter"></div><div class="qr-label">🤵 Garçom</div><div class="link-box"><input id="link_waiter" readonly/><button class="btn btn-ghost btn-sm" onclick="copyLink('link_waiter')">📋</button></div></div>
-<div class="qr-item"><div id="qr_kitchen"></div><div class="qr-label">👨‍ Cozinha</div><div class="link-box"><input id="link_kitchen" readonly/><button class="btn btn-ghost btn-sm" onclick="copyLink('link_kitchen')">📋</button></div></div>
-<div class="qr-item"><div id="qr_cashier"></div><div class="qr-label">💰 Caixa</div><div class="link-box"><input id="link_cashier" readonly/><button class="btn btn-ghost btn-sm" onclick="copyLink('link_cashier')">📋</button></div></div>
-</div></div>
+
+<!-- CÓDIGO DA LOJA -->
+<div class="card"><h2>🔑 Código da loja</h2><div class="item" style="text-align:center;font-size:28px;font-weight:800;letter-spacing:4px" id="team_code">—</div><button class="btn btn-amber btn-block" onclick="regenCode()">🔄 Gerar novo código</button><p class="muted" style="margin-top:10px">⚠️ Ao regenerar, os acessos antigos param de funcionar.</p></div>
+
+<!-- COMO FUNCIONA -->
+<div class="card"><h2>ℹ️ Como a equipe entra</h2>
+<div class="item">1️⃣ No painel, toque em <b>🤵 Garçom</b>, <b>👨‍🍳 Cozinha</b> ou <b>💰 Caixa</b></div>
+<div class="item">2️⃣ Ou abra direto: <b>garcom.html</b>, <b>cozinha.html</b> ou <b>caixa.html</b>?loja=SEU_CÓDIGO</div>
+<div class="item">3️⃣ O funcionário digita o <b>PIN</b> que você definiu aqui (botão 🎫 mostra a ficha)</div>
+</div>
+
 </div><div>
+
+<!-- FUNCIONÁRIOS -->
 <div class="card"><h2>👥 Funcionários</h2>
-<div style="background:var(--card2);padding:14px;border-radius:12px;margin-bottom:14px;border:1px solid var(--border)"><h3 style="margin-bottom:10px">➕ Novo funcionário</h3><input id="stf_name" placeholder="Nome"/><select id="stf_cargo"><option value="waiter">🤵 Garçom</option><option value="kitchen">👨‍🍳 Cozinha</option><option value="cashier">💰 Caixa</option><option value="manager">👔 Gerente</option></select><button class="btn btn-green btn-block" onclick="createStaff()">Criar funcionário</button><div id="stf_res"></div></div>
+<div style="background:var(--card2);padding:14px;border-radius:12px;margin-bottom:14px;border:1px solid var(--border)"><h3 style="margin-bottom:10px">➕ Novo funcionário</h3><input id="stf_name" placeholder="Nome"/><select id="stf_cargo"><option value="waiter">🤵 Garçom</option><option value="kitchen">👨‍ Cozinha</option><option value="cashier">💰 Caixa</option><option value="manager">👔 Gerente</option></select><button class="btn btn-green btn-block" onclick="createStaff()">Criar funcionário</button><div id="stf_res"></div></div>
 <div id="list_staff"></div></div>
+
 </div></div>
 </div>
 
@@ -81,30 +83,43 @@ input,select{width:100%;padding:10px 12px;background:var(--card2);border:1px sol
  </div>
 </div>
 
-<!-- ÁREA DE IMPRESSÃO (sem popup) -->
 <div id="print_area" class="hidden"></div>
-
 <div id="toast" class="toast"></div>
+
 <script>
 const $=id=>document.getElementById(id);
 let S={store:null,code:null},staffList=[],pinsVisible={};
 const CARGO={waiter:'🤵 Garçom',kitchen:'👨‍🍳 Cozinha',cashier:'💰 Caixa',manager:'👔 Gerente'};
 const PAGE={waiter:'garcom.html',kitchen:'cozinha.html',cashier:'caixa.html',manager:'index.html'};
+
 function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t==='err'?'#ef4444':'#22c55e';e.style.color=t==='err'?'#fff':'#052e16';e.classList.add('show');clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500)}
 function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}catch(e){return{data:null,error:e}}}
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function base(){return location.href.substring(0,location.href.lastIndexOf('/')+1)}
 
-function renderQR(container,link){
- container.innerHTML='';
- const canvas=document.createElement('canvas');
- container.appendChild(canvas);
- try{
-  QRCode.toCanvas(canvas,link,{width:120,margin:2,color:{dark:'#000000',light:'#ffffff'}},function(err){
-   if(err){console.warn(err);container.innerHTML='<div style="color:red;font-size:11px">Erro QR</div>'}
-  });
- }catch(e){console.warn(e)}
+/* ===== QR COM FALLBACK (usado só na ficha) ===== */
+function qrImgUrl(link,size){return 'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&data='+encodeURIComponent(link)}
+function qrImgUrl2(link,size){return 'https://chart.googleapis.com/chart?cht=qr&chs='+size+'x'+size+'&chl='+encodeURIComponent(link)}
+function useImgFallback(el,link,size){
+ el.innerHTML='';
+ const img=document.createElement('img');
+ img.width=size;img.height=size;
+ img.alt='QR Code';
+ img.onerror=function(){
+  if(this.src.indexOf('qrserver')!==-1){this.src=qrImgUrl2(link,size)}
+  else{this.outerHTML='<div style="font-size:10px;color:#c00;padding:8px">QR indisponível</div>'}
+ };
+ img.src=qrImgUrl(link,size);
+ el.appendChild(img);
+}
+function drawQR(el,link,size){
+ size=size||140;el.innerHTML='';
+ if(window.QRCode&&QRCode.toCanvas){
+  const cv=document.createElement('canvas');el.appendChild(cv);
+  try{QRCode.toCanvas(cv,link,{width:size,margin:2},function(err){if(err)useImgFallback(el,link,size)})}
+  catch(e){useImgFallback(el,link,size)}
+ }else useImgFallback(el,link,size);
 }
 
 async function boot(){
@@ -118,13 +133,15 @@ async function boot(){
  S.code=S.store.staff_code;
  $('app_store_name').textContent=S.store.name+' — Equipe';
  $('team_code').textContent=S.code;
- renderLoginQRs();loadStaff();
+ loadStaff();
 }
+
 async function loadStaff(){
  const{data}=await rpc('dono_listar_staff',{p_store_id:S.store.id});
  staffList=Array.isArray(data)?data:[];
  renderStaff();
 }
+
 function renderStaff(){
  $('list_staff').innerHTML=staffList.length?staffList.map(s=>{
   const visible=pinsVisible[s.id];
@@ -133,7 +150,7 @@ function renderStaff(){
    <div class="staff-info"><b>${escapeHtml(s.nome)}</b><span class="badge b-${s.cargo}">${CARGO[s.cargo]||s.cargo}</span>${s.last_login?`<div class="muted" style="font-size:11px;margin-top:4px">Último acesso: ${new Date(s.last_login).toLocaleString('pt-BR')}</div>`:''}</div>
    <div class="staff-pin">${pinDisplay}</div>
    <div class="staff-actions">
-    <button class="btn btn-ghost btn-sm" onclick="togglePin('${s.id}')">${visible?'🙈':'👁️'}</button>
+    <button class="btn btn-ghost btn-sm" onclick="togglePin('${s.id}')">${visible?'🙈':'️'}</button>
     <button class="btn btn-ghost btn-sm" onclick="copyStaffLink('${s.cargo}')">🔗</button>
     <button class="btn btn-amber btn-sm" onclick="regenPin('${s.id}')">🔄</button>
     <button class="btn btn-purple btn-sm" onclick="editPin('${s.id}','${escapeHtml(s.pin)}')">✏️</button>
@@ -143,6 +160,7 @@ function renderStaff(){
  }).join(''):'<div class="muted" style="text-align:center;padding:20px">Nenhum funcionário. Crie o primeiro! 👆</div>';
 }
 function togglePin(id){pinsVisible[id]=!pinsVisible[id];renderStaff()}
+
 async function createStaff(){
  const nome=$('stf_name').value.trim(),res=$('stf_res');
  if(!nome){res.innerHTML='<div class="msg err">Digite o nome.</div>';return}
@@ -176,39 +194,25 @@ async function deleteStaff(id,nome){
  loadStaff();
 }
 async function regenCode(){
- if(!confirm('Regenerar código? QR Codes antigos param de funcionar.'))return;
+ if(!confirm('Regenerar código? Os acessos antigos param de funcionar.'))return;
  const{data}=await rpc('dono_regenerar_codigo',{p_store_id:S.store.id});
- if(data?.ok){S.code=data.staff_code;$('team_code').textContent=S.code;toast('Novo código gerado!');renderLoginQRs()}
+ if(data?.ok){S.code=data.staff_code;$('team_code').textContent=S.code;toast('Novo código gerado!')}
  else toast(data?.error||'Erro','err');
 }
 function copyStaffLink(c){navigator.clipboard.writeText(base()+PAGE[c]+'?loja='+encodeURIComponent(S.code)).then(()=>toast('Link copiado!')).catch(()=>toast('Erro ao copiar','err'))}
-function copyLink(id){const el=$(id);el.select();navigator.clipboard.writeText(el.value).then(()=>toast('Link copiado!')).catch(()=>toast('Erro ao copiar','err'))}
-function renderLoginQRs(){
- if(typeof QRCode==='undefined'){toast('Biblioteca QR não carregou','err');return}
- requestAnimationFrame(()=>{requestAnimationFrame(()=>{
-  ['waiter','kitchen','cashier'].forEach(c=>{
-   const el=$('qr_'+c),lk=$('link_'+c);
-   if(!el)return;
-   const u=base()+PAGE[c]+'?loja='+encodeURIComponent(S.code||'');
-   renderQR(el,u);
-   if(lk)lk.value=u;
-  });
- })});
-}
+
 function showFicha(id){
  const s=staffList.find(x=>x.id===id);if(!s)return;
  const u=base()+PAGE[s.cargo]+'?loja='+encodeURIComponent(S.code||'');
- $('ficha_content').innerHTML=`<div style="font-size:14px;color:#666;margin-bottom:8px">🍽️ ${escapeHtml(S.store.name)}</div><div style="font-size:22px;font-weight:800;margin-bottom:4px">${escapeHtml(s.nome)}</div><div style="font-size:14px;color:#666;margin-bottom:16px">${CARGO[s.cargo]||s.cargo}</div><div style="background:#f1f5f9;padding:16px;border-radius:12px;margin-bottom:16px"><div style="font-size:12px;color:#666;margin-bottom:6px">PIN DE ACESSO</div><div style="font-size:36px;font-weight:800;letter-spacing:8px;font-family:monospace">${escapeHtml(s.pin)}</div></div><div id="ficha_qr" style="display:inline-block"></div><div style="font-size:12px;color:#666;margin-top:12px">1️⃣ Escaneie o QR Code<br>2️⃣ Digite seu PIN<br>3️⃣ Comece a trabalhar! 🚀</div>`;
+ $('ficha_content').innerHTML=`<div style="font-size:14px;color:#666;margin-bottom:8px">🍽️ ${escapeHtml(S.store.name)}</div><div style="font-size:22px;font-weight:800;margin-bottom:4px">${escapeHtml(s.nome)}</div><div style="font-size:14px;color:#666;margin-bottom:16px">${CARGO[s.cargo]||s.cargo}</div><div style="background:#f1f5f9;padding:16px;border-radius:12px;margin-bottom:16px"><div style="font-size:12px;color:#666;margin-bottom:6px">PIN DE ACESSO</div><div style="font-size:36px;font-weight:800;letter-spacing:8px;font-family:monospace">${escapeHtml(s.pin)}</div></div><div id="ficha_qr" style="display:inline-block"></div><div style="font-size:12px;color:#666;margin-top:12px">1️⃣ Acesse pelo link ou QR Code<br>2️⃣ Digite seu PIN<br>3️⃣ Comece a trabalhar! 🚀</div>`;
  $('ficha_overlay').classList.remove('hidden');
- requestAnimationFrame(()=>{requestAnimationFrame(()=>{
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
   const q=$('ficha_qr');
-  if(q){q.innerHTML='';const cv=document.createElement('canvas');q.appendChild(cv);
-   try{QRCode.toCanvas(cv,u,{width:140,margin:2},function(err){if(err)console.warn(err)})}catch(e){console.warn(e)}}
- })});
+  if(q)drawQR(q,u,140);
+ }));
 }
 function closeFicha(){$('ficha_overlay').classList.add('hidden')}
 function printFicha(){
- // ✅ Impressão sem popup (evita bloqueio)
  const content=$('ficha_content').innerHTML;
  const pa=$('print_area');
  pa.innerHTML=`<div style="display:flex;justify-content:center;align-items:center;min-height:100vh"><div style="border:3px dashed #ccc;padding:40px;border-radius:20px;text-align:center;max-width:350px">${content}</div></div>`;
@@ -216,8 +220,9 @@ function printFicha(){
  window.print();
  setTimeout(()=>{pa.classList.add('hidden');pa.innerHTML=''},500);
 }
+
 boot();
-window.regenCode=regenCode;window.createStaff=createStaff;window.regenPin=regenPin;window.editPin=editPin;window.deleteStaff=deleteStaff;window.copyStaffLink=copyStaffLink;window.copyLink=copyLink;window.showFicha=showFicha;window.closeFicha=closeFicha;window.printFicha=printFicha;window.togglePin=togglePin;
+window.regenCode=regenCode;window.createStaff=createStaff;window.regenPin=regenPin;window.editPin=editPin;window.deleteStaff=deleteStaff;window.copyStaffLink=copyStaffLink;window.showFicha=showFicha;window.closeFicha=closeFicha;window.printFicha=printFicha;window.togglePin=togglePin;
 </script>
 </body>
 </html>
