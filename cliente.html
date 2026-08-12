@@ -121,7 +121,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 <div class="overlay hidden" id="modal_error" onclick="if(event.target===this)closeError()"><div class="sheet error-modal"><div class="ico">⚠️</div><h2>Ops!</h2><p id="error_text" style="color:var(--muted);font-size:14px;margin-top:8px"></p><button class="btn btn-primary" onclick="closeError()">Entendi</button></div></div>
 
-<!-- GUIA DE INSTALAÇÃO -->
 <div class="overlay hidden" id="modal_install" onclick="if(event.target===this)closeInstall()"><div class="sheet">
 <h2>📲 Instalar na tela inicial</h2>
 <div id="guide_android" class="hidden">
@@ -151,23 +150,13 @@ function maskPhone(el){let v=el.value.replace(/\D/g,'').slice(0,11);if(v.length>
 function showError(msg){$('error_text').textContent=msg;$('modal_error').classList.remove('hidden')}
 function closeError(){$('modal_error').classList.add('hidden')}
 
-/* ========== 📲 INSTALAR NA TELA INICIAL ========== */
+/* ========== 📲 INSTALAR ========== */
 function setupManifest(){
  try{
   const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
-  const manifest={
-   name:'Anote — Cardápio',
-   short_name:'Anote',
-   start_url:location.href,
-   display:'standalone',
-   background_color:'#f5f5f4',
-   theme_color:'#ea580c',
-   icons:[{src:base+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]
-  };
+  const manifest={name:'Anote — Cardápio',short_name:'Anote',start_url:location.href,display:'standalone',background_color:'#f5f5f4',theme_color:'#ea580c',icons:[{src:base+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
   const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-  const link=document.createElement('link');
-  link.rel='manifest';
-  link.href=URL.createObjectURL(blob);
+  const link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
   document.head.appendChild(link);
  }catch(e){}
 }
@@ -218,7 +207,15 @@ async function loadMenu(){
  $('store_name').textContent=escapeHtml(storeInfo.name);
  $('store_address').textContent=escapeHtml(storeInfo.address||'');
  document.title=storeInfo.name;
- if(tableId){const c=$('table_chip');c.textContent='🪑 Mesa';c.classList.remove('hidden')}
+ if(tableId){
+  const c=$('table_chip');
+  c.textContent='🪑 Mesa';
+  c.classList.remove('hidden');
+  try{
+   const tm=await supabase.rpc('cliente_dados_mesa',{p_table_id:tableId});
+   if(tm.data&&tm.data.ok)c.textContent='🪑 Mesa '+tm.data.table_number;
+  }catch(e){}
+ }
  renderCats();renderMenu('all');
 }
 function renderCats(){const c=$('cats');let h='<div class="cat-chip active" onclick="filterCat(this,\'all\')">Tudo</div>';categories.forEach(x=>h+=`<div class="cat-chip" onclick="filterCat(this,'${x.id}')">${escapeHtml(x.name)}</div>`);c.innerHTML=h}
