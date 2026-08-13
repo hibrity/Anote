@@ -4,9 +4,11 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Anote — Logística</title>
+<meta name="theme-color" content="#0f172a"/>
+<link rel="icon" type="image/svg+xml" href="icon.svg"/>
 <script type="module">
 import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
-window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInJ5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
+window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
 window.dispatchEvent(new Event("supabase-ready"));
 </script>
 <style>
@@ -47,7 +49,7 @@ select{padding:9px 12px;background:var(--card2);border:1px solid var(--border);b
 <body>
 <div class="wrap">
 <div class="topbar">
- <div><div class="title">🚚 Logística — <span id="loja_nome">...</span></div><div class="muted">Rotas otimizadas de entrega</div></div>
+ <div><div class="title">🚚 Logística — <span id="loja_nome">...</span></div><div class="muted">Rotas otimizadas + despacho automático</div></div>
  <div class="row">
   <button class="btn btn-ghost btn-sm" onclick="carregarTudo()">🔄</button>
   <button class="btn btn-ghost btn-sm" onclick="location.href='index.html'">← Painel</button>
@@ -81,9 +83,12 @@ select{padding:9px 12px;background:var(--card2);border:1px solid var(--border);b
   <button class="btn btn-blue btn-sm" onclick="salvarConfig()">Salvar config</button>
  </div>
  <div class="row" style="margin-top:12px">
+  <button class="btn btn-blue" onclick="syncLoja()">🏪 Coordenada da LOJA</button>
   <button class="btn btn-amber" onclick="sincronizarCoords()">📍 Sincronizar coordenadas</button>
-  <button class="btn btn-green" onclick="gerarRotas()">🚚 Gerar rotas automáticas</button>
+  <button class="btn btn-green" onclick="gerarRotas()">🚚 Gerar rotas</button>
+  <button class="btn btn-purple" onclick="atribuirAuto()">🤖 Atribuir automático</button>
  </div>
+ <div class="muted" style="margin-top:8px">🤖 Modo 100% automático ativo: o sistema gera rotas, atribui entregadores livres e libera quem está a ~1 min da loja.</div>
  <div id="log_msg"></div>
 </div>
 
@@ -93,17 +98,20 @@ select{padding:9px 12px;background:var(--card2);border:1px solid var(--border);b
 </div>
 </div>
 
+<!-- 📲 APP INSTALÁVEL -->
+<button id="pwa_btn" onclick="pwaInstall()" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:#22c55e;color:#052e16;border:none;border-radius:999px;padding:12px 18px;font-weight:800;font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.35);cursor:pointer">📲 Instalar app</button>
+
 <script>
 const $=id=>document.getElementById(id);
 const MAPBOX_TOKEN="pk.eyJ1IjoiZGVzZW5nbyIsImEiOiJjbW0ydmhqNnEwYjA2MnFxYnd2bjlodzh3In0.XFElYEdEwfR1MlFp9T9E6w";
-let storeId=null, entregas=[], rotas=[], entregadores=[], cfg={demand_mode:'media',delivery_radius_km:1.2};
+let storeId=null,storeAddr='',entregas=[],rotas=[],entregadores=[],cfg={demand_mode:'media',delivery_radius_km:1.2};
 
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);return{data,error}}catch(e){return{data:null,error:e}}}
 function log(m,t='ok'){$('log_msg').innerHTML=`<div class="msg ${t}">${m}</div>`}
 
-/* ===== GEOMETRIA (do RouterGo) ===== */
+/* ===== GEOMETRIA (RouterGo) ===== */
 function haversine(a,b){
  const dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;
  const la=a.lat*Math.PI/180,lb=b.lat*Math.PI/180;
@@ -134,8 +142,6 @@ function clusterStops(items,opts){
  }
  return clusters;
 }
-
-/* ===== GEOCODING (Mapbox) ===== */
 async function geocode(endereco){
  const url=`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(endereco)}.json?limit=1&country=br&language=pt&access_token=${MAPBOX_TOKEN}`;
  const j=await(await fetch(url)).json();
@@ -172,15 +178,20 @@ function render(){
  renderRotas();
 }
 
-/* ===== CONFIG ===== */
+/* ===== AÇÕES ===== */
 async function salvarConfig(){
  cfg.demand_mode=$('cfg_mode').value;
  cfg.delivery_radius_km=Number($('cfg_raio').value);
  await rpc('logistica_set_config',{p_store_id:storeId,p_mode:cfg.demand_mode,p_raio:cfg.delivery_radius_km});
  log('✅ Config salva!');render();
 }
-
-/* ===== SINCRONIZAR COORDENADAS ===== */
+async function syncLoja(){
+ if(!storeAddr){log('Endereço da loja não carregado.','err');return}
+ const g=await geocode(storeAddr);
+ if(!g){log('Não consegui geocodificar o endereço da loja.','err');return}
+ await rpc('logistica_set_store_coords',{p_store_id:storeId,p_lat:g.lat,p_lng:g.lng});
+ log('✅ Coordenada da loja salva! O modo automático já funciona.');
+}
 async function sincronizarCoords(){
  const sem=entregas.filter(e=>e.lat==null||e.lng==null);
  if(!sem.length){log('Todas as entregas já têm coordenada. ✅');return}
@@ -195,8 +206,6 @@ async function sincronizarCoords(){
  log(`✅ ${ok} entrega(s) com coordenada salva!`);
  await carregarTudo();
 }
-
-/* ===== GERAR ROTAS ===== */
 async function gerarRotas(){
  const livres=entregas.filter(e=>e.lat!=null&&e.lng!=null);
  if(livres.length<2){log('Precisa de pelo menos 2 entregas COM coordenada. Use "Sincronizar coordenadas" antes.','err');return}
@@ -211,40 +220,42 @@ async function gerarRotas(){
  const clusters=clusterStops(stops,{maxStops,radiusKm:cfg.delivery_radius_km});
  let seq=rotas.length+1;
  for(const c of clusters){
-  const nome=`Rota ${seq++}`;
   await rpc('logistica_criar_rota',{
-   p_store_id:storeId,p_nome:nome,p_paradas:c.stops,
+   p_store_id:storeId,p_nome:`Rota ${seq++}`,p_paradas:c.stops,
    p_dist:Number(c.totalKm.toFixed(2)),p_dur:Math.round(c.totalKm*3)
   });
  }
  log(`✅ ${clusters.length} rota(s) gerada(s)!`);
  await carregarTudo();
 }
+async function atribuirAuto(){
+ const{data}=await rpc('logistica_atribuir_automatico',{p_store_id:storeId});
+ if(data&&data.ok)log('🤖 '+data.atribuidas+' rota(s) atribuída(s) automaticamente!');
+ await carregarTudo();
+}
 
 /* ===== ROTAS ===== */
 function renderRotas(){
  const el=$('rotas_list');
- if(!rotas.length){el.innerHTML='<div class="empty">Nenhuma rota ainda. Gere rotas acima. 🚚</div>';return}
+ if(!rotas.length){el.innerHTML='<div class="empty">Nenhuma rota ainda. </div>';return}
  el.innerHTML=rotas.map(r=>{
   const paradas=Array.isArray(r.paradas)?r.paradas:[];
   const opts=entregadores.map(e=>`<option value="${e.id}" ${r.entregador_id===e.id?'selected':''}>${escapeHtml(e.nome)}</option>`).join('');
   return`<div class="rota ${r.status}">
    <div class="rota-head">
     <b>🚚 ${escapeHtml(r.nome)}</b>
-    <span class="muted">~${r.distancia_km??'?'} km · ${r.entregue_count||0}✅ ${r.falha_count||0}❌</span>
+    <span class="muted">~${r.distancia_km??'?'} km · ${r.entregue_count||0}✅ ${r.falha_count||0}❌ ${r.entregador_nome?'· 🛵 '+escapeHtml(r.entregador_nome):''}</span>
     <span class="badge b-${r.status}">${r.status==='nova'?'Nova':r.status==='em_rota'?'Em rota':'Concluída'}</span>
    </div>
-   <div>${paradas.map((p,i)=>`<div class="parada"><span class="st ${p.status||'pendente'}">${p.status==='entregue'?'✅':p.status==='falha'?'❌':'⏳'}</span> #${p.numero} — ${escapeHtml(p.cliente)} · ${escapeHtml(p.endereco||'')}${p.motivo?` <i>(${escapeHtml(p.motivo)})</i>`:''}</div>`).join('')||'<div class="muted">Sem paradas</div>'}</div>
-   ${r.status!=='concluida'?`<div class="row" style="margin-top:10px">
-     <select onchange="atribuir('${r.id}',this.value)"><option value="">Atribuir entregador...</option>${opts}</select>
-    </div>`:`<div class="muted" style="margin-top:8px"> ${escapeHtml(r.entregador_nome||'—')}</div>`}
+   <div>${paradas.map(p=>`<div class="parada"><span class="st ${p.status||'pendente'}">${p.status==='entregue'?'✅':p.status==='falha'?'❌':'⏳'}</span> #${p.numero} — ${escapeHtml(p.cliente)} · ${escapeHtml(p.endereco||'')}${p.motivo?` <i>(${escapeHtml(p.motivo)})</i>`:''}</div>`).join('')||'<div class="muted">Sem paradas</div>'}</div>
+   ${r.status==='nova'?`<div class="row" style="margin-top:10px"><select onchange="atribuir('${r.id}',this.value)"><option value="">Atribuir entregador...</option>${opts}</select></div>`:''}
   </div>`;
  }).join('');
 }
 async function atribuir(rotaId,entregadorId){
  if(!entregadorId)return;
  await rpc('logistica_atribuir_rota',{p_rota_id:rotaId,p_entregador_id:entregadorId});
- log('✅ Rota atribuída! O entregador verá no app.');
+ log('✅ Rota atribuída!');
  await carregarTudo();
 }
 
@@ -256,12 +267,32 @@ async function boot(){
  const{data}=await rpc('dono_entrar');
  if(!data?.ok||!data.store){location.href='index.html';return}
  storeId=data.store.id;
+ storeAddr=data.store.address||'';
  $('loja_nome').textContent=data.store.name;
  await carregarTudo();
+ setInterval(async()=>{await rpc('logistica_auto_dispatch',{p_store_id:storeId})},15000);
 }
 boot();
-window.carregarTudo=carregarTudo;window.salvarConfig=salvarConfig;
-window.sincronizarCoords=sincronizarCoords;window.gerarRotas=gerarRotas;window.atribuir=atribuir;
+window.carregarTudo=carregarTudo;window.salvarConfig=salvarConfig;window.syncLoja=syncLoja;
+window.sincronizarCoords=sincronizarCoords;window.gerarRotas=gerarRotas;window.atribuirAuto=atribuirAuto;window.atribuir=atribuir;
+
+/* ===== PWA ===== */
+var pwaDeferred=null;
+function pwaBase(){return location.href.split('#')[0].split('?')[0]}
+function pwaManifest(){
+ var m={name:document.title,short_name:'Anote Logística',start_url:pwaBase(),display:'standalone',background_color:'#0f172a',theme_color:'#0f172a',icons:[{src:new URL('icon.svg',location.href).href,sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
+ var b=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
+ var l=document.getElementById('pwa_manifest');
+ if(!l){l=document.createElement('link');l.id='pwa_manifest';l.rel='manifest';document.head.appendChild(l)}
+ l.href=URL.createObjectURL(b);
+}
+pwaManifest();
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();pwaDeferred=e});
+window.addEventListener('appinstalled',function(){var b=document.getElementById('pwa_btn');if(b)b.style.display='none'});
+function pwaInstall(){
+ if(pwaDeferred){pwaDeferred.prompt();pwaDeferred.userChoice.then(function(c){if(c.outcome==='accepted'){pwaDeferred=null;document.getElementById('pwa_btn').style.display='none'}})}
+ else{var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);alert(ios?'Para instalar: toque em Compartilhar e depois em "Adicionar à Tela de Início" 📲':'Para instalar: toque no menu ⋮ e depois em "Adicionar à tela inicial" 📲')}
+}
 </script>
 </body>
 </html>
