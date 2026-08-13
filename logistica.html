@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Anote — Logística</title>
+<script type="module">
+import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
+window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInJ5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
+window.dispatchEvent(new Event("supabase-ready"));
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--r:14px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+.hidden{display:none!important}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)}
+.title{font-size:20px;font-weight:800}
+.muted{color:var(--mut);font-size:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-green{background:var(--green);color:#052e16}.btn-blue{background:var(--blue);color:#fff}.btn-amber{background:var(--amber);color:#3b2503}.btn-purple{background:var(--purple);color:#fff}.btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
+.btn-sm{padding:7px 12px;font-size:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:14px}
+.stat{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.stat .v{font-size:26px;font-weight:800}
+.stat .l{font-size:12px;color:var(--mut);margin-top:4px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+select{padding:9px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:13px;outline:none}
+.rota{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.rota.em_rota{border-color:var(--blue)}
+.rota.concluida{border-color:var(--green);opacity:.75}
+.rota-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.b-nova{background:#dbeafe;color:#1d4ed8}.b-em_rota{background:#fef3c7;color:#b45309}.b-concluida{background:#dcfce7;color:#15803d}
+.parada{font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border)}
+.parada:last-child{border-bottom:none}
+.parada .st{font-weight:700}
+.st.entregue{color:var(--green)}.st.falha{color:var(--red)}.st.pendente{color:var(--mut)}
+.empty{text-align:center;color:var(--mut);padding:30px}
+.msg{padding:10px;border-radius:10px;font-size:13px;margin-top:10px}
+.msg.err{background:#451a1a;color:#fca5a5}.msg.ok{background:#14351f;color:#86efac}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="topbar">
+ <div><div class="title">🚚 Logística — <span id="loja_nome">...</span></div><div class="muted">Rotas otimizadas de entrega</div></div>
+ <div class="row">
+  <button class="btn btn-ghost btn-sm" onclick="carregarTudo()">🔄</button>
+  <button class="btn btn-ghost btn-sm" onclick="location.href='index.html'">← Painel</button>
+ </div>
+</div>
+
+<div class="stats">
+ <div class="stat"><div class="v" id="st_livres" style="color:var(--amber)">0</div><div class="l">Entregas sem rota</div></div>
+ <div class="stat"><div class="v" id="st_semcoord" style="color:var(--red)">0</div><div class="l">Sem coordenada</div></div>
+ <div class="stat"><div class="v" id="st_rotas" style="color:var(--blue)">0</div><div class="l">Rotas ativas</div></div>
+ <div class="stat"><div class="v" id="st_online" style="color:var(--green)">0</div><div class="l">Entregadores</div></div>
+</div>
+
+<div class="card">
+ <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+  <b>⚙️ Configuração</b>
+  <span class="muted" id="cfg_atual"></span>
+ </div>
+ <div class="row" style="margin-top:10px">
+  <select id="cfg_mode">
+   <option value="baixa">🟢 Demanda baixa (4 paradas)</option>
+   <option value="media">🟡 Demanda média (5 paradas)</option>
+   <option value="alta">🔴 Demanda alta (7 paradas)</option>
+  </select>
+  <select id="cfg_raio">
+   <option value="0.8">Raio 0.8 km</option>
+   <option value="1.2">Raio 1.2 km</option>
+   <option value="2">Raio 2 km</option>
+   <option value="3">Raio 3 km</option>
+  </select>
+  <button class="btn btn-blue btn-sm" onclick="salvarConfig()">Salvar config</button>
+ </div>
+ <div class="row" style="margin-top:12px">
+  <button class="btn btn-amber" onclick="sincronizarCoords()">📍 Sincronizar coordenadas</button>
+  <button class="btn btn-green" onclick="gerarRotas()">🚚 Gerar rotas automáticas</button>
+ </div>
+ <div id="log_msg"></div>
+</div>
+
+<div class="card">
+ <b>🚚 Rotas</b>
+ <div id="rotas_list" style="margin-top:12px"><div class="empty">Carregando...</div></div>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const MAPBOX_TOKEN="pk.eyJ1IjoiZGVzZW5nbyIsImEiOiJjbW0ydmhqNnEwYjA2MnFxYnd2bjlodzh3In0.XFElYEdEwfR1MlFp9T9E6w";
+let storeId=null, entregas=[], rotas=[], entregadores=[], cfg={demand_mode:'media',delivery_radius_km:1.2};
+
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
+async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);return{data,error}}catch(e){return{data:null,error:e}}}
+function log(m,t='ok'){$('log_msg').innerHTML=`<div class="msg ${t}">${m}</div>`}
+
+/* ===== GEOMETRIA (do RouterGo) ===== */
+function haversine(a,b){
+ const dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;
+ const la=a.lat*Math.PI/180,lb=b.lat*Math.PI/180;
+ const h=Math.sin(dLat/2)**2+Math.sin(dLng/2)**2*Math.cos(la)*Math.cos(lb);
+ return 2*6371*Math.asin(Math.sqrt(h));
+}
+function orderNearest(pts){
+ if(pts.length<=2)return pts;
+ const rest=[...pts],out=[rest.shift()];
+ while(rest.length){
+  const last=out[out.length-1];let bi=0,bd=Infinity;
+  for(let i=0;i<rest.length;i++){const d=haversine(last,rest[i]);if(d<bd){bd=d;bi=i}}
+  out.push(rest.splice(bi,1)[0]);
+ }
+ return out;
+}
+function clusterStops(items,opts){
+ const maxStops=Math.max(2,Math.floor(opts.maxStops||5));
+ const radius=Math.max(.2,Number(opts.radiusKm||1.2));
+ const pool=[...items],clusters=[];
+ while(pool.length){
+  const seed=pool.shift(),group=[seed];
+  for(let i=pool.length-1;i>=0&&group.length<maxStops;i--)
+   if(haversine(seed,pool[i])<=radius)group.push(pool.splice(i,1)[0]);
+  const ordered=orderNearest(group);
+  let km=0;for(let i=0;i<ordered.length-1;i++)km+=haversine(ordered[i],ordered[i+1]);
+  clusters.push({stops:ordered,totalKm:km});
+ }
+ return clusters;
+}
+
+/* ===== GEOCODING (Mapbox) ===== */
+async function geocode(endereco){
+ const url=`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(endereco)}.json?limit=1&country=br&language=pt&access_token=${MAPBOX_TOKEN}`;
+ const j=await(await fetch(url)).json();
+ const f=j?.features?.[0];
+ if(!f?.center?.length)return null;
+ const[lng,lat]=f.center;
+ return{lat:Number(lat),lng:Number(lng)};
+}
+
+/* ===== CARREGAR ===== */
+async function carregarTudo(){
+ if(!storeId)return;
+ const[a,b,c,d]=await Promise.all([
+  rpc('logistica_entregas_livres',{p_store_id:storeId}),
+  rpc('logistica_listar_rotas',{p_store_id:storeId}),
+  rpc('logistica_entregadores',{p_store_id:storeId}),
+  rpc('logistica_get_config',{p_store_id:storeId})
+ ]);
+ entregas=a.data?.entregas||[];
+ rotas=b.data?.rotas||[];
+ entregadores=c.data?.entregadores||[];
+ if(d.data){cfg.demand_mode=d.data.demand_mode;cfg.delivery_radius_km=Number(d.data.delivery_radius_km||1.2)}
+ render();
+}
+function render(){
+ const semCoord=entregas.filter(e=>e.lat==null||e.lng==null).length;
+ $('st_livres').textContent=entregas.length;
+ $('st_semcoord').textContent=semCoord;
+ $('st_rotas').textContent=rotas.filter(r=>r.status!=='concluida').length;
+ $('st_online').textContent=entregadores.length;
+ $('cfg_atual').textContent=`Modo: ${cfg.demand_mode} · Raio: ${cfg.delivery_radius_km} km`;
+ $('cfg_mode').value=cfg.demand_mode;
+ $('cfg_raio').value=String(cfg.delivery_radius_km);
+ renderRotas();
+}
+
+/* ===== CONFIG ===== */
+async function salvarConfig(){
+ cfg.demand_mode=$('cfg_mode').value;
+ cfg.delivery_radius_km=Number($('cfg_raio').value);
+ await rpc('logistica_set_config',{p_store_id:storeId,p_mode:cfg.demand_mode,p_raio:cfg.delivery_radius_km});
+ log('✅ Config salva!');render();
+}
+
+/* ===== SINCRONIZAR COORDENADAS ===== */
+async function sincronizarCoords(){
+ const sem=entregas.filter(e=>e.lat==null||e.lng==null);
+ if(!sem.length){log('Todas as entregas já têm coordenada. ✅');return}
+ log(`📍 Geocodificando ${sem.length} entrega(s)...`);
+ let ok=0;
+ for(const e of sem){
+  const end=e.endereco||e.notes||'';
+  if(!end)continue;
+  const g=await geocode(end);
+  if(g){await rpc('logistica_set_coords',{p_order_id:e.id,p_lat:g.lat,p_lng:g.lng});ok++}
+ }
+ log(`✅ ${ok} entrega(s) com coordenada salva!`);
+ await carregarTudo();
+}
+
+/* ===== GERAR ROTAS ===== */
+async function gerarRotas(){
+ const livres=entregas.filter(e=>e.lat!=null&&e.lng!=null);
+ if(livres.length<2){log('Precisa de pelo menos 2 entregas COM coordenada. Use "Sincronizar coordenadas" antes.','err');return}
+ let maxStops=5;
+ if(cfg.demand_mode==='baixa')maxStops=4;
+ if(cfg.demand_mode==='alta')maxStops=7;
+ const stops=livres.map(e=>({
+  order_id:e.id,lat:Number(e.lat),lng:Number(e.lng),
+  cliente:e.cliente||'Cliente',endereco:e.endereco||'',
+  numero:e.order_number,status:'pendente'
+ }));
+ const clusters=clusterStops(stops,{maxStops,radiusKm:cfg.delivery_radius_km});
+ let seq=rotas.length+1;
+ for(const c of clusters){
+  const nome=`Rota ${seq++}`;
+  await rpc('logistica_criar_rota',{
+   p_store_id:storeId,p_nome:nome,p_paradas:c.stops,
+   p_dist:Number(c.totalKm.toFixed(2)),p_dur:Math.round(c.totalKm*3)
+  });
+ }
+ log(`✅ ${clusters.length} rota(s) gerada(s)!`);
+ await carregarTudo();
+}
+
+/* ===== ROTAS ===== */
+function renderRotas(){
+ const el=$('rotas_list');
+ if(!rotas.length){el.innerHTML='<div class="empty">Nenhuma rota ainda. Gere rotas acima. 🚚</div>';return}
+ el.innerHTML=rotas.map(r=>{
+  const paradas=Array.isArray(r.paradas)?r.paradas:[];
+  const opts=entregadores.map(e=>`<option value="${e.id}" ${r.entregador_id===e.id?'selected':''}>${escapeHtml(e.nome)}</option>`).join('');
+  return`<div class="rota ${r.status}">
+   <div class="rota-head">
+    <b>🚚 ${escapeHtml(r.nome)}</b>
+    <span class="muted">~${r.distancia_km??'?'} km · ${r.entregue_count||0}✅ ${r.falha_count||0}❌</span>
+    <span class="badge b-${r.status}">${r.status==='nova'?'Nova':r.status==='em_rota'?'Em rota':'Concluída'}</span>
+   </div>
+   <div>${paradas.map((p,i)=>`<div class="parada"><span class="st ${p.status||'pendente'}">${p.status==='entregue'?'✅':p.status==='falha'?'❌':'⏳'}</span> #${p.numero} — ${escapeHtml(p.cliente)} · ${escapeHtml(p.endereco||'')}${p.motivo?` <i>(${escapeHtml(p.motivo)})</i>`:''}</div>`).join('')||'<div class="muted">Sem paradas</div>'}</div>
+   ${r.status!=='concluida'?`<div class="row" style="margin-top:10px">
+     <select onchange="atribuir('${r.id}',this.value)"><option value="">Atribuir entregador...</option>${opts}</select>
+    </div>`:`<div class="muted" style="margin-top:8px"> ${escapeHtml(r.entregador_nome||'—')}</div>`}
+  </div>`;
+ }).join('');
+}
+async function atribuir(rotaId,entregadorId){
+ if(!entregadorId)return;
+ await rpc('logistica_atribuir_rota',{p_rota_id:rotaId,p_entregador_id:entregadorId});
+ log('✅ Rota atribuída! O entregador verá no app.');
+ await carregarTudo();
+}
+
+/* ===== BOOT ===== */
+async function boot(){
+ try{await waitSB()}catch(e){return}
+ const{data:ses}=await supabase.auth.getSession();
+ if(!ses?.session){location.href='index.html';return}
+ const{data}=await rpc('dono_entrar');
+ if(!data?.ok||!data.store){location.href='index.html';return}
+ storeId=data.store.id;
+ $('loja_nome').textContent=data.store.name;
+ await carregarTudo();
+}
+boot();
+window.carregarTudo=carregarTudo;window.salvarConfig=salvarConfig;
+window.sincronizarCoords=sincronizarCoords;window.gerarRotas=gerarRotas;window.atribuir=atribuir;
+</script>
+</body>
+</html>
