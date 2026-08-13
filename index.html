@@ -58,6 +58,13 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 .app-card .copy:hover{background:var(--green);color:#052e16}
 .app-card.pro{border-color:var(--purple);background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(236,72,153,.05))}
 .app-card.pro::before{content:"PRO";position:absolute;top:6px;left:8px;background:var(--purple);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px}
+.card-stats{margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);text-align:left;font-size:11px;color:var(--mut);display:flex;flex-direction:column;gap:3px;line-height:1.5}
+.card-stats b{color:var(--txt)}
+.card-stats .ok{color:var(--green);font-weight:700}
+.card-stats .warn{color:var(--amber);font-weight:700}
+.card-stats .bad{color:var(--red);font-weight:700}
+.mini-btn{margin-top:6px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--txt);font-size:11px;font-weight:700;padding:6px;cursor:pointer;width:100%}
+.mini-btn:hover{background:var(--green);color:#052e16}
 .plan-bar{background:var(--card2);border-radius:999px;height:8px;overflow:hidden;margin:8px 0}
 .plan-bar-fill{height:100%;transition:width .4s}
 .plan-info{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-bottom:4px}
@@ -96,8 +103,8 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 <div id="screen_login" class="hidden"><div class="login-shell">
 <div style="text-align:center;margin-bottom:24px">
  <div style="font-size:48px;margin-bottom:8px">📝</div>
-  <div class="title" style="font-size:28px;font-weight:900">Anote</div>
-  <div class="muted">Crie sua loja ou entre na sua conta</div>
+ <div class="title" style="font-size:28px;font-weight:900">Anote</div>
+ <div class="muted">Crie sua loja ou entre na sua conta</div>
 </div>
 <div class="card"><div class="login-tabs">
 <div class="login-tab active" id="lt_new" onclick="switchEntry('new')">🏪 Criar loja</div>
@@ -132,24 +139,28 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
   <span class="ico">🤵</span>
   <div class="lbl">Garçom</div>
   <div class="sub">Mesas</div>
+  <div class="card-stats" id="cs_garcom">Carregando...</div>
  </div>
  <div class="app-card" onclick="goStaff('cozinha.html')">
   <div class="copy" onclick="event.stopPropagation();copyStaff('cozinha.html')">📋</div>
   <span class="ico">👨‍🍳</span>
   <div class="lbl">Cozinha</div>
   <div class="sub">Pedidos</div>
+  <div class="card-stats" id="cs_cozinha">Carregando...</div>
  </div>
  <div class="app-card" onclick="goStaff('caixa.html')">
   <div class="copy" onclick="event.stopPropagation();copyStaff('caixa.html')">📋</div>
   <span class="ico">💰</span>
   <div class="lbl">Caixa</div>
   <div class="sub">Pagamentos</div>
+  <div class="card-stats" id="cs_caixa">Carregando...</div>
  </div>
  <div class="app-card" onclick="goStaff('entregador.html')">
   <div class="copy" onclick="event.stopPropagation();copyStaff('entregador.html')">📋</div>
   <span class="ico">🛵</span>
   <div class="lbl">Entregador</div>
   <div class="sub">Entregas</div>
+  <div class="card-stats" id="cs_entrega">Carregando...</div>
  </div>
 </div>
 
@@ -317,7 +328,44 @@ async function refreshAll(){
    $('plan_sub').textContent=plano.limite+' entregas/dia';
   }
  }
+ renderResumoEquipe();
  renderAlerts();
+}
+
+/* ===== 🆕 RESUMO VIVO NOS CARDS DA EQUIPE ===== */
+async function renderResumoEquipe(){
+ const{data}=await rpc('dono_painel_resumo',{p_store_id:S.store.id});
+ if(!data)return;
+ const g=data.garcom,c=data.cozinha,x=data.caixa,e=data.entrega;
+
+ // 🤵 GARÇOM
+ const livres=g.mesas_total!=null?Math.max(0,g.mesas_total-g.mesas_ocupadas):null;
+ $('cs_garcom').innerHTML=
+  '<div>👥 <b>'+g.garcons+'</b> garçons no salão</div>'+
+  '<div>🪑 <b>'+g.mesas_ocupadas+'</b> ocupadas'+(livres!=null?' • <b>'+livres+'</b> livres':'')+'</div>'+
+  '<div>🏃 <b>'+g.atendendo+'</b> em atendimento</div>'+
+  '<div><span class="ok">✅ '+g.atendidas_hoje+' mesas atendidas hoje</span></div>';
+
+ // 👨‍🍳 COZINHA
+ $('cs_cozinha').innerHTML=
+  '<div>👥 <b>'+c.pessoas+'</b> na cozinha</div>'+
+  '<div>🧾 <b>'+c.total_hoje+'</b> pedidos — 🍽️ '+c.mesa+' • 🛵 '+c.delivery+' • 🥡 '+c.balcao+'</div>'+
+  '<div>🆕 '+c.novos+' • 🔥 '+c.andamento+' • ✅ '+c.prontos+'</div>'+
+  '<div>'+(c.atrasados>0?'<span class="bad">⏰ '+c.atrasados+' atrasados</span>':'<span class="ok">⏰ 0 atrasados</span>')+'</div>';
+
+ // 💰 CAIXA
+ $('cs_caixa').innerHTML=
+  '<div>💵 Faturamento hoje: <b>'+Number(x.faturamento_hoje||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</b></div>'+
+  '<div><span class="ok">✅ '+x.pagos+' pagos</span> • <span class="warn">⏳ '+x.pendentes+' pendentes</span></div>'+
+  '<div>🛵 <b>'+x.prontos_entrega+'</b> prontos p/ entrega</div>'+
+  '<div>📋 <b>'+x.contas_solicitadas+'</b> contas solicitadas</div>'+
+  '<button class="mini-btn" onclick="event.stopPropagation();location.href=\'pedidos.html\'">➕ Fazer pedido</button>';
+
+ // 🛵 ENTREGADOR
+ $('cs_entrega').innerHTML=
+  '<div>🛵 <b>'+e.entregadores+'</b> entregadores</div>'+
+  '<div><span class="ok">✅ '+e.entregues_hoje+' entregas feitas hoje</span></div>'+
+  '<div>'+(e.atrasadas>0?'<span class="bad">⏰ '+e.atrasadas+' entregas atrasadas</span>':'<span class="ok">⏰ 0 atrasadas</span>')+'</div>';
 }
 
 async function renderAlerts(){
