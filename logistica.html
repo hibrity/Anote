@@ -31,12 +31,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .stat .l{font-size:12px;color:var(--mut);margin-top:4px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 select{padding:9px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:13px;outline:none}
+.badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.b-nova{background:#dbeafe;color:#1d4ed8}.b-em_rota{background:#fef3c7;color:#b45309}.b-concluida{background:#dcfce7;color:#15803d}
 .rota{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
 .rota.em_rota{border-color:var(--blue)}
 .rota.concluida{border-color:var(--green);opacity:.75}
 .rota-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-.badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
-.b-nova{background:#dbeafe;color:#1d4ed8}.b-em_rota{background:#fef3c7;color:#b45309}.b-concluida{background:#dcfce7;color:#15803d}
 .parada{font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border)}
 .parada:last-child{border-bottom:none}
 .parada .st{font-weight:700}
@@ -65,6 +65,25 @@ select{padding:9px 12px;background:var(--card2);border:1px solid var(--border);b
 
 <div class="card">
  <div class="row" style="justify-content:space-between;flex-wrap:wrap">
+  <b>💳 Plano da logística automática</b>
+  <span class="badge b-nova" id="plan_badge">FREE</span>
+ </div>
+ <div class="muted" id="plan_uso" style="margin:8px 0"></div>
+ <div style="background:var(--card2);border-radius:999px;height:10px;overflow:hidden"><div id="plan_bar" style="height:100%;background:var(--green);width:0%;transition:width .4s"></div></div>
+ <div class="row" style="margin-top:10px">
+  <select id="plan_sel" onchange="mudarPlano(this.value)">
+   <option value="free"> Free (8/dia)</option>
+   <option value="pay1">💰 Pay 1 (15/dia)</option>
+   <option value="pay2">💰 Pay 2 (30/dia)</option>
+   <option value="pro">🚀 Pro (ilimitado)</option>
+  </select>
+  <button class="btn btn-purple btn-sm" onclick="upgrade()">🚀 Fazer upgrade</button>
+ </div>
+ <div class="muted" style="margin-top:6px">Ao atingir o limite, as rotas voltam a ser manuais até o dia seguinte. O botão "Gerar rotas" continua livre.</div>
+</div>
+
+<div class="card">
+ <div class="row" style="justify-content:space-between;flex-wrap:wrap">
   <b>⚙️ Configuração</b>
   <span class="muted" id="cfg_atual"></span>
  </div>
@@ -88,7 +107,7 @@ select{padding:9px 12px;background:var(--card2);border:1px solid var(--border);b
   <button class="btn btn-green" onclick="gerarRotas()">🚚 Gerar rotas</button>
   <button class="btn btn-purple" onclick="atribuirAuto()">🤖 Atribuir automático</button>
  </div>
- <div class="muted" style="margin-top:8px">🤖 Modo 100% automático ativo: o sistema gera rotas, atribui entregadores livres e libera quem está a ~1 min da loja.</div>
+ <div class="muted" style="margin-top:8px">🤖 Modo automático ativo: gera rotas, atribui entregadores livres e libera quem está a ~1 min da loja.</div>
  <div id="log_msg"></div>
 </div>
 
@@ -105,6 +124,7 @@ select{padding:9px 12px;background:var(--card2);border:1px solid var(--border);b
 const $=id=>document.getElementById(id);
 const MAPBOX_TOKEN="pk.eyJ1IjoiZGVzZW5nbyIsImEiOiJjbW0ydmhqNnEwYjA2MnFxYnd2bjlodzh3In0.XFElYEdEwfR1MlFp9T9E6w";
 let storeId=null,storeAddr='',entregas=[],rotas=[],entregadores=[],cfg={demand_mode:'media',delivery_radius_km:1.2};
+let plano={plan:'free',limite:8,usado:0,restante:8};
 
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
@@ -151,6 +171,32 @@ async function geocode(endereco){
  return{lat:Number(lat),lng:Number(lng)};
 }
 
+/* ===== PLANO ===== */
+async function carregarPlano(){
+ const{data}=await rpc('logistica_plano_info',{p_store_id:storeId});
+ if(!data||!data.ok)return;
+ plano=data;
+ $('plan_badge').textContent=plano.plan.toUpperCase();
+ $('plan_sel').value=plano.plan;
+ if(plano.limite<0){
+  $('plan_uso').innerHTML='🚀 <b>PRO</b> — entregas automáticas ilimitadas';
+  $('plan_bar').style.width='100%';
+  $('plan_bar').style.background='var(--purple)';
+ }else{
+  $('plan_uso').innerHTML='Hoje: <b>'+plano.usado+'/'+plano.limite+'</b> entregas automáticas'+(plano.restante<=0?' — ⚠️ limite atingido, modo manual até amanhã':'');
+  $('plan_bar').style.width=Math.min(100,(plano.usado/plano.limite)*100)+'%';
+  $('plan_bar').style.background=plano.restante<=0?'var(--red)':(plano.usado/plano.limite>0.7?'var(--amber)':'var(--green)');
+ }
+}
+async function mudarPlano(p){
+ await rpc('dono_set_plan',{p_store_id:storeId,p_plan:p});
+ await carregarPlano();
+ log('💳 Plano alterado para '+p.toUpperCase()+'!');
+}
+function upgrade(){
+ alert('💳 Planos Anote Logística:\n\n🆓 FREE — 8 entregas auto/dia\n💰 PAY 1 — R$ 29/mês → 15/dia\n💰 PAY 2 — R$ 59/mês → 30/dia\n🚀 PRO — R$ 99/mês → ilimitado\n\n(Em breve: pagamento por Pix direto no painel!)');
+}
+
 /* ===== CARREGAR ===== */
 async function carregarTudo(){
  if(!storeId)return;
@@ -165,6 +211,7 @@ async function carregarTudo(){
  entregadores=c.data?.entregadores||[];
  if(d.data){cfg.demand_mode=d.data.demand_mode;cfg.delivery_radius_km=Number(d.data.delivery_radius_km||1.2)}
  render();
+ carregarPlano();
 }
 function render(){
  const semCoord=entregas.filter(e=>e.lat==null||e.lng==null).length;
@@ -237,13 +284,13 @@ async function atribuirAuto(){
 /* ===== ROTAS ===== */
 function renderRotas(){
  const el=$('rotas_list');
- if(!rotas.length){el.innerHTML='<div class="empty">Nenhuma rota ainda. </div>';return}
+ if(!rotas.length){el.innerHTML='<div class="empty">Nenhuma rota ainda.</div>';return}
  el.innerHTML=rotas.map(r=>{
   const paradas=Array.isArray(r.paradas)?r.paradas:[];
   const opts=entregadores.map(e=>`<option value="${e.id}" ${r.entregador_id===e.id?'selected':''}>${escapeHtml(e.nome)}</option>`).join('');
   return`<div class="rota ${r.status}">
    <div class="rota-head">
-    <b>🚚 ${escapeHtml(r.nome)}</b>
+    <b>🚚 ${escapeHtml(r.nome)}${r.auto?' 🤖':''}</b>
     <span class="muted">~${r.distancia_km??'?'} km · ${r.entregue_count||0}✅ ${r.falha_count||0}❌ ${r.entregador_nome?'· 🛵 '+escapeHtml(r.entregador_nome):''}</span>
     <span class="badge b-${r.status}">${r.status==='nova'?'Nova':r.status==='em_rota'?'Em rota':'Concluída'}</span>
    </div>
@@ -274,7 +321,8 @@ async function boot(){
 }
 boot();
 window.carregarTudo=carregarTudo;window.salvarConfig=salvarConfig;window.syncLoja=syncLoja;
-window.sincronizarCoords=sincronizarCoords;window.gerarRotas=gerarRotas;window.atribuirAuto=atribuirAuto;window.atribuir=atribuir;
+window.sincronizarCoords=sincronizarCoords;window.gerarRotas=gerarRotas;window.atribuirAuto=atribuirAuto;
+window.atribuir=atribuir;window.mudarPlano=mudarPlano;window.upgrade=upgrade;
 
 /* ===== PWA ===== */
 var pwaDeferred=null;
