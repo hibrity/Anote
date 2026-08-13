@@ -4,6 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Anote — Painel</title>
+<meta name="theme-color" content="#0f172a"/>
+<link rel="icon" type="image/svg+xml" href="icon.svg"/>
 <script type="module">
 import{createClient}from"https://esm.sh/@supabase/supabase-js@2";
 window.supabase=createClient("https://mrchckrrkkvkmhpgellp.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yY2hja3Jya2t2a21ocGdlbGxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1NDU4NTYsImV4cCI6MjA4OTEyMTg1Nn0.sIhnEkNV7614lZj3WKFFjSvyxLqVf0ReNu-ka88eUjk");
@@ -11,62 +13,92 @@ window.dispatchEvent(new Event("supabase-ready"));
 </script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--cyan:#06b6d4;--r:14px}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
-.wrap{max-width:1100px;margin:0 auto;padding:16px}.hidden{display:none!important}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
-h2{font-size:17px;margin-bottom:12px}
-h3{font-size:14px;margin-bottom:8px;color:var(--mut)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
+:root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--cyan:#06b6d4;--orange:#ea580c;--r:16px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+.wrap{max-width:1100px;margin:0 auto;padding:16px 16px 100px}
+.hidden{display:none!important}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+h2{font-size:17px;margin-bottom:12px;font-weight:800}
+h3{font-size:13px;margin-bottom:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .1s,filter .15s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-green{background:var(--green);color:#052e16}
 .btn-blue{background:var(--blue);color:#fff}
 .btn-amber{background:var(--amber);color:#3b2503}
 .btn-red{background:var(--red);color:#fff}
 .btn-purple{background:var(--purple);color:#fff}
 .btn-cyan{background:var(--cyan);color:#083344}
+.btn-orange{background:var(--orange);color:#fff}
 .btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
 .btn-block{width:100%}
-.btn-sm{padding:6px 10px;font-size:12px}
-input{width:100%;padding:10px 12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:14px;margin-bottom:8px;outline:none}
-label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weight:600}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.btn-sm{padding:7px 12px;font-size:12px}
+input{width:100%;padding:11px 14px;background:var(--card2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:14px;margin-bottom:8px;outline:none}
+input:focus{border-color:var(--green)}
+label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weight:700}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:110px}
 .muted{color:var(--mut);font-size:13px}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.title{font-size:20px;font-weight:800}
-.stat{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px}
-.stat b{display:block;font-size:22px;margin-top:4px}
+.header{background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.header-info .title{font-size:22px;font-weight:900;background:linear-gradient(135deg,#22c55e,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header-info .sub{font-size:12px;color:var(--mut);margin-top:2px}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap}
+.badge-plan{display:inline-block;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;background:var(--purple);color:#fff;margin-left:6px}
+.badge-plan.free{background:#475569}.badge-plan.pay1{background:var(--blue)}.badge-plan.pay2{background:var(--amber);color:#3b2503}.badge-plan.pro{background:linear-gradient(135deg,#a855f7,#ec4899)}
 .msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
-.msg.err{background:#451a1a;color:#fca5a5}.msg.ok{background:#14351f;color:#86efac}
-.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.nav .btn{flex:1;min-width:120px;padding:14px}
-.nav-staff{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px}
-.nav-staff .btn{padding:12px;font-size:13px}
+.msg.err{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d}.msg.ok{background:#14351f;color:#86efac;border:1px solid #166534}
+.apps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.app-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.app-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.app-card:active{transform:scale(.97)}
+.app-card .ico{font-size:32px;display:block;margin-bottom:6px}
+.app-card .lbl{font-size:13px;font-weight:800}
+.app-card .sub{font-size:11px;color:var(--mut);margin-top:2px}
+.app-card .copy{position:absolute;top:8px;right:8px;background:var(--card2);border:1px solid var(--border);border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer}
+.app-card .copy:hover{background:var(--green);color:#052e16}
+.app-card.pro{border-color:var(--purple);background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(236,72,153,.05))}
+.app-card.pro::before{content:"PRO";position:absolute;top:6px;left:8px;background:var(--purple);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px}
+.plan-bar{background:var(--card2);border-radius:999px;height:8px;overflow:hidden;margin:8px 0}
+.plan-bar-fill{height:100%;transition:width .4s}
+.plan-info{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-bottom:4px}
+.stat{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.stat b{display:block;font-size:24px;margin-top:4px;font-weight:800}
+.stat .lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
 .login-shell{max-width:440px;margin:50px auto 0}
 .login-tabs{display:flex;gap:8px;margin-bottom:16px}
 .login-tab{flex:1;padding:12px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--border);cursor:pointer;font-weight:700;color:var(--mut);font-size:13px}
-.login-tab.active{background:var(--green);color:#052e16}
+.login-tab.active{background:var(--green);color:#052e16;border-color:var(--green)}
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .boot-shell{text-align:center;padding:100px 20px}
-@media(max-width:800px){.grid3{grid-template-columns:1fr}}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.section-divider{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin:20px 0 10px;font-weight:800;display:flex;align-items:center;gap:8px}
+.section-divider::after{content:"";flex:1;height:1px;background:var(--border)}
+@media(max-width:800px){.grid3{grid-template-columns:1fr 1fr}.apps-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.grid3{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<!-- ✅ TELA NEUTRA DE CARREGAMENTO (evita piscar o login) -->
+<!-- ✅ TELA DE CARREGAMENTO -->
 <div id="screen_boot">
  <div class="boot-shell">
-  <div class="title" style="margin-bottom:24px">Anote</div>
+  <div style="font-size:48px;margin-bottom:16px">📝</div>
+  <div class="title" style="font-size:28px;font-weight:900;margin-bottom:20px">Anote</div>
   <div class="spinner"></div>
   <div class="muted">Carregando...</div>
  </div>
 </div>
 
-<!-- LOGIN (começa OCULTO) -->
+<!-- LOGIN -->
 <div id="screen_login" class="hidden"><div class="login-shell">
-<div style="text-align:center;margin-bottom:24px"><div class="title">Anote</div><div class="muted">Crie sua loja ou entre</div></div>
+<div style="text-align:center;margin-bottom:24px">
+ <div style="font-size:48px;margin-bottom:8px">📝</div>
+ <div class="title" style="font-size:28px;font-weight:900">Anote</div>
+ <div class="muted">Crie sua loja ou entre na sua conta</div>
+</div>
 <div class="card"><div class="login-tabs">
 <div class="login-tab active" id="lt_new" onclick="switchEntry('new')">🏪 Criar loja</div>
 <div class="login-tab" id="lt_login" onclick="switchEntry('login')">🔑 Já tenho conta</div></div>
@@ -76,54 +108,154 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 
 <!-- APP -->
 <div id="screen_app" class="hidden">
-<div class="topbar">
- <div><div class="title" id="app_store_name">Loja</div><div class="muted">👑 Dono</div></div>
- <div class="row" style="max-width:340px"><button class="btn btn-ghost" onclick="refreshAll()">🔄 Atualizar</button><button class="btn btn-red" onclick="logout()">Sair</button></div>
+
+<div class="header">
+ <div class="header-info">
+  <div class="title" id="app_store_name">Loja</div>
+  <div class="sub">👑 Dono • Código: <span id="app_code">...</span><span class="badge-plan free" id="plan_badge">FREE</span></div>
+ </div>
+ <div class="header-actions">
+  <button class="btn btn-ghost btn-sm" onclick="refreshAll()">🔄</button>
+  <button class="btn btn-red btn-sm" onclick="logout()">Sair</button>
+ </div>
 </div>
 
 <div id="alerts_wrap"></div>
 
-<h3 style="margin-bottom:8px">📋 Gestão</h3>
-<div class="nav">
- <button class="btn btn-blue" onclick="location.href='catalogo.html'">📦 Catálogo</button>
- <button class="btn btn-blue" onclick="location.href='pedidos.html'">🧾 Pedidos</button>
- <button class="btn btn-blue" onclick="location.href='equipe.html'">👥 Equipe</button>
- <button class="btn btn-blue" onclick="location.href='mesas.html'">🔳 Mesas</button>
+<!-- 📱 APPS DA LOJA -->
+<div class="section-divider">📱 Apps da loja</div>
+
+<h3>⚡ Equipe</h3>
+<div class="apps-grid">
+ <div class="app-card" onclick="goStaff('garcom.html')">
+  <div class="copy" onclick="event.stopPropagation();copyStaff('garcom.html')">📋</div>
+  <span class="ico">🤵</span>
+  <div class="lbl">Garçom</div>
+  <div class="sub">Mesas</div>
+ </div>
+ <div class="app-card" onclick="goStaff('cozinha.html')">
+  <div class="copy" onclick="event.stopPropagation();copyStaff('cozinha.html')">📋</div>
+  <span class="ico">👨‍🍳</span>
+  <div class="lbl">Cozinha</div>
+  <div class="sub">Pedidos</div>
+ </div>
+ <div class="app-card" onclick="goStaff('caixa.html')">
+  <div class="copy" onclick="event.stopPropagation();copyStaff('caixa.html')">📋</div>
+  <span class="ico">💰</span>
+  <div class="lbl">Caixa</div>
+  <div class="sub">Pagamentos</div>
+ </div>
+ <div class="app-card" onclick="goStaff('entregador.html')">
+  <div class="copy" onclick="event.stopPropagation();copyStaff('entregador.html')">📋</div>
+  <span class="ico">🛵</span>
+  <div class="lbl">Entregador</div>
+  <div class="sub">Entregas</div>
+ </div>
 </div>
 
-<h3 style="margin-bottom:8px">⚡ Acessos da equipe</h3>
-<div class="nav-staff">
- <button class="btn btn-cyan" onclick="goStaff('garcom.html')">🤵 Garçom</button>
- <button class="btn btn-amber" onclick="goStaff('cozinha.html')">👨‍🍳 Cozinha</button>
- <button class="btn btn-green" onclick="goStaff('caixa.html')">💰 Caixa</button>
+<h3>🚚 Logística (PRO)</h3>
+<div class="apps-grid">
+ <div class="app-card pro" onclick="location.href='logistica.html'">
+  <span class="ico">🚚</span>
+  <div class="lbl">Central de Rotas</div>
+  <div class="sub">Despacho automático</div>
+ </div>
+ <div class="app-card pro" onclick="location.href='logistica.html#plano'">
+  <span class="ico">💳</span>
+  <div class="lbl">Meu Plano</div>
+  <div class="sub" id="plan_sub">8 entregas/dia</div>
+ </div>
 </div>
 
-<div class="card"><h2>📊 Resumo</h2><div class="grid3" id="stats"></div></div>
+<h3>👥 Clientes</h3>
+<div class="apps-grid">
+ <div class="app-card" onclick="openClient('cliente.html')">
+  <div class="copy" onclick="event.stopPropagation();copyClient('cliente.html')">📋</div>
+  <span class="ico">🍽️</span>
+  <div class="lbl">Mesa</div>
+  <div class="sub">QR Code</div>
+ </div>
+ <div class="app-card" onclick="openClient('delivery.html')">
+  <div class="copy" onclick="event.stopPropagation();copyClient('delivery.html')">📋</div>
+  <span class="ico">🛵</span>
+  <div class="lbl">Delivery</div>
+  <div class="sub">Em casa</div>
+ </div>
+</div>
+
+<!-- 📋 GESTÃO -->
+<div class="section-divider">📋 Gestão</div>
+<div class="apps-grid">
+ <div class="app-card" onclick="location.href='catalogo.html'">
+  <span class="ico">📦</span>
+  <div class="lbl">Catálogo</div>
+  <div class="sub">Produtos</div>
+ </div>
+ <div class="app-card" onclick="location.href='pedidos.html'">
+  <span class="ico">🧾</span>
+  <div class="lbl">Pedidos</div>
+  <div class="sub">Histórico</div>
+ </div>
+ <div class="app-card" onclick="location.href='equipe.html'">
+  <span class="ico">👥</span>
+  <div class="lbl">Equipe</div>
+  <div class="sub">Cadastro</div>
+ </div>
+ <div class="app-card" onclick="location.href='mesas.html'">
+  <span class="ico">🔳</span>
+  <div class="lbl">Mesas</div>
+  <div class="sub">Layout</div>
+ </div>
+</div>
+
+<!-- 💳 PLANO + RESUMO -->
+<div class="section-divider">📊 Informações</div>
+
+<div class="card">
+ <h2>💳 Plano da Logística</h2>
+ <div class="plan-info">
+  <span><b id="plan_name">FREE</b> • <span id="plan_uso">0/8</span> entregas hoje</span>
+  <button class="btn btn-purple btn-sm" onclick="location.href='logistica.html#plano'">🚀 Upgrade</button>
+ </div>
+ <div class="plan-bar"><div id="plan_bar" class="plan-bar-fill" style="width:0%;background:var(--green)"></div></div>
+ <div class="muted" style="font-size:11px">Ao atingir o limite, as rotas voltam ao modo manual até amanhã.</div>
+</div>
+
+<div class="card">
+ <h2>📊 Resumo da loja</h2>
+ <div class="grid3" id="stats"></div>
 </div>
 
 </div>
-<div id="toast" class="toast" style="position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:.3s;pointer-events:none"></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- 📲 APP INSTALÁVEL -->
+<button id="pwa_btn" onclick="pwaInstall()" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:#22c55e;color:#052e16;border:none;border-radius:999px;padding:12px 18px;font-weight:800;font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.35);cursor:pointer">📲 Instalar app</button>
 
 <script>
 const $=id=>document.getElementById(id);
-let S={store:null,code:null},liveTimer=null,lastAlerts=0;
+let S={store:null,code:null},liveTimer=null,lastAlerts=0,plano={plan:'free',limite:8,usado:0};
 
 function toast(m,t='ok'){
  const e=$('toast');e.textContent=m;
  e.style.background=t==='err'?'#ef4444':'#22c55e';
  e.style.color=t==='err'?'#fff':'#052e16';
- e.style.opacity='0';
- e.classList.add('show');e.style.opacity='';
+ e.classList.add('show');
  clearTimeout(e._tm);e._tm=setTimeout(()=>e.classList.remove('show'),2500);
 }
 function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}catch(e){return{data:null,error:e}}}
 
-function goStaff(page){
- if(!S||!S.code){toast('Código da loja não disponível','err');return}
- const base=location.href.substring(0,location.href.lastIndexOf('/')+1);
- location.href=base+page+'?loja='+encodeURIComponent(S.code);
-}
+/* ===== LINKS ===== */
+function base(){return location.href.substring(0,location.href.lastIndexOf('/')+1)}
+function staffUrl(page){return base()+page+'?loja='+encodeURIComponent(S.code)}
+function clientUrl(page){return base()+page+'?loja='+encodeURIComponent(S.store.id)}
+function goStaff(page){location.href=staffUrl(page)}
+function openClient(page){window.open(clientUrl(page),'_blank')}
+function copyStaff(page){navigator.clipboard.writeText(staffUrl(page)).then(()=>toast('Link copiado! 📋'))}
+function copyClient(page){navigator.clipboard.writeText(clientUrl(page)).then(()=>toast('Link copiado! 📋'))}
 
 function switchEntry(m){['new','login'].forEach(x=>{$('lt_'+x).classList.toggle('active',x===m);$('entry_'+x).classList.toggle('hidden',x!==m)})}
 
@@ -152,13 +284,14 @@ async function enterApp(){
  let st=data.store;
  if(!st.staff_code){const r=await rpc('dono_regenerar_codigo',{p_store_id:st.id});if(r.data?.ok)st.staff_code=r.data.staff_code;else{show('login');return}}
  S.store=st;S.code=st.staff_code;
- show('app');$('app_store_name').textContent=st.name;
+ show('app');
+ $('app_store_name').textContent=st.name;
+ $('app_code').textContent=st.staff_code;
  refreshAll();startLive();
 }
 
 function logout(){supabase.auth.signOut();stopLive();show('login')}
 
-/* ✅ Agora também esconde a tela de boot */
 function show(s){
  $('screen_boot').classList.add('hidden');
  $('screen_login').classList.toggle('hidden',s!=='login');
@@ -170,7 +303,36 @@ function stopLive(){if(liveTimer){clearInterval(liveTimer);liveTimer=null}}
 async function refreshAll(){
  if(!S.store)return;
  const d=await rpc('dono_dashboard',{p_store_id:S.store.id});
- if(d.data?.ok){const s=d.data.stats;$('stats').innerHTML='<div class="stat">Produtos<b>'+s.total_products+'</b></div><div class="stat">Clientes<b>'+s.total_customers+'</b></div><div class="stat">Pedidos<b>'+s.total_orders+'</b></div><div class="stat">Em aberto<b>'+s.open_orders+'</b></div><div class="stat">Hoje<b>'+s.today_orders+'</b></div><div class="stat">Fat. hoje<b>'+Number(s.today_revenue||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</b></div>'}
+ if(d.data?.ok){
+  const s=d.data.stats;
+  $('stats').innerHTML=`
+   <div class="stat"><div class="lbl">Produtos</div><b>${s.total_products}</b></div>
+   <div class="stat"><div class="lbl">Clientes</div><b>${s.total_customers}</b></div>
+   <div class="stat"><div class="lbl">Pedidos</div><b>${s.total_orders}</b></div>
+   <div class="stat"><div class="lbl">Em aberto</div><b>${s.open_orders}</b></div>
+   <div class="stat"><div class="lbl">Hoje</div><b>${s.today_orders}</b></div>
+   <div class="stat"><div class="lbl">Fat. hoje</div><b>${Number(s.today_revenue||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</b></div>`;
+ }
+ const p=await rpc('logistica_plano_info',{p_store_id:S.store.id});
+ if(p.data?.ok){
+  plano=p.data;
+  const badge=$('plan_badge');
+  badge.textContent=plano.plan.toUpperCase();
+  badge.className='badge-plan '+plano.plan;
+  $('plan_name').textContent=plano.plan.toUpperCase();
+  if(plano.limite<0){
+   $('plan_uso').textContent='ilimitado';
+   $('plan_bar').style.width='100%';
+   $('plan_bar').style.background='var(--purple)';
+   $('plan_sub').textContent='ilimitado';
+  }else{
+   $('plan_uso').textContent=plano.usado+'/'+plano.limite;
+   const pct=Math.min(100,(plano.usado/plano.limite)*100);
+   $('plan_bar').style.width=pct+'%';
+   $('plan_bar').style.background=plano.restante<=0?'var(--red)':(pct>70?'var(--amber)':'var(--green)');
+   $('plan_sub').textContent=plano.limite+' entregas/dia';
+  }
+ }
  renderAlerts();
 }
 
@@ -194,14 +356,32 @@ async function ackAlert(id){await rpc('staff_alerta_ack',{p_store_id:S.store.id,
 async function doneAlert(id){await rpc('staff_alerta_done',{p_store_id:S.store.id,p_codigo:S.code,p_alert_id:id});renderAlerts()}
 function beep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.1;o.start();setTimeout(()=>{o.stop();c.close()},300)}catch(e){}}
 
-/* ✅ Boot: se der qualquer erro, mostra o login (nunca fica preso no loading) */
 async function boot(){
  try{await waitSB()}catch(e){show('login');return}
  const{data}=await supabase.auth.getSession();
  if(data.session)await enterApp();else show('login');
 }
 boot();
-window.switchEntry=switchEntry;window.createStore=createStore;window.ownerLogin=ownerLogin;window.logout=logout;window.refreshAll=refreshAll;window.ackAlert=ackAlert;window.doneAlert=doneAlert;window.goStaff=goStaff;
+
+/* ===== PWA ===== */
+var pwaDeferred=null;
+function pwaBase(){return base()}
+function pwaManifest(){
+ var m={name:'Anote — '+(S.store?.name||'Painel'),short_name:'Anote',start_url:pwaBase(),display:'standalone',background_color:'#0f172a',theme_color:'#0f172a',icons:[{src:pwaBase()+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
+ var b=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
+ var l=document.getElementById('pwa_manifest');
+ if(!l){l=document.createElement('link');l.id='pwa_manifest';l.rel='manifest';document.head.appendChild(l)}
+ l.href=URL.createObjectURL(b);
+}
+setTimeout(pwaManifest,1000);
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();pwaDeferred=e});
+window.addEventListener('appinstalled',function(){var b=document.getElementById('pwa_btn');if(b)b.style.display='none'});
+function pwaInstall(){
+ if(pwaDeferred){pwaDeferred.prompt();pwaDeferred.userChoice.then(function(c){if(c.outcome==='accepted'){pwaDeferred=null;document.getElementById('pwa_btn').style.display='none'}})}
+ else{var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);alert(ios?'Para instalar: toque em Compartilhar e depois em "Adicionar à Tela de Início" 📲':'Para instalar: toque no menu ⋮ e depois em "Adicionar à tela inicial" 📲')}
+}
+
+window.switchEntry=switchEntry;window.createStore=createStore;window.ownerLogin=ownerLogin;window.logout=logout;window.refreshAll=refreshAll;window.ackAlert=ackAlert;window.doneAlert=doneAlert;window.goStaff=goStaff;window.openClient=openClient;window.copyStaff=copyStaff;window.copyClient=copyClient;window.pwaInstall=pwaInstall;
 </script>
 </body>
 </html>
