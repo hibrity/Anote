@@ -15,21 +15,17 @@ window.dispatchEvent(new Event("supabase-ready"));
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0f172a;--card:#1e293b;--card2:#0b1220;--border:#2c3a52;--txt:#f1f5f9;--mut:#94a3b8;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--cyan:#06b6d4;--orange:#ea580c;--r:16px}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
-.wrap{max-width:1100px;margin:0 auto;padding:16px 16px 100px}
+.wrap{max-width:720px;margin:0 auto;padding:16px 16px 100px}
 .hidden{display:none!important}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-h2{font-size:17px;margin-bottom:12px;font-weight:800}
-h3{font-size:13px;margin-bottom:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .1s,filter .15s}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:16px}
+h2{font-size:16px;margin-bottom:12px;font-weight:800}
+h3{font-size:13px;margin-bottom:8px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .1s}
 .btn:active{transform:scale(.97)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-green{background:var(--green);color:#052e16}
-.btn-blue{background:var(--blue);color:#fff}
-.btn-amber{background:var(--amber);color:#3b2503}
 .btn-red{background:var(--red);color:#fff}
 .btn-purple{background:var(--purple);color:#fff}
-.btn-cyan{background:var(--cyan);color:#083344}
-.btn-orange{background:var(--orange);color:#fff}
 .btn-ghost{background:var(--card2);color:var(--txt);border:1px solid var(--border)}
 .btn-block{width:100%}
 .btn-sm{padding:7px 12px;font-size:12px}
@@ -37,33 +33,38 @@ input{width:100%;padding:11px 14px;background:var(--card2);border:1px solid var(
 input:focus{border-color:var(--green)}
 label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weight:700}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:110px}
 .muted{color:var(--mut);font-size:13px}
-.header{background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.header{background:linear-gradient(135deg,#1e293b,#0f172a);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .header-info .title{font-size:22px;font-weight:900;background:linear-gradient(135deg,#22c55e,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .header-info .sub{font-size:12px;color:var(--mut);margin-top:2px}
-.header-actions{display:flex;gap:8px;flex-wrap:wrap}
-.badge-plan{display:inline-block;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;background:var(--purple);color:#fff;margin-left:6px}
-.badge-plan.free{background:#475569}.badge-plan.pay1{background:var(--blue)}.badge-plan.pay2{background:var(--amber);color:#3b2503}.badge-plan.pro{background:linear-gradient(135deg,#a855f7,#ec4899)}
+.header-actions{display:flex;gap:8px}
+.badge-plan{display:inline-block;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;margin-left:6px}
+.badge-plan.pro{background:linear-gradient(135deg,#22c55e,#06b6d4);color:#052e16}
 .msg{padding:10px;border-radius:10px;font-size:13px;margin-top:8px}
 .msg.err{background:#451a1a;color:#fca5a5;border:1px solid #7f1d1d}.msg.ok{background:#14351f;color:#86efac;border:1px solid #166534}
-.apps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
-.app-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
-.app-card:hover{border-color:var(--green);transform:translateY(-2px)}
-.app-card:active{transform:scale(.97)}
-.app-card .ico{font-size:32px;display:block;margin-bottom:6px}
-.app-card .lbl{font-size:13px;font-weight:800}
-.app-card .sub{font-size:11px;color:var(--mut);margin-top:2px}
-.app-card .copy{position:absolute;top:8px;right:8px;background:var(--card2);border:1px solid var(--border);border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer}
-.app-card .copy:hover{background:var(--green);color:#052e16}
-.app-card.pro{border-color:var(--purple);background:linear-gradient(135deg,rgba(168,85,247,.08),rgba(236,72,153,.05))}
-.app-card.pro::before{content:"PRO";position:absolute;top:6px;left:8px;background:var(--purple);color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px}
+
+/* ===== MENU DE NAVEGAÇÃO ===== */
+.nav-menu{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.nav-section{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.2px;font-weight:800;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+.nav-section:first-child{margin-top:0}
+.nav-section::after{content:"";flex:1;height:1px;background:var(--border)}
+.nav-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 14px;cursor:pointer;transition:all .15s;text-decoration:none;color:var(--txt);position:relative}
+.nav-item:hover{border-color:var(--green);transform:translateX(3px)}
+.nav-item:active{transform:scale(.98)}
+.nav-item .ico{font-size:20px;width:30px;text-align:center;flex-shrink:0}
+.nav-item .info{flex:1;min-width:0}
+.nav-item .lbl{font-size:14px;font-weight:700}
+.nav-item .sub{font-size:11px;color:var(--mut);margin-top:1px}
+.nav-item .copy-btn{background:var(--card2);border:1px solid var(--border);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;flex-shrink:0;transition:all .15s}
+.nav-item .copy-btn:hover{background:var(--green);color:#052e16;border-color:var(--green)}
+.nav-item.pro{border-color:var(--purple);background:linear-gradient(135deg,rgba(168,85,247,.07),rgba(236,72,153,.03))}
+.nav-item.pro .pro-tag{position:absolute;top:-8px;right:12px;background:var(--purple);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:999px;letter-spacing:.5px}
+
 .plan-bar{background:var(--card2);border-radius:999px;height:8px;overflow:hidden;margin:8px 0}
-.plan-bar-fill{height:100%;transition:width .4s}
-.plan-info{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-bottom:4px}
+.plan-bar-fill{height:100%;transition:width .4s;background:var(--green)}
 .stat{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
-.stat b{display:block;font-size:24px;margin-top:4px;font-weight:800}
-.stat .lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.stat b{display:block;font-size:22px;margin-top:4px;font-weight:800}
+.stat .lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
 .login-shell{max-width:440px;margin:50px auto 0}
 .login-tabs{display:flex;gap:8px;margin-bottom:16px}
 .login-tab{flex:1;padding:12px;text-align:center;border-radius:10px;background:var(--card2);border:1px solid var(--border);cursor:pointer;font-weight:700;color:var(--mut);font-size:13px}
@@ -73,20 +74,17 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 .boot-shell{text-align:center;padding:100px 20px}
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.3)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.section-divider{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin:20px 0 10px;font-weight:800;display:flex;align-items:center;gap:8px}
-.section-divider::after{content:"";flex:1;height:1px;background:var(--border)}
-@media(max-width:800px){.grid3{grid-template-columns:1fr 1fr}.apps-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:500px){.grid3{grid-template-columns:1fr}}
+@media(max-width:500px){.grid3{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<!-- ✅ TELA DE CARREGAMENTO -->
+<!-- BOOT -->
 <div id="screen_boot">
  <div class="boot-shell">
   <div style="font-size:48px;margin-bottom:16px">📝</div>
-  <div class="title" style="font-size:28px;font-weight:900;margin-bottom:20px">Anote</div>
+  <div style="font-size:28px;font-weight:900;margin-bottom:20px">Anote</div>
   <div class="spinner"></div>
   <div class="muted">Carregando...</div>
  </div>
@@ -96,7 +94,7 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 <div id="screen_login" class="hidden"><div class="login-shell">
 <div style="text-align:center;margin-bottom:24px">
  <div style="font-size:48px;margin-bottom:8px">📝</div>
- <div class="title" style="font-size:28px;font-weight:900">Anote</div>
+ <div style="font-size:28px;font-weight:900">Anote</div>
  <div class="muted">Crie sua loja ou entre na sua conta</div>
 </div>
 <div class="card"><div class="login-tabs">
@@ -112,7 +110,7 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 <div class="header">
  <div class="header-info">
   <div class="title" id="app_store_name">Loja</div>
-  <div class="sub">👑 Dono • Código: <span id="app_code">...</span><span class="badge-plan free" id="plan_badge">FREE</span></div>
+  <div class="sub">👑 Dono • <span id="app_code">...</span><span class="badge-plan pro">ATIVO</span></div>
  </div>
  <div class="header-actions">
   <button class="btn btn-ghost btn-sm" onclick="refreshAll()">🔄</button>
@@ -122,105 +120,69 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 
 <div id="alerts_wrap"></div>
 
-<!-- 📱 APPS DA LOJA -->
-<div class="section-divider">📱 Apps da loja</div>
+<!-- ===== MENU DE NAVEGAÇÃO ===== -->
+<div class="nav-menu">
 
-<h3>⚡ Equipe</h3>
-<div class="apps-grid">
- <div class="app-card" onclick="goStaff('garcom.html')">
-  <div class="copy" onclick="event.stopPropagation();copyStaff('garcom.html')">📋</div>
+ <div class="nav-section">⚡ Equipe</div>
+ <div class="nav-item" onclick="goStaff('garcom.html')">
   <span class="ico">🤵</span>
-  <div class="lbl">Garçom</div>
-  <div class="sub">Mesas</div>
+  <div class="info"><div class="lbl">Garçom</div><div class="sub">Atendimento de mesas</div></div>
+  <span class="copy-btn" onclick="event.stopPropagation();copyStaff('garcom.html')">📋</span>
  </div>
- <div class="app-card" onclick="goStaff('cozinha.html')">
-  <div class="copy" onclick="event.stopPropagation();copyStaff('cozinha.html')">📋</div>
+ <div class="nav-item" onclick="goStaff('cozinha.html')">
   <span class="ico">👨‍🍳</span>
-  <div class="lbl">Cozinha</div>
-  <div class="sub">Pedidos</div>
+  <div class="info"><div class="lbl">Cozinha</div><div class="sub">Preparo de pedidos</div></div>
+  <span class="copy-btn" onclick="event.stopPropagation();copyStaff('cozinha.html')">📋</span>
  </div>
- <div class="app-card" onclick="goStaff('caixa.html')">
-  <div class="copy" onclick="event.stopPropagation();copyStaff('caixa.html')">📋</div>
+ <div class="nav-item" onclick="goStaff('caixa.html')">
   <span class="ico">💰</span>
-  <div class="lbl">Caixa</div>
-  <div class="sub">Pagamentos</div>
+  <div class="info"><div class="lbl">Caixa</div><div class="sub">Pagamentos e fechamento</div></div>
+  <span class="copy-btn" onclick="event.stopPropagation();copyStaff('caixa.html')">📋</span>
  </div>
- <div class="app-card" onclick="goStaff('entregador.html')">
-  <div class="copy" onclick="event.stopPropagation();copyStaff('entregador.html')">📋</div>
+ <div class="nav-item" onclick="goStaff('entregador.html')">
   <span class="ico">🛵</span>
-  <div class="lbl">Entregador</div>
-  <div class="sub">Entregas</div>
+  <div class="info"><div class="lbl">Entregador</div><div class="sub">Entregas e rotas</div></div>
+  <span class="copy-btn" onclick="event.stopPropagation();copyStaff('entregador.html')">📋</span>
  </div>
-</div>
 
-<h3>🚚 Logística (PRO)</h3>
-<div class="apps-grid">
- <div class="app-card pro" onclick="location.href='logistica.html'">
+ <div class="nav-section">🚚 Logística</div>
+ <div class="nav-item pro" onclick="location.href='logistica.html'">
+  <span class="pro-tag">AUTO</span>
   <span class="ico">🚚</span>
-  <div class="lbl">Central de Rotas</div>
-  <div class="sub">Despacho automático</div>
+  <div class="info"><div class="lbl">Central de Rotas</div><div class="sub">Despacho automático de entregas</div></div>
  </div>
- <div class="app-card pro" onclick="location.href='logistica.html#plano'">
-  <span class="ico">💳</span>
-  <div class="lbl">Meu Plano</div>
-  <div class="sub" id="plan_sub">8 entregas/dia</div>
- </div>
-</div>
 
-<h3>👥 Clientes</h3>
-<div class="apps-grid">
- <div class="app-card" onclick="openClient('cliente.html')">
-  <div class="copy" onclick="event.stopPropagation();copyClient('cliente.html')">📋</div>
-  <span class="ico">🍽️</span>
-  <div class="lbl">Mesa</div>
-  <div class="sub">QR Code</div>
- </div>
- <div class="app-card" onclick="openClient('delivery.html')">
-  <div class="copy" onclick="event.stopPropagation();copyClient('delivery.html')">📋</div>
-  <span class="ico">🛵</span>
-  <div class="lbl">Delivery</div>
-  <div class="sub">Em casa</div>
- </div>
-</div>
-
-<!-- 📋 GESTÃO -->
-<div class="section-divider">📋 Gestão</div>
-<div class="apps-grid">
- <div class="app-card" onclick="location.href='catalogo.html'">
+ <div class="nav-section">📋 Gestão</div>
+ <div class="nav-item" onclick="location.href='catalogo.html'">
   <span class="ico">📦</span>
-  <div class="lbl">Catálogo</div>
-  <div class="sub">Produtos</div>
+  <div class="info"><div class="lbl">Catálogo</div><div class="sub">Produtos e preços</div></div>
  </div>
- <div class="app-card" onclick="location.href='pedidos.html'">
+ <div class="nav-item" onclick="location.href='pedidos.html'">
   <span class="ico">🧾</span>
-  <div class="lbl">Pedidos</div>
-  <div class="sub">Histórico</div>
+  <div class="info"><div class="lbl">Pedidos</div><div class="sub">Histórico completo</div></div>
  </div>
- <div class="app-card" onclick="location.href='equipe.html'">
+ <div class="nav-item" onclick="location.href='equipe.html'">
   <span class="ico">👥</span>
-  <div class="lbl">Equipe</div>
-  <div class="sub">Cadastro</div>
+  <div class="info"><div class="lbl">Equipe</div><div class="sub">Cadastro de funcionários</div></div>
  </div>
- <div class="app-card" onclick="location.href='mesas.html'">
+ <div class="nav-item" onclick="location.href='mesas.html'">
   <span class="ico">🔳</span>
-  <div class="lbl">Mesas</div>
-  <div class="sub">Layout</div>
+  <div class="info"><div class="lbl">Mesas</div><div class="sub">Layout do salão</div></div>
  </div>
+
 </div>
 
-<!-- 💳 PLANO + RESUMO -->
-<div class="section-divider">📊 Informações</div>
-
+<!-- STATUS LOGÍSTICA -->
 <div class="card">
- <h2>💳 Plano da Logística</h2>
- <div class="plan-info">
-  <span><b id="plan_name">FREE</b> • <span id="plan_uso">0/8</span> entregas hoje</span>
-  <button class="btn btn-purple btn-sm" onclick="location.href='logistica.html#plano'">🚀 Upgrade</button>
+ <h2>🚚 Logística hoje</h2>
+ <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+  <span class="muted"><b id="plan_uso">0</b> entregas automáticas geradas</span>
+  <span style="color:var(--green);font-weight:700">✅ Liberado</span>
  </div>
- <div class="plan-bar"><div id="plan_bar" class="plan-bar-fill" style="width:0%;background:var(--green)"></div></div>
- <div class="muted" style="font-size:11px">Ao atingir o limite, as rotas voltam ao modo manual até amanhã.</div>
+ <div class="plan-bar"><div id="plan_bar" class="plan-bar-fill" style="width:0%"></div></div>
 </div>
 
+<!-- RESUMO -->
 <div class="card">
  <h2>📊 Resumo da loja</h2>
  <div class="grid3" id="stats"></div>
@@ -231,12 +193,11 @@ label{font-size:12px;color:var(--mut);display:block;margin-bottom:4px;font-weigh
 
 <div id="toast" class="toast"></div>
 
-<!-- 📲 APP INSTALÁVEL -->
 <button id="pwa_btn" onclick="pwaInstall()" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:#22c55e;color:#052e16;border:none;border-radius:999px;padding:12px 18px;font-weight:800;font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.35);cursor:pointer">📲 Instalar app</button>
 
 <script>
 const $=id=>document.getElementById(id);
-let S={store:null,code:null},liveTimer=null,lastAlerts=0,plano={plan:'free',limite:8,usado:0};
+let S={store:null,code:null},liveTimer=null,lastAlerts=0;
 
 function toast(m,t='ok'){
  const e=$('toast');e.textContent=m;
@@ -248,14 +209,10 @@ function toast(m,t='ok'){
 function waitSB(){return new Promise((res,rej)=>{if(window.supabase)return res();const t=setTimeout(()=>rej(),10000);window.addEventListener('supabase-ready',()=>{clearTimeout(t);res()},{once:true})})}
 async function rpc(n,p={}){try{const{data,error}=await supabase.rpc(n,p);if(error)console.warn(n+':',error.message);return{data,error}}catch(e){return{data:null,error:e}}}
 
-/* ===== LINKS ===== */
 function base(){return location.href.substring(0,location.href.lastIndexOf('/')+1)}
 function staffUrl(page){return base()+page+'?loja='+encodeURIComponent(S.code)}
-function clientUrl(page){return base()+page+'?loja='+encodeURIComponent(S.store.id)}
 function goStaff(page){location.href=staffUrl(page)}
-function openClient(page){window.open(clientUrl(page),'_blank')}
-function copyStaff(page){navigator.clipboard.writeText(staffUrl(page)).then(()=>toast('Link copiado! 📋'))}
-function copyClient(page){navigator.clipboard.writeText(clientUrl(page)).then(()=>toast('Link copiado! 📋'))}
+function copyStaff(page){navigator.clipboard.writeText(staffUrl(page)).then(()=>toast('Link copiado! 📋')).catch(()=>prompt('Copie:',staffUrl(page)))}
 
 function switchEntry(m){['new','login'].forEach(x=>{$('lt_'+x).classList.toggle('active',x===m);$('entry_'+x).classList.toggle('hidden',x!==m)})}
 
@@ -291,7 +248,6 @@ async function enterApp(){
 }
 
 function logout(){supabase.auth.signOut();stopLive();show('login')}
-
 function show(s){
  $('screen_boot').classList.add('hidden');
  $('screen_login').classList.toggle('hidden',s!=='login');
@@ -315,23 +271,9 @@ async function refreshAll(){
  }
  const p=await rpc('logistica_plano_info',{p_store_id:S.store.id});
  if(p.data?.ok){
-  plano=p.data;
-  const badge=$('plan_badge');
-  badge.textContent=plano.plan.toUpperCase();
-  badge.className='badge-plan '+plano.plan;
-  $('plan_name').textContent=plano.plan.toUpperCase();
-  if(plano.limite<0){
-   $('plan_uso').textContent='ilimitado';
-   $('plan_bar').style.width='100%';
-   $('plan_bar').style.background='var(--purple)';
-   $('plan_sub').textContent='ilimitado';
-  }else{
-   $('plan_uso').textContent=plano.usado+'/'+plano.limite;
-   const pct=Math.min(100,(plano.usado/plano.limite)*100);
-   $('plan_bar').style.width=pct+'%';
-   $('plan_bar').style.background=plano.restante<=0?'var(--red)':(pct>70?'var(--amber)':'var(--green)');
-   $('plan_sub').textContent=plano.limite+' entregas/dia';
-  }
+  $('plan_uso').textContent=p.data.usado;
+  const baseLine=Math.max(p.data.usado,30);
+  $('plan_bar').style.width=(p.data.usado/baseLine*100)+'%';
  }
  renderAlerts();
 }
@@ -345,11 +287,11 @@ async function renderAlerts(){
  $('alerts_wrap').innerHTML=a.map(x=>{
   const m=x.table_number||'?';
   if(x.type==='waiter')return x.status==='ack'
-   ?'<div class="msg ok" style="margin-bottom:8px">🏃 <b>Mesa '+m+'</b> — garçom a caminho <button class="btn btn-green btn-sm" onclick="doneAlert(\''+x.id+'\')">✔ Concluir</button></div>'
+   ?'<div class="msg ok" style="margin-bottom:8px">🏃 <b>Mesa '+m+'</b> — garçom a caminho <button class="btn btn-green btn-sm" onclick="doneAlert(\''+x.id+'\')">✔</button></div>'
    :'<div class="msg err" style="margin-bottom:8px">🔔 <b>Mesa '+m+'</b> chamando! <button class="btn btn-green btn-sm" onclick="ackAlert(\''+x.id+'\')">✅ Vou lá</button></div>';
   return x.status==='ack'
-   ?'<div class="msg ok" style="margin-bottom:8px">💳 <b>Mesa '+m+'</b> — conta confirmada <button class="btn btn-blue btn-sm" onclick="doneAlert(\''+x.id+'\')">✔ Concluir</button></div>'
-   :'<div class="msg err" style="margin-bottom:8px">💳 <b>Mesa '+m+'</b> pediu a conta! <button class="btn btn-blue btn-sm" onclick="ackAlert(\''+x.id+'\')">✅ Confirmar</button></div>';
+   ?'<div class="msg ok" style="margin-bottom:8px">💳 <b>Mesa '+m+'</b> — conta confirmada <button class="btn btn-purple btn-sm" onclick="doneAlert(\''+x.id+'\')">✔</button></div>'
+   :'<div class="msg err" style="margin-bottom:8px">💳 <b>Mesa '+m+'</b> pediu a conta! <button class="btn btn-purple btn-sm" onclick="ackAlert(\''+x.id+'\')">✅ Confirmar</button></div>';
  }).join('');
 }
 async function ackAlert(id){await rpc('staff_alerta_ack',{p_store_id:S.store.id,p_codigo:S.code,p_alert_id:id});renderAlerts()}
@@ -363,11 +305,9 @@ async function boot(){
 }
 boot();
 
-/* ===== PWA ===== */
 var pwaDeferred=null;
-function pwaBase(){return base()}
 function pwaManifest(){
- var m={name:'Anote — '+(S.store?.name||'Painel'),short_name:'Anote',start_url:pwaBase(),display:'standalone',background_color:'#0f172a',theme_color:'#0f172a',icons:[{src:pwaBase()+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
+ var m={name:'Anote — '+(S.store?.name||'Painel'),short_name:'Anote',start_url:base(),display:'standalone',background_color:'#0f172a',theme_color:'#0f172a',icons:[{src:base()+'icon.svg',sizes:'512x512',type:'image/svg+xml',purpose:'any'}]};
  var b=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
  var l=document.getElementById('pwa_manifest');
  if(!l){l=document.createElement('link');l.id='pwa_manifest';l.rel='manifest';document.head.appendChild(l)}
@@ -381,7 +321,7 @@ function pwaInstall(){
  else{var ios=/iphone|ipad|ipod/i.test(navigator.userAgent);alert(ios?'Para instalar: toque em Compartilhar e depois em "Adicionar à Tela de Início" 📲':'Para instalar: toque no menu ⋮ e depois em "Adicionar à tela inicial" 📲')}
 }
 
-window.switchEntry=switchEntry;window.createStore=createStore;window.ownerLogin=ownerLogin;window.logout=logout;window.refreshAll=refreshAll;window.ackAlert=ackAlert;window.doneAlert=doneAlert;window.goStaff=goStaff;window.openClient=openClient;window.copyStaff=copyStaff;window.copyClient=copyClient;window.pwaInstall=pwaInstall;
+window.switchEntry=switchEntry;window.createStore=createStore;window.ownerLogin=ownerLogin;window.logout=logout;window.refreshAll=refreshAll;window.ackAlert=ackAlert;window.doneAlert=doneAlert;window.goStaff=goStaff;window.copyStaff=copyStaff;window.pwaInstall=pwaInstall;
 </script>
 </body>
 </html>
